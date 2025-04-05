@@ -1,0 +1,271 @@
+h1 {
+    margin: 0;
+}
+
+
+button {
+    box-sizing: border-box;
+    border: 2px solid #7B7B7B;
+    background-color: #FFFFFF;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.06);
+    outline: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+button.action {
+    padding: 0;
+    height: 36px;
+    width: 36px;
+
+    text-align: center;
+    font-size: 17px;
+}
+
+button:active {
+    transform: translate(0.6px, 0.6px);
+}
+
+button.action.active {
+    background-color: #7B7B7B;
+    color: #FFFFFF;
+}
+
+button.action:disabled {
+    color: initial;
+    opacity: 0.3;
+    box-shadow: none;
+    pointer-events: none;
+}
+
+
+.v-divider {
+    height: 95%;
+    width: 1.6px;
+    background-color: #C0C0C0;
+}
+
+h1 {
+    font-size: 19px;
+    font-weight: normal;
+}
+
+h2 {
+    font-size: 18px;
+    margin: 0;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.anchor-right {
+    display: flex;
+    justify-content: right;
+}
+
+.columns {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+label {
+    font-size: 13px;
+    display: block;
+    margin-bottom: 2px;
+    margin-left: 2px;
+}
+
+.columns > * {
+    flex: 1;
+}
+
+.input-group {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.section-action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: right;
+    margin-top: 16px;
+}
+
+.checkbox-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 12px 0;
+}
+
+.checkbox-item label {
+    margin-bottom: 0;
+    margin-left: 4px;
+}
+
+select {
+    box-sizing: border-box;
+    border: 2px solid #7B7B7B;
+    background-color: #FFFFFF;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.06);
+    outline: none;
+    border-radius: 5px;
+    padding: 6px 8px 6px 4px;
+}
+
+input {
+    box-sizing: border-box;
+    border: 2px solid #7B7B7B;
+    background-color: #FCFCFC;
+    box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.06);
+    outline: none;
+    border-radius: 5px;
+    padding: 6px 8px 6px 8px;
+}
+
+input[type="checkbox"] {
+    transform: scale(1.5);
+}
+
+
+.tab-area:not(.active) {
+    display: none;
+}
+
+
+.tab-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    align-items: flex-end;
+    height: 32px;
+    padding: 0 8px;
+}
+
+.tab-button {
+    font-size: 12px;
+    border: 1.7px solid #838383;
+    padding: 5px 10px 6px 10px;
+    border-radius: 3px 3px 0 0;
+    border-bottom-width: 0;
+    transform: translateY(1.8px);
+    cursor: pointer;
+    user-select: none;
+}
+
+.tab-button.active {
+    background-color: #FFFFFF;
+}
+
+
+
+
+.collapsible {
+    margin-bottom: 16px;
+}
+
+.collapsible > header {
+    border-bottom: 1.7px solid #838383;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 0 2px 2px 4px;
+}
+
+.collapsible > header::after {
+    content: '▲';
+    float: right;
+}
+
+.collapsible > main {
+    padding: 4px;
+}
+
+.collapsible.collapsed > header::after {
+    content: '▼'
+}
+
+.collapsible.collapsed > main {
+    display: none;
+}
+
+.template {
+    display: none;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+table tr {
+    border-bottom: rgba(131, 131, 131, 0.5) 1.5px solid;
+}
+
+table thead tr {
+    border-bottom: rgba(131, 131, 131, 0.75) 2px solid;
+}
+
+table thead th {
+    text-align: left;
+    font-weight: normal;
+    font-size: 0.95em;
+}
+
+table td {
+    padding: 6px 0;
+}
+
+table tr > td:first-child, table tr > th:first-child {
+    padding-left: 8px;
+}
+
+table tr > td:last-child, table tr > th:last-child {
+    padding-right: 8px;
+}
+
+table.row-clickable tbody tr {
+    cursor: pointer;
+}
+
+table.row-clickable tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+table.row-clickable tr:active {
+    transform: scale(0.99);
+}
+
+.vertex-tag, .arc-tag {
+    background-color: rgba(0, 0, 0, 0.08);
+    display: inline-block;
+    vertical-align: middle;
+    padding: 4px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0 2px;
+}
+
+.hidden {
+    display: none;
+}
+
+.arc-tag {
+    background-image: url("../assets/icons/arc-tag-arrow.svg");
+    background-size: auto 40%;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.arc-tag > div {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.arc-tag > div:first-child {
+    margin-right: 20px;
+}
