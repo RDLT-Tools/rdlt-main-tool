@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="./styles/widgets.css" />
 
     <script type="module" src="./script/main.mjs"></script>
-    <script type="module" src="./script/test.mjs"></script>
+    <script type="module" src="./test/test.mjs"></script>
 </head>
 <body>
     <header>
@@ -251,151 +251,205 @@
                         </div>
                     </div>
                     <div class="tab-area panel" data-tab-id="verifications" data-panel-id="verifications">
-                        Verifications Panel
+                        <header>
+                            <h2>Verifications</h2>
+                        </header>
+                        <br/>
+                        <div class="collapsible" data-section-id="fc">
+                            <header>Free Choiceness</header>
+                            <main>
+                                <div class="section-description">
+                                    Verify the input RDLT whether it is free-choice or inconclusive.
+                                </div>
+                                <div class="input-group columns full-width">
+                                    <div>
+                                        <label>Source</label>
+                                        <div style="display: flex; gap: 6px;">
+                                            <select name="source" style="flex: 1"></select>
+                                            <button><i class="fas fa-hand"></i></button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label>Sink</label>
+                                        <div style="display: flex; gap: 6px;">
+                                            <select name="sink" style="flex: 1"></select>
+                                            <button><i class="fas fa-hand"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <select name="type">
+                                        <option value="SDPCS">Σ-distinct PCS</option>
+                                    </select>
+                                    <button data-subaction="start">Start</button>
+                                </div>
+                            </main>
+                        </div>
                     </div>
                 </main>
             </aside>
         </div>
-        <div class="subworkspace tab-area template aes-subworkspace" data-tab-template-id="aes">
-            <aside class="left-panels">
-                <section class="tab-buttons">
-                    <div class="tab-button" data-tab-id="configs">Configurations</div>
-                    <div class="tab-button" data-tab-id="steps">Steps</div>
-                </section>
-                <main class="panel-tabs">
-                    <div class="tab-area panel" data-tab-id="configs">Configs panel</div>
-                    <div class="tab-area panel" data-tab-id="steps" data-panel-id="steps">
-                        <header><h2>Activity Extraction Steps</h2></header>
-                        <main>
-                            <table class="row-clickable">
+        <template data-tab-template-id="aes">
+            <div class="subworkspace tab-area aes-subworkspace">
+                <aside class="left-panels">
+                    <section class="tab-buttons">
+                        <div class="tab-button" data-tab-id="configs">Configurations</div>
+                        <div class="tab-button" data-tab-id="steps">Steps</div>
+                    </section>
+                    <main class="panel-tabs">
+                        <div class="tab-area panel" data-tab-id="configs">Configs panel</div>
+                        <div class="tab-area panel" data-tab-id="steps" data-panel-id="steps">
+                            <header><h2>Activity Extraction Steps</h2></header>
+                            <main>
+                                <table class="row-clickable">
+                                    <thead><tr>
+                                        <th>#</th>
+                                        <th>Action</th>
+                                        <th>Component</th>
+                                        <th>Remarks</th>
+                                    </tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </main>
+                        </div>
+                    </main>
+                </aside>
+                <main class="aes-main">
+                    <header>
+                        <div>
+                            <h1>Live Activity Extraction</h1>
+                            via <b class="aes-mode-label">Pseudorandom Selection</b>
+                        </div>
+                        <div class="aes-status-view">
+                            <div class="aes-step-indicator"></div> 
+                            <span class="aes-step-label"></span>
+                            <div class="arc-tag"><div class="arc-tag-from">x1</div><div class="arc-tag-to">x2</div></div>
+                            <div class="vertex-tag">x1</div>
+                        </div>
+                        <div class="aes-status-view-choosing">
+                            <div class="aes-status-view-choosing-chip">
+                                <i class="fas fa-circle-info"></i>&nbsp;
+                                Please choose an arc to explore
+                            </div>
+                        </div>
+                        <div class="aes-quick-controls">
+                            <button data-aes-action="random"><i class="fas fa-shuffle"></i></button>
+                            <button data-aes-action="repeat"><i class="fas fa-rotate-right"></i></button>
+                            <!-- <button data-aes-action="pause"><i class="fas fa-pause"></i></button> -->
+                            <button data-aes-action="prev"><i class="fas fa-backward-step"></i></button>
+                            <button data-aes-action="next"><i class="fas fa-forward-step"></i></button>
+                        </div>
+                    </header>
+                    <main>
+                        <section class="drawing">
+                            <svg></svg>
+                        </section>
+                    </main>
+                </main>
+                <aside class="right-panels">
+                    <section class="tab-buttons">
+                        <div class="tab-button" data-tab-id="states">States</div>
+                        <div class="tab-button" data-tab-id="profile">Activity Profile</div>
+                    </section>
+                    <main class="panel-tabs">
+                        <div class="tab-area panel" data-tab-id="states" data-panel-id="states">
+                            <header>
+                                <h2>Current Arc States</h2>
+                            </header> 
+                            <table>
                                 <thead><tr>
-                                    <th>#</th>
-                                    <th>Action</th>
-                                    <th>Component</th>
-                                    <th>Remarks</th>
+                                    <th>Arc</th>
+                                    <th>Attributes</th>
+                                    <th>T</th>
                                 </tr></thead>
                                 <tbody></tbody>
                             </table>
-                        </main>
-                    </div>
-                </main>
-            </aside>
-            <main class="aes-main">
-                <header>
-                    <div>
-                        <h1>Live Activity Extraction</h1>
-                        via <b class="aes-mode-label">Pseudorandom Selection</b>
-                    </div>
-                    <div class="aes-status-view">
-                        <div class="aes-step-indicator"></div> 
-                        <span class="aes-step-label"></span>
-                        <div class="arc-tag"><div class="arc-tag-from">x1</div><div class="arc-tag-to">x2</div></div>
-                        <div class="vertex-tag">x1</div>
-                    </div>
-                    <div class="aes-status-view-choosing">
-                        <div class="aes-status-view-choosing-chip">
-                            <i class="fas fa-circle-info"></i>&nbsp;
-                            Please choose an arc to explore
                         </div>
-                    </div>
-                    <div class="aes-quick-controls">
-                        <button data-aes-action="random"><i class="fas fa-shuffle"></i></button>
-                        <button data-aes-action="repeat"><i class="fas fa-rotate-right"></i></button>
-                        <!-- <button data-aes-action="pause"><i class="fas fa-pause"></i></button> -->
-                        <button data-aes-action="prev"><i class="fas fa-backward-step"></i></button>
-                        <button data-aes-action="next"><i class="fas fa-forward-step"></i></button>
-                    </div>
-                </header>
-                <main>
-                    <section class="drawing">
-                        <svg></svg>
+                        <div class="tab-area panel" data-tab-id="profile" data-panel-id="profile">
+                            <header><h2>Activity Profile</h2></header>
+                            <main>
+                                <table>
+                                    <thead><tr></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </main>
+                        </div>
+                    </main>
+                </aside>
+            </div>
+        </template>
+        <template data-tab-template-id="ver">
+            <div class="subworkspace tab-area">
+                <main class="ver-main">
+                    <header>
+                        <div>
+                            <h1>Lorem Ipsum</h1>
+                        </div>
+                        <div></div>
+                        <div class="ver-controls">
+                            <select><option>Main Model</option></select>
+                        </div>
+                    </header>
+                    <main>
+                        <section class="drawing">
+                            <svg></svg>
+                        </section>
+                    </main>
+                </main>
+                <aside class="right-panels">
+                    <section class="tab-buttons">
+                        <div class="tab-button" data-tab-id="result">Result</div>
                     </section>
-                </main>
-            </main>
-            <aside class="right-panels">
-                <section class="tab-buttons">
-                    <div class="tab-button" data-tab-id="states">States</div>
-                    <div class="tab-button" data-tab-id="profile">Activity Profile</div>
-                </section>
-                <main class="panel-tabs">
-                    <div class="tab-area panel" data-tab-id="states" data-panel-id="states">
-                        <header>
-                            <h2>Current Arc States</h2>
-                        </header> 
-                        <table>
-                            <thead><tr>
-                                <th>Arc</th>
-                                <th>Attributes</th>
-                                <th>T</th>
-                            </tr></thead>
-                            <tbody>
-                                <tr class="active">
-                                    <td>
-                                        <div class="arc-tag">
-                                            <div>v1</div>
-                                            <div>v2</div>
-                                        </div>
-                                    </td>
-                                    <td>a : 3</td>
-                                    <td>
-                                        <div class="aes-states-T">
-                                            <span data-aes-state-T-ct="traversed">1</span>
-                                            <span data-aes-state-T-ct="traversed">2</span>
-                                            <span data-aes-state-T-ct="checked">3</span>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="arc-tag">
-                                            <div>v1</div>
-                                            <div>v2</div>
-                                        </div>
-                                    </td>
-                                    <td>a : 3</td>
-                                    <td>
-                                        <div class="aes-states-T">
-                                            <span data-aes-state-T-ct="traversed">1</span>
-                                            <span data-aes-state-T-ct="traversed">2</span>
-                                            <span data-aes-state-T-ct="checked">3</span>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="tab-area panel" data-tab-id="profile" data-panel-id="profile">
-                        <header><h2>Activity Profile</h2></header>
-                        <main>
-                            <table>
-                                <thead><tr></tr></thead>
-                                <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>
-                                            <div class="arc-tag"><div>x1</div><div>x2</div></div>
-                                            <div class="arc-tag"><div>x1</div><div>x2</div></div>
-                                            <div class="arc-tag"><div>x1</div><div>x2</div></div>
-                                            <div class="arc-tag"><div>x1</div><div>x2</div></div>
-                                            <div class="arc-tag"><div>x1</div><div>x2</div></div>
-                                            <div class="arc-tag"><div>x1</div><div>x2</div></div>
-                                            <div class="arc-tag"><div>x1</div><div>x2</div></div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td>
-                                            <div class="arc-tag"><div>x1</div><div>x2</div></div>
-                                            <div class="arc-tag"><div>x1</div><div>x2</div></div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </main>
-                    </div>
-                </main>
-            </aside>
-        </div>
+                    <main class="panel-tabs">
+                        <div class="tab-area panel" data-tab-id="result" data-panel-id="result">
+                            <header>
+                                <h2>Separability</h2>
+                            </header>
+                            <br/>
+                            <div class="collapsible">
+                                <header>Criteria</header>
+                                <main>
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td>Y</td>
+                                                <td>Valid L values</td>
+                                            </tr>
+                                            <tr>
+                                                <td>N</td>
+                                                <td>Valid C values</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </main>
+                            </div> 
+                            <div class="collapsible">
+                                <header>Violating Arcs</header>
+                                <main>
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td><div class="arc-tag">
+                                                    <div>x1</div>
+                                                    <div>x2</div>
+                                                </div></td>
+                                            </tr>
+                                            <tr>
+                                                <td><div class="arc-tag">
+                                                    <div>x1</div>
+                                                    <div>x2</div>
+                                                </div></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </main>
+                            </div> 
+                        </div>
+                    </main>
+                </aside>
+            </div>
+        </template>
+        
     </main>
     <div id="tmp">
         <svg id="svg-export-tmp" height="100" width="100">

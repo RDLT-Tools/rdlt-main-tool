@@ -40,4 +40,17 @@ export default class TextStyle {
             weight: this.weight
         });
     }
+
+    toJSON() {
+        return {
+            fontFamily: this.fontFamily,
+            size: this.size,
+            color: this.color,
+            weight: this.weight
+        };
+    }
+
+    static fromJSON(json) {
+        return new TextStyle(json);
+    }
 }

@@ -5,6 +5,7 @@ import VisualComponent from "../../entities/model/visual/VisualComponent.mjs";
 import ArcStyles from "../../entities/styling/ArcStyles.mjs";
 import ComponentStyles from "../../entities/styling/ComponentStyles.mjs";
 import ModelContext from "../model/ModelContext.mjs";
+import { LocalSessionManager } from "../session/LocalSessionManager.mjs";
 
 export default class ModellingManager {
     /** @type { ModelContext } */
@@ -56,6 +57,14 @@ export default class ModellingManager {
         }
     };
 
+    loadModel() {
+        const visualModelManager = this.context.managers.visualModel;
+        visualModelManager.getAllArcs().map(arc => this.#displayNewArc(arc));
+        visualModelManager.getAllComponents().map(vertex => this.#displayNewComponent(vertex));
+
+        this.#notifyModelStructureChangesListeners();
+    }
+
     /**
      * @param {number} id 
      * @returns {VisualComponent | null} 
@@ -73,13 +82,25 @@ export default class ModellingManager {
     }
 
     generateNextComponentIdentifier() {
-        const identifiers = this.context.managers.visualModel.getAllComponents().map(c => c.identifier).sort();
-        if(identifiers.length === 0) return "x1";
+        const components = this.context.managers.visualModel.getAllComponents();
+        
+        if(components.length === 0) return "x1";
 
-        const lastIdentifier = identifiers[identifiers.length - 1];
-        const numericSuffix = lastIdentifier.match(/\d+$/)?.[0] || "";
-        const prefix = lastIdentifier.substring(0, lastIdentifier.length - numericSuffix.length);
-        return `${prefix}${Number(numericSuffix) + 1}`;
+        const identifiers = components.map(c => {
+            const identifier = c.identifier;
+            if(!identifier) return { prefix: "", num: 0 };
+
+            const numericSuffix = identifier.match(/\d+$/)?.[0] || "";
+            const prefix = identifier.substring(0, identifier.length - numericSuffix.length);
+
+            return { prefix, num: Number(numericSuffix) || 0 };
+        }).sort((i1, i2) => {
+            return i1.prefix.localeCompare(i2.prefix) || (i1.num - i2.num);
+        });
+
+
+        const lastIdentifier = identifiers[identifiers.length-1];
+        return `${lastIdentifier.prefix}${lastIdentifier.num+1}`;
     }
 
     /**
@@ -254,6 +275,7 @@ export default class ModellingManager {
         this.modellingStates.events.isMoving = false;
         this.context.managers.workspace.setModellingEvent("ismoving", false);
         this.context.managers.transform.endMovement();
+        this.#saveModel();
     }
 
     #startHighlighting(x, y) {
@@ -367,6 +389,19 @@ export default class ModellingManager {
      */
     addComponent(type, props = {}, geometry, styles) {
         const visualComponent = this.context.managers.visualModel.addComponent(type, props, geometry, styles);
+        this.#displayNewComponent(visualComponent);
+
+        this.#notifyModelStructureChangesListeners();
+        this.#saveModel();
+
+        return visualComponent;
+    }
+
+    /**
+     * 
+     * @param {VisualComponent} visualComponent 
+     */
+    #displayNewComponent(visualComponent) {
         const componentElement = this.context.managers.drawing.addComponent(visualComponent);
         this.context.managers.userEvents.registerComponent(visualComponent.uid, componentElement);
 
@@ -374,10 +409,6 @@ export default class ModellingManager {
             const rbsBounds = this.context.managers.rbsBounds.onComponentSetAsRBSCenter(visualComponent.uid);
             this.context.managers.drawing.addRBS(visualComponent, rbsBounds);
         }
-
-        this.#notifyModelStructureChangesListeners();
-
-        return visualComponent;
     }
 
 
@@ -404,6 +435,8 @@ export default class ModellingManager {
         if('identifier' in props && component.isRBSCenter) {
             drawingManager.updateRBSCenterIdentifier(id, component.identifier);
         }
+
+        this.#saveModel();
     }
 
     /**
@@ -449,17 +482,7 @@ export default class ModellingManager {
      * @returns {VisualArc}
      */
     addArc(fromVertexUID, toVertexUID, props, geometry, styles, thenSelect = false) {
-        const component1 = this.getComponentById(fromVertexUID);
-        const component2 = this.getComponentById(toVertexUID);
-        if(!component1 || !component2) return;
-
         const visualArc = this.context.managers.visualModel.addArc(fromVertexUID, toVertexUID, props, geometry, styles);
-        const arcElement = this.context.managers.drawing.addArc(visualArc, component1.geometry, component2.geometry);
-        this.context.managers.userEvents.registerArc(visualArc.uid, arcElement);
-
-        // Check changes to any RBS bounds
-        const rbsBounds = this.context.managers.rbsBounds.onArcsChanged([visualArc.uid]);
-        this.context.managers.drawing.updateMultipleRBSBounds(rbsBounds);
 
         if(thenSelect) {
             this.#clearSelection();
@@ -467,9 +490,27 @@ export default class ModellingManager {
             this.#refreshSelected();
         }
 
+        this.#displayNewArc(visualArc);
+
         this.#notifyModelStructureChangesListeners();
+        this.#saveModel();
 
         return visualArc;
+    }
+
+    /**
+     * @param {VisualArc} visualArc 
+     */
+    #displayNewArc(visualArc) {
+        const component1 = this.getComponentById(visualArc.fromVertexUID);
+        const component2 = this.getComponentById(visualArc.toVertexUID);
+
+        const arcElement = this.context.managers.drawing.addArc(visualArc, component1.geometry, component2.geometry);
+        this.context.managers.userEvents.registerArc(visualArc.uid, arcElement);
+
+        // Check changes to any RBS bounds
+        const rbsBounds = this.context.managers.rbsBounds.onArcsChanged([visualArc.uid]);
+        this.context.managers.drawing.updateMultipleRBSBounds(rbsBounds);
     }
 
     /**
@@ -485,6 +526,8 @@ export default class ModellingManager {
             const rbsBounds = this.context.managers.rbsBounds.onArcsChanged([id]);
             this.context.managers.drawing.updateMultipleRBSBounds(rbsBounds);   
         }
+
+        this.#saveModel();
     }
 
     startDragAndDrop(componentType) {
@@ -591,6 +634,7 @@ export default class ModellingManager {
         this.#clearSelection();
         this.#refreshSelected();
         this.#notifyModelStructureChangesListeners();
+        this.#saveModel();
     }
 
     removedSelectedArcs() {
@@ -610,11 +654,17 @@ export default class ModellingManager {
         this.#clearSelection();
         this.#refreshSelected();
         this.#notifyModelStructureChangesListeners();
+        this.#saveModel();
     }
 
     #notifyModelStructureChangesListeners() {
         // Update dependent listeners
         this.context.managers.panels.execute.refreshModelValues();
+        this.context.managers.panels.verifications.refreshModelValues();
+    }
+
+    #saveModel() {
+        LocalSessionManager.saveModel(this.context);
     }
 
 

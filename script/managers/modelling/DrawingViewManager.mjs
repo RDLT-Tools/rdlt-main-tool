@@ -232,6 +232,7 @@ export default class DrawingViewManager {
      */
     #setComponentProps(builder, component) {
         builder.setCenterLabelText(component.identifier);
+        builder.setOuterLabelText(component.label);
     }
 
     /**

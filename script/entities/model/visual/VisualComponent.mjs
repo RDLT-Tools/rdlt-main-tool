@@ -60,4 +60,24 @@ export default class VisualComponent {
         copied.notes = this.notes;
         return copied;
     }
+
+    toJSON() {
+        return {
+            uid: this.uid,
+            identifier: this.identifier,
+            label: this.label,
+            type: this.type,
+            isRBSCenter: this.isRBSCenter,
+            geometry: this.geometry.toJSON(),
+            styles: this.styles.toJSON()
+        };
+    }
+
+    static fromJSON(json) {
+        return new VisualComponent({
+            ...json,
+            geometry: ComponentGeometry.fromJSON(json.geometry),
+            styles: ComponentStyles.fromJSON(json.styles),
+        });
+    }
 }

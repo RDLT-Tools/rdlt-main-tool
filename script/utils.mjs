@@ -137,3 +137,14 @@ export function pickRandomFromSet(set) {
     const randomIndex = Math.floor(Math.random() * arr.length);
     return arr[randomIndex];
 }
+
+export function generateUniqueID() {
+    const timestamp = Date.now();
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let randomChars = "";
+    for (let i = 0; i < 5; i++) {
+        randomChars += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    return `${timestamp}${randomChars}`;
+}

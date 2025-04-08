@@ -57,4 +57,24 @@ export default class VisualArc {
             styles: this.styles.copy(),
         });
     }
+
+    toJSON() {
+        return {
+            uid: this.uid,
+            C: this.C,
+            L: this.L,
+            fromVertexUID: this.fromVertexUID,
+            toVertexUID: this.toVertexUID,
+            geometry: this.geometry.toJSON(),
+            styles: this.styles.toJSON()
+        };
+    }
+
+    static fromJSON(json) {
+        return new VisualArc({
+            ...json,
+            geometry: ArcGeometry.fromJSON(json.geometry),
+            styles: ArcStyles.fromJSON(json.styles),
+        });
+    }
 }

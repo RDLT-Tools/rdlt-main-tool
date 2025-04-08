@@ -1,6 +1,6 @@
 import { AESimulationManager } from "../activity/AESimulationManager.mjs";
-import { AESSubworkspaceManager } from "../activity/AESSubworkspaceManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
+import { VerificationsResultManager } from "../verifications/VerificationsResultManager.mjs";
 import { TabGroupManager } from "../workspace/TabGroupManager.mjs";
 import { TabManager } from "../workspace/TabManager.mjs";
 
@@ -32,7 +32,12 @@ export default class WorkspaceManager {
      */
      
     /**
-     * @type {{ main: HTMLDivElement, buttons: ViewButtons, panels: PanelsView, drawing: ViewDrawing }}
+     * @type {{ 
+     *      main: HTMLDivElement, 
+     *      buttons: ViewButtons,
+     *      panels: PanelsView, 
+     *      drawing: ViewDrawing 
+     * }}
      */
     #view = {
         main: null,
@@ -190,7 +195,7 @@ export default class WorkspaceManager {
         ));
         
         this.tabs.left.selectTab("palette");
-        this.tabs.right.selectTab("execute");
+        this.tabs.right.selectTab("verifications");
 
     }
 
@@ -210,12 +215,9 @@ export default class WorkspaceManager {
      * @returns {TabManager}
      */
     #addTemplatedSubworkspace(id, title, templateID) {
-        const templateTabArea = document.querySelector(`.template[data-tab-template-id='${templateID}']`)
-        const tabArea = templateTabArea.cloneNode(true);
-        tabArea.classList.remove("template");
-        tabArea.removeAttribute("data-tab-tempate-id");
-
-        const tabManager = new TabManager(this.context, id, title);
+        const templateTabArea = document.querySelector(`template[data-tab-template-id='${templateID}']`).content;
+        const tabArea = templateTabArea.cloneNode(true).firstElementChild;
+        const tabManager = new TabManager(this.context, this.tabs.subworkspaces, id, title, true);
         tabManager.tabAreaElement = tabArea;
 
         this.tabs.subworkspaces.addTab(tabManager);
@@ -228,10 +230,20 @@ export default class WorkspaceManager {
         return this.#addTemplatedSubworkspace(`aes-${aesID}`, "Activity Extraction", "aes");
     }
 
+    addVerificationResultSubworkspace(verID, title) {
+        return this.#addTemplatedSubworkspace(`ver-${verID}`, title, "ver");
+    }
+
     /** @param {{ name, source, sink, mode }} configs */
     startAESimulation(configs) {
         return new AESimulationManager(this.context, configs, 
             this.context.managers.visualModel.makeCopy()
+        );
+    }
+
+    showVerificationResults(result, visualModel) {
+        return new VerificationsResultManager(this.context, result,
+            visualModel
         );
     }
 }

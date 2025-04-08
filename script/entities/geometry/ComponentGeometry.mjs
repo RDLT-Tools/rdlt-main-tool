@@ -37,4 +37,15 @@ export default class ComponentGeometry {
             maxY: this.position.y + this.size/2
         };
     }
+
+    toJSON() {
+        return {
+            position: { ...this.position },
+            size: this.size
+        };
+    }
+
+    static fromJSON(json) {
+        return new ComponentGeometry(json);
+    }
 }

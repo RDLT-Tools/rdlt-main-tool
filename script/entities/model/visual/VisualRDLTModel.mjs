@@ -3,7 +3,68 @@ import ModelAnnotation from "./ModelAnnotation.mjs";
 import VisualArc from "./VisualArc.mjs";
 import VisualComponent from "./VisualComponent.mjs";
 
+
+/**
+ * @typedef {{ x: number, y: number }} Position
+ * @typedef {{ width: number, color: string }} OutlineStyleJSON
+ * @typedef {{
+ *      fontFamily: string,
+ *      size: number,
+ *      color: string,
+ *      weight: number
+ * }} TextStyleJSON
+ * 
+ * @typedef {{
+ *      position: Position,
+ *      size: number
+ * }} VertexGeometryJSON
+ * 
+ * @typedef {{
+ *      outline: OutlineStyleJSON,
+ *      innerLabel: TextStyleJSON,
+ *      outerLabel: TextStyleJSON
+ * }} VertexStylesJSON
+ * 
+ * @typedef {{
+ *      uid: number, identifier: string,
+ *      label: string, type: "boundary" | "entity" | "controller",
+ *      isRBSCenter: boolean, 
+ *      geometry: VertexGeometryJSON,
+ *      styles: VertexStylesJSON
+ * }} VisualVertexJSON
+ * 
+ * 
+ * @typedef {{
+ *      pathType: "straight" | "elbowed",
+ *      isAutoDraw: boolean,
+ *      waypoints: Position[],
+ *      arcLabel: { baseSegmentIndex: number, footFracDistance: number, perpDistance: number }
+ * }} ArcGeometryJSON
+ * 
+ * @typedef {{
+ *      outline: OutlineStyleJSON,
+ *      label: TextStyleJSON,
+ *      connectorEnd: { type: "none" | "arrow-open" | "arrow-closed-filled" | "arrow-closed", thickness: number }
+ * }} ArcStylesJSON
+ * 
+ * @typedef {{
+ *      uid: number, C: string, L: number,
+ *      fromVertexUID: number, toVertexUID: number,
+ *      geometry: ArcGeometryJSON,
+ *      styles: ArcStylesJSON
+ * }} VisualArcJSON
+ * 
+ * @typedef {{
+ *      name: string,
+ *      components: VisualVertexJSON[],
+ *      arcs: VisualArcJSON[]
+ * }} VisualRDLTModelJSON
+ */
 export default class VisualRDLTModel {
+
+    VERTEX_ID_COUNTER = 1;
+    ARC_ID_COUNTER = 1;
+
     /** @type {string} */
     #name;
 
@@ -318,5 +379,44 @@ export default class VisualRDLTModel {
             components: copiedVertices,
             arcs: copiedArcs
         });
+    }
+    
+    toJSON() {
+        return {
+            name: this.#name,
+            components: Object.values(this.#components).map(c => c.toJSON()),
+            arcs: this.#arcs.map(a => a.toJSON()),
+            VERTEX_ID_COUNTER: this.VERTEX_ID_COUNTER,
+            ARC_ID_COUNTER: this.ARC_ID_COUNTER,
+        };
+    }
+
+    toSimpleModel() {
+        return {
+            components: Object.values(this.#components).map(c => ({
+                uid: c.uid,
+                identifier: c.identifier,
+                isRBSCenter: c.isRBSCenter
+            })),
+            arcs: this.#arcs.map(a => ({
+                uid: a.uid,
+                fromVertexUID: a.fromVertexUID,
+                toVertexUID: a.toVertexUID,
+            }))
+        };
+    }
+
+    static fromJSON(json) {
+        const visualRDLTModel = new VisualRDLTModel({
+            name: json.name,
+            components: json.components.map(c => VisualComponent.fromJSON(c)),
+            arcs: json.arcs.map(a => VisualArc.fromJSON(a)),
+        });
+
+        // Setup UID counters for visual component and visual arcs
+        visualRDLTModel.VERTEX_ID_COUNTER = json.VERTEX_ID_COUNTER;
+        visualRDLTModel.ARC_ID_COUNTER = json.ARC_ID_COUNTER;
+
+        return visualRDLTModel;
     }
 }

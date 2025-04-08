@@ -48,6 +48,7 @@ export class TabGroupManager {
      */
     loadTab(tabManager) {
         this.#tabs.push(tabManager);
+        tabManager.tabGroupManager = this;
 
         tabManager.tabButtonElement.addEventListener("click", () => this.selectTab(tabManager.id));
     }
@@ -68,5 +69,12 @@ export class TabGroupManager {
 
         this.#activeTab = id;
         tabManager.setActive(true);
+    }
+
+    onTabClosed(id) {
+        this.#tabs = this.#tabs.filter(t => t.id !== id);
+        if(this.#tabs.length > 0) {
+            this.selectTab(this.#tabs[this.#tabs.length-1].id);
+        }
     }
 }

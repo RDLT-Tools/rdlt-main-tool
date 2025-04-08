@@ -49,6 +49,10 @@ export default class TextSVGBuilder {
         this.position = { x, y };
         this.align = align;
         this.vAlign = vAlign;
+
+        this.element.setAttribute("stroke", "white");
+        this.element.setAttribute("stroke-width", "4");
+        this.element.setAttribute("paint-order", "stroke fill");
     }
 
     get text() { return this.#text; }
@@ -100,6 +104,10 @@ export default class TextSVGBuilder {
     set vAlign(vAlign) {
         this.#vAlign = vAlign || "start";
         this.#element.setAttribute("dominant-baseline", this.#vAlign);
+    }
+
+    set width(width) {
+        this.#element.setAttribute("width", width);
     }
 
     copy() {

@@ -12,10 +12,21 @@ import UserEventsManager from "../modelling/events/UserEventsManager.mjs";
 import WorkspaceManager from "../modelling/WorkspaceManager.mjs";
 import ExportManager from "../file/export/ExportManager.mjs";
 import ExecutePanelManager from "../panels/ExecutePanelManager.mjs";
+import VisualRDLTModel from "../../entities/model/visual/VisualRDLTModel.mjs";
+import VerificationsPanelManager from "../panels/VerificationsPanelManager.mjs";
 
 export default class ModelContext {
+    
+    /** @type {string} */
+    #id;
+    
     /**
-     * @typedef {{ palette: PalettePanelManager, properties: PropertiesPanelManager, execute: ExecutePanelManager }} PanelManagersGroup 
+     * @typedef {{ 
+     *      palette: PalettePanelManager, 
+     *      properties: PropertiesPanelManager, 
+     *      execute: ExecutePanelManager,
+     *      verifications: VerificationsPanelManager
+     * }} PanelManagersGroup 
      * 
      * @type {{ 
      *  model: ModelManager,
@@ -35,22 +46,43 @@ export default class ModelContext {
     managers;
 
 
-    constructor() {
-        this.#initialize();
+    constructor(id, modelJSON) {
+        this.#id = id || this.#generateID();
+        this.#initialize(modelJSON);
     }
 
-    #initialize() {
-        this.#setupManagers();
+    get id() { return this.#id; }
+
+    #generateID() {
+        const timestamp = Date.now();
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let randomChars = "";
+        for (let i = 0; i < 5; i++) {
+            randomChars += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        return `${timestamp}${randomChars}`;
     }
 
-    #setupManagers() {
+    #initialize(modelJSON) {
+        const visualModel = modelJSON ? VisualRDLTModel.fromJSON(modelJSON) : null;
+        console.log(visualModel);
+
+        this.#setupManagers(visualModel);
+    }
+
+    /**
+     * 
+     * @param {VisualRDLTModel} visualModel 
+     */
+    #setupManagers(visualModel) {
         // Setup workspace manager and its views
         const workspaceManager = new WorkspaceManager(this);
 
 
         this.managers = {
             model: new ModelManager(this),
-            visualModel: new VisualModelManager(this),
+            visualModel: new VisualModelManager(this, visualModel),
             modelling: new ModellingManager(this), 
             drawing: new DrawingViewManager(this, 
                 { drawingSVG: workspaceManager.getDrawingSVG() }),
@@ -65,8 +97,15 @@ export default class ModelContext {
             panels: {
                 palette: new PalettePanelManager(this, workspaceManager.getPanelRootElement("palette")),
                 properties: new PropertiesPanelManager(this, workspaceManager.getPanelRootElement("properties")),
-                execute: new ExecutePanelManager(this, workspaceManager.getPanelRootElement("execute"))
+                execute: new ExecutePanelManager(this, workspaceManager.getPanelRootElement("execute")),
+                verifications: new VerificationsPanelManager(this, workspaceManager.getPanelRootElement("verifications"))
             },
         };
+
+        this.managers.modelling.loadModel();
+    }
+
+    static fromJSON(json) {
+        return new ModelContext(json.id, json.model);
     }
 }

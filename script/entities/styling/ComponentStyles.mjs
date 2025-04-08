@@ -26,4 +26,21 @@ export default class ComponentStyles {
 
         return copied;
     }
+
+    toJSON() {
+        return {
+            outline: this.outline.toJSON(),
+            innerLabel: this.innerLabel.toJSON(),
+            outerLabel: this.outerLabel.toJSON()
+        };
+    }
+
+    static fromJSON(json) {
+        const componentStyles = new ComponentStyles();
+        componentStyles.outline = OutlineStyle.fromJSON(json.outline);
+        componentStyles.innerLabel = TextStyle.fromJSON(json.innerLabel);
+        componentStyles.outerLabel = TextStyle.fromJSON(json.outerLabel);
+
+        return componentStyles;
+    }
 }

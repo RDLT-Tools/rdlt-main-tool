@@ -1,5 +1,6 @@
 import { buildElement } from "../../utils.mjs";
 import ModelContext from "../model/ModelContext.mjs";
+import { TabGroupManager } from "./TabGroupManager.mjs";
 
 export class TabManager {
     /** @type {string} */
@@ -20,24 +21,34 @@ export class TabManager {
     /** @type {HTMLDivElement} */
     tabAreaElement;
 
+    /** @type {TabGroupManager} */
+    tabGroupManager;
+
     /**
      * @param {ModelContext} id 
      * @param {string} id 
      * @param {string} title 
+     * @param {boolean} dismissable 
      */
-    constructor(context, id, title) {
+    constructor(context, tabGroupManager, id, title, dismissable = false) {
         this.context = context;
+        this.tabGroupManager = tabGroupManager;
         this.id = id;
         this.title = title;
-        this.dismissable = false;
+        this.dismissable = dismissable;
     }
 
     buildTabButton() {
         if(this.tabButtonElement) return this.tabButtonElement;
-        
+
+        this.tabButtonCloseElement = buildElement("button", { classname: "close-btn" }, [ 
+            buildElement("i", { classname: "fas fa-close" }) ]);
+
+        this.tabButtonCloseElement.addEventListener("click", () => this.close());
+
         this.tabButtonElement = buildElement("div", {
             classname: "tab-button"
-        }, [ this.title ]);
+        }, this.dismissable ? [ this.title, this.tabButtonCloseElement ] : [ this.title ]);
 
         return this.tabButtonElement;
     }
@@ -72,8 +83,16 @@ export class TabManager {
         }
     }
 
+    close() {
+        if(!this.dismissable) return;
+
+        this.tabButtonElement.remove();
+        this.tabAreaElement.remove();
+        this.tabGroupManager.onTabClosed(this.id);
+    }
+
     static load(context, id, title, tabButtonElement, tabAreaElement) {
-        const tabManager = new TabManager(context, id, title);
+        const tabManager = new TabManager(context, null, id, title);
         tabManager.tabButtonElement = tabButtonElement;
         tabManager.tabAreaElement = tabAreaElement;
 

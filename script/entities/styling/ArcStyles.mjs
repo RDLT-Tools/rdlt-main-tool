@@ -34,4 +34,21 @@ export default class ArcStyles {
 
         return copied;
     }
+
+    toJSON() {
+        return {
+            outline: this.outline.toJSON(),
+            label: this.label.toJSON(),
+            connectorEnd: { ...this.connectorEnd },
+        };
+    }
+
+    static fromJSON(json) {
+        const arcStyles = new ArcStyles();
+        arcStyles.outline = OutlineStyle.fromJSON(json.outline);
+        arcStyles.label = TextStyle.fromJSON(json.label);
+        arcStyles.connectorEnd = json.connectorEnd;
+
+        return arcStyles;
+    }
 }

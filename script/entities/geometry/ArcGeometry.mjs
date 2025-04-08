@@ -18,7 +18,7 @@ export default class ArcGeometry {
     waypoints;
 
     /**
-     * @type {{ baseSegmentIndex: 0, footFracDistance: number, perpDistance: number }}
+     * @type {{ baseSegmentIndex: number, footFracDistance: number, perpDistance: number }}
      */
     arcLabel;
 
@@ -47,5 +47,18 @@ export default class ArcGeometry {
             waypoints: this.waypoints.map(point => ({ ...point })),
             arcLabel: this.arcLabel
         });
+    }
+
+    toJSON() {
+        return {
+            pathType: this.pathType,
+            isAutoDraw: this.isAutoDraw,
+            waypoints: this.waypoints.map(waypoint => ({ ...waypoint})),
+            arcLabel: {...this.arcLabel}
+        };
+    }
+
+    static fromJSON(json) {
+        return new ArcGeometry(json);
     }
 }

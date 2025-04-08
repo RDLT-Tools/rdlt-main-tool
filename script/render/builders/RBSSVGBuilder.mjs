@@ -12,7 +12,7 @@ export default class RBSSVGBuilder {
     /** @type {SVGRectElement} */
     #boundsElement;
 
-    static padding = 15;
+    static padding = 20;
 
     constructor() {
         this.#label = new TextSVGBuilder("RBS", {

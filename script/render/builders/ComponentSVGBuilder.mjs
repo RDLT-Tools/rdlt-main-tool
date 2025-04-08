@@ -27,6 +27,9 @@ export default class ComponentSVGBuilder {
     /** @type {TextSVGBuilder} */
     #centerLabel;
 
+    /** @type {TextSVGBuilder} */
+    #outerLabel;
+
     /** @type {SVGGElement} */
     #element;
 
@@ -75,7 +78,15 @@ export default class ComponentSVGBuilder {
                 fontSize: 20
             });
 
+            this.#outerLabel = new TextSVGBuilder("", {
+                align: "middle", vAlign: "central", 
+                x: this.boundWidth/2,
+                y: this.boundHeight + 2,
+                fontSize: 14
+            });
+
             this.#centerLabel.element.classList.add("diagram");
+            this.#outerLabel.element.classList.add("diagram");
 
             const hoverElement = SVGAssetsRepository.loadComponentHoverSVGElement();
             hoverElement.classList.add("component-hover");
@@ -93,7 +104,8 @@ export default class ComponentSVGBuilder {
             this.#element = makeGroupSVG([
                 groupBounds,
                 this.#componentElement,
-                this.#centerLabel.element
+                this.#centerLabel.element,
+                this.#outerLabel.element
             ], { className: "component" });
         } else if(origin === "dragging") {
             this.#element = makeGroupSVG([
@@ -141,6 +153,12 @@ export default class ComponentSVGBuilder {
 
     setCenterLabelText(text) {
         this.#centerLabel.text = text;
+
+        return this;
+    }
+
+    setOuterLabelText(text) {
+        this.#outerLabel.text = text;
 
         return this;
     }

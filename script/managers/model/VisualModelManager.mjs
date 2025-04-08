@@ -16,10 +16,10 @@ export default class VisualModelManager {
     /**
      * @param {ModelContext} context 
      */
-    constructor(context) {
+    constructor(context, visualRDLTModel = null) {
         this.context = context;
 
-        this.#visualModel = new VisualRDLTModel();
+        this.#visualModel = visualRDLTModel || new VisualRDLTModel();
     }
     
     getModelName() {
@@ -35,6 +35,7 @@ export default class VisualModelManager {
      */
     addComponent(type, props, geometry, styles) {
         const visualComponent = new VisualComponent({
+            uid: this.#visualModel.VERTEX_ID_COUNTER++,
             type,
             identifier: props.identifier,
             label: props.label,
@@ -121,6 +122,7 @@ export default class VisualModelManager {
     addArc(fromVertexUID, toVertexUID, props, geometry, styles) {
         const { C, L } = props || {};
         const visualArc = new VisualArc({
+            uid: this.#visualModel.ARC_ID_COUNTER++,
             fromVertexUID,
             toVertexUID,
             C, L,
@@ -186,5 +188,9 @@ export default class VisualModelManager {
     /** @returns {VisualRDLTModel} */
     makeCopy() {
         return this.#visualModel.copy();
+    }
+
+    getModelJSON() {
+        return this.#visualModel.toJSON();
     }
 }

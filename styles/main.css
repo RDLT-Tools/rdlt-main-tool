@@ -288,15 +288,19 @@ svg .arc-waypoint:not([data-nomove]) {
   pointer-events: all !important;
 }
 
-.aes-subworkspace > main > header {
+.subworkspace > main > header {
   display: flex;
   align-items: center;
   padding: 8px 24px;
   border-bottom: 1.7px solid #838383;
 }
 
-.aes-subworkspace > main > header > * {
+.subworkspace > main > header > * {
   flex: 1;
+}
+
+.subworkspace > main > header > *:last-child {
+  text-align: right;
 }
 
 .aes-subworkspace .aes-quick-controls {

@@ -26,6 +26,17 @@ export default class OutlineStyle {
             color: this.color
         });
     }
+    
+    toJSON() {
+        return {
+            width: this.width,  
+            color: this.color,  
+        };
+    }
+
+    static fromJSON(json) {
+        return new OutlineStyle(json);
+    }
 
     
 }

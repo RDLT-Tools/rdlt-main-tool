@@ -1,7 +1,7 @@
 import { AESStep } from "../../entities/activity/AESStep.mjs";
 import VisualRDLTModel from "../../entities/model/visual/VisualRDLTModel.mjs";
 import { backtrack, buildArcMap, buildArcsAdjacencyMatrix, buildVertexMap, checkArc, iterateAtVertex, traverseArc } from "../../services/aes.mjs";
-import { pickRandomFromSet } from "../../utils.mjs";
+import { generateUniqueID, pickRandomFromSet } from "../../utils.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import { AESDrawingManager } from "./AESDrawingManager.mjs";
 import { AESSubworkspaceManager } from "./AESSubworkspaceManager.mjs";
@@ -10,12 +10,10 @@ import { AESStatesPanelManager } from "./panels/AESStatesPanelManager.mjs";
 import { AESStepsPanelManager } from "./panels/AESStepsPanelManager.mjs";
 
 export class AESimulationManager {
-    static idCounter = 1;
-
     /** @type {ModelContext} */
     context;
 
-    /** @type {number} */
+    /** @type {string} */
     id;
 
     /** 
@@ -93,7 +91,7 @@ export class AESimulationManager {
      */
     constructor(context, configs, visualModelSnapshot) {
         this.context = context;
-        this.id = AESimulationManager.idCounter++;
+        this.id = generateUniqueID();
         this.configs = configs;
         this.#modelSnapshot = visualModelSnapshot;
 
