@@ -147,6 +147,7 @@ export default class ComponentSVGBuilder {
 
         this.#type = type;
         const newComponentShapeElement = SVGAssetsRepository.loadComponentSVGElement(this.#type);
+        newComponentShapeElement.classList.add("diagram");
         this.#componentShapeElement.parentElement.replaceChild(newComponentShapeElement, this.#componentShapeElement);
         this.#componentShapeElement = newComponentShapeElement;
     }

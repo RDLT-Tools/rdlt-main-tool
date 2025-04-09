@@ -74,10 +74,12 @@ export default class PropertiesPanelManager {
         if([ 'type', 'identifier', 'label', 'isRBSCenter' ].includes(fieldName)) {
             modellingManager.updateComponentProps(componentUID, { [fieldName]: value });
         } else if([ 'x', 'y' ].includes(fieldName)) {
-            modellingManager.updateComponentPosition(componentUID,
-                fieldName === 'x' ? Number(value) : null,
-                fieldName === 'y' ? Number(value) : null
-            );
+            modellingManager.updateComponentsPositions({
+                [componentUID]: {
+                    x: fieldName === 'x' ? Number(value) : null,
+                    y: fieldName === 'y' ? Number(value) : null
+                }
+            });
         }
     }
 

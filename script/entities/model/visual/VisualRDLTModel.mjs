@@ -352,7 +352,7 @@ export default class VisualRDLTModel {
             if(incomingArcs.length === 0) potentialSourceVertices.push(this.#components[vertexUID]);
         }
 
-        return potentialSourceVertices;
+        return potentialSourceVertices.sort((v1, v2) => v1.identifier.localeCompare(v2.identifier));
     }
 
     getPotentialSinkVertices() {
@@ -363,7 +363,7 @@ export default class VisualRDLTModel {
             if(outgoingArcs.length === 0) potentialSinkVerties.push(this.#components[vertexUID]);
         }
 
-        return potentialSinkVerties;
+        return potentialSinkVerties.sort((v1, v2) => v1.identifier.localeCompare(v2.identifier));
     }
 
     copy() {

@@ -74,7 +74,9 @@ export class TabGroupManager {
     onTabClosed(id) {
         this.#tabs = this.#tabs.filter(t => t.id !== id);
         if(this.#tabs.length > 0) {
-            this.selectTab(this.#tabs[this.#tabs.length-1].id);
+            if(this.#activeTab === id) {
+                this.selectTab(this.#tabs[this.#tabs.length-1].id);
+            }
         }
     }
 }

@@ -32,12 +32,12 @@
  *      }[]
  * }}
  */
-export function verifyFreeChoiceness(model, source, sink, type) {
-    // TODO: Implement free choiceness
+export function performSomeVerification(model, source, sink, type) {
+    // TODO: Implement verification
     console.log({ model, source, sink, type });
 
     return {
-        title: "Free-Choiceness",
+        title: "Lorem Ipsum",
         instances: [
             {
                 name: "Main Model",

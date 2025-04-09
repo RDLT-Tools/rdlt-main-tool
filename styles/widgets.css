@@ -175,6 +175,7 @@ input[type="checkbox"] {
     margin-right: -5px;
     margin-top: -6px;
     margin-bottom: -6px;
+    background-color: transparent;
 }
 
 .tab-button .close-btn:hover {
