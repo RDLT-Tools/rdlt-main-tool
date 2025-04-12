@@ -13,32 +13,53 @@ export class LocalSessionManager {
         localStorage.setItem(key, JSON.stringify(value));
     }
 
+    static #remove(key) {
+        localStorage.removeItem(key);
+    }
+
     /**
      * @param {ModelContext} context 
      */
     static saveModel(context) {
         const modelJSON = context.managers.visualModel.getModelJSON();
         
-        this.#saveContextRef(context);
         LocalSessionManager.#set(`rdlt-tool-model-${context.id}`, modelJSON);
+    }
+
+    /**
+     * @param {ModelContext} context 
+     */
+    static removeModel(context) {
+        LocalSessionManager.#remove(`rdlt-tool-model-${context.id}`);
     }
 
     /**
      * 
      * @param {ModelContext} context 
      */
-    static #saveContextRef(context) {
-        const contextID = context.id;
-        const savedContextIDs = LocalSessionManager.#get("rdlt-tool-contexts-set") || [];
-        
-        if(!savedContextIDs.includes(contextID)) {
-            savedContextIDs.push(contextID);
-            LocalSessionManager.#set("rdlt-tool-contexts-set", savedContextIDs);
-        }
+    static saveContext(context) {
+        LocalSessionManager.saveModel(context);
     }
 
+    /**
+     * @param {ModelContext[]} contexts 
+     */
+    static saveContextIDs(contexts) {
+        const savedContextIDs = contexts.map(context => context.id);
+        LocalSessionManager.#set("rdlt-tool-contexts", savedContextIDs);
+    }
+
+    static saveAppStates(states) {
+        LocalSessionManager.#set("rdlt-tool-states", states);
+    }
+
+    static loadAppStates() {
+        return LocalSessionManager.#get("rdlt-tool-states");
+    }
+
+
     static loadAllContexts() {
-        const savedContextIDs = LocalSessionManager.#get("rdlt-tool-contexts-set") || [];
+        const savedContextIDs = LocalSessionManager.#get("rdlt-tool-contexts") || [];
         
         const contextsJSON = [];
         for(const contextID of savedContextIDs) {

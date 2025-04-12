@@ -666,12 +666,4 @@ export default class ModellingManager {
     #saveModel() {
         LocalSessionManager.saveModel(this.context);
     }
-
-
-    test() {
-        // this.#addComponentToSelection(2);
-        this.#addComponentToSelection(1);
-        this.#refreshSelected();
-    }
-
 }

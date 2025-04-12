@@ -1,4 +1,6 @@
+import App from "../../App.mjs";
 import { AESimulationManager } from "../activity/AESimulationManager.mjs";
+import ImportManager from "../file/import/ImportManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import { VerificationsResultManager } from "../verifications/VerificationsResultManager.mjs";
 import { TabGroupManager } from "../workspace/TabGroupManager.mjs";
@@ -33,6 +35,7 @@ export default class WorkspaceManager {
      
     /**
      * @type {{ 
+     *      root: HTMLDivElement,
      *      main: HTMLDivElement, 
      *      buttons: ViewButtons,
      *      panels: PanelsView, 
@@ -40,6 +43,7 @@ export default class WorkspaceManager {
      * }}
      */
     #view = {
+        root: null,
         main: null,
         buttons: {
             modes: {},
@@ -71,13 +75,17 @@ export default class WorkspaceManager {
     }
 
     #initializeView() {
-        this.#view.main = document.querySelector("body > main");
+        const rootElementTemplate = document.querySelector(`template[data-tab-template-id="model-context"]`).content;
+        const rootElement = rootElementTemplate.cloneNode(true).firstElementChild;
+        this.#view.root = rootElement;
+
+        this.#view.main = rootElement.querySelector(".main-view");
         // Initialize mode buttons
-        [...document.querySelectorAll('button[data-mode]')].forEach(
+        [...rootElement.querySelectorAll('button[data-mode]')].forEach(
             button => this.#view.buttons.modes[button.getAttribute("data-mode")] = button);
         
         // Initialize action buttons
-        [...document.querySelectorAll('button[data-action]')].forEach(
+        [...rootElement.querySelectorAll('button[data-action]')].forEach(
             button => {
                 const action = button.getAttribute("data-action");
                 this.#view.buttons.actions[action] = button;
@@ -86,18 +94,23 @@ export default class WorkspaceManager {
         
         // Initialize drawing area
         this.#view.drawing = {
-            container: document.querySelector('.drawing'),
-            svg: document.querySelector('.drawing > svg'),
+            container: rootElement.querySelector('.drawing'),
+            svg: rootElement.querySelector('.drawing > svg'),
         };
 
         // Initialize panels
-        [...document.querySelectorAll(".panel")].forEach(
+        [...rootElement.querySelectorAll(".panel")].forEach(
             panel => {
                 const panelID = panel.getAttribute("data-panel-id");
                 this.#view.panels[panelID] = panel;
         });
 
     }
+
+    getRootElement() {
+        return this.#view.root;
+    }
+
 
     /**
      * @returns {SVGElement}
@@ -123,6 +136,12 @@ export default class WorkspaceManager {
             case "save":
                 this.context.managers.export.exportToRDLTFile();
             break;
+            case "add":
+                App.addContext();
+            break;
+            case "upload":
+                ImportManager.importRDLTFile();
+            break;
             case "download":
                 this.context.managers.export.exportToPNGImage();
             break;
@@ -136,15 +155,15 @@ export default class WorkspaceManager {
     }
 
     #setupSubworkspaceTabs() {
-        const tabButtonsContainer = document.querySelector("body > .tab-buttons");
-        const tabAreaContainer = document.querySelector("body > main");
+        const tabButtonsContainer = this.#view.root.querySelector(".tab-buttons");
+        const tabAreaContainer = this.#view.root.querySelector("main");
 
         this.tabs.subworkspaces = new TabGroupManager(this, tabButtonsContainer, tabAreaContainer);
         
         this.tabs.subworkspaces.loadTab(TabManager.load(
             this, "main-model", "Main Model",
-            document.querySelector(".tab-button[data-tab-id='main-model']"),
-            document.querySelector(".tab-area[data-tab-id='main-model']"),
+            this.#view.root.querySelector(".tab-button[data-tab-id='main-model']"),
+            this.#view.root.querySelector(".tab-area[data-tab-id='main-model']"),
         ));
 
         this.tabs.subworkspaces.selectTab("main-model");
@@ -152,11 +171,11 @@ export default class WorkspaceManager {
 
     #setupMainModelTabs() {
 
-        const leftPanelsTabButtonsContainer = document.querySelector(".left-panels > .tab-buttons");
-        const leftPanelsTabAreaContainer = document.querySelector(".left-panels > .panel-tabs");
+        const leftPanelsTabButtonsContainer = this.#view.root.querySelector(".left-panels > .tab-buttons");
+        const leftPanelsTabAreaContainer = this.#view.root.querySelector(".left-panels > .panel-tabs");
 
-        const rightPanelsTabButtonsContainer = document.querySelector(".right-panels > .tab-buttons");
-        const rightPanelsTabAreaContainer = document.querySelector(".right-panels > .panel-tabs");
+        const rightPanelsTabButtonsContainer = this.#view.root.querySelector(".right-panels > .tab-buttons");
+        const rightPanelsTabAreaContainer = this.#view.root.querySelector(".right-panels > .panel-tabs");
 
 
         this.tabs.left = new TabGroupManager(this, leftPanelsTabButtonsContainer, leftPanelsTabAreaContainer);
@@ -195,7 +214,7 @@ export default class WorkspaceManager {
         ));
         
         this.tabs.left.selectTab("palette");
-        this.tabs.right.selectTab("verifications");
+        this.tabs.right.selectTab("properties");
 
     }
 
@@ -215,7 +234,7 @@ export default class WorkspaceManager {
      * @returns {TabManager}
      */
     #addTemplatedSubworkspace(id, title, templateID) {
-        const templateTabArea = document.querySelector(`template[data-tab-template-id='${templateID}']`).content;
+        const templateTabArea = this.#view.root.querySelector(`template[data-tab-template-id='${templateID}']`).content;
         const tabArea = templateTabArea.cloneNode(true).firstElementChild;
         const tabManager = new TabManager(this.context, this.tabs.subworkspaces, id, title, true);
         tabManager.tabAreaElement = tabArea;

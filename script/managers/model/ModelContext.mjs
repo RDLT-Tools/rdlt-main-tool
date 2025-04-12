@@ -43,12 +43,12 @@ export default class ModelContext {
      *  panels: PanelManagersGroup,
      * }}
     */
-    managers;
+    managers = {};
 
 
-    constructor(id, modelJSON) {
+    constructor(id, visualModel) {
         this.#id = id || this.#generateID();
-        this.#initialize(modelJSON);
+        this.#initialize(visualModel);
     }
 
     get id() { return this.#id; }
@@ -64,10 +64,7 @@ export default class ModelContext {
         return `${timestamp}${randomChars}`;
     }
 
-    #initialize(modelJSON) {
-        const visualModel = modelJSON ? VisualRDLTModel.fromJSON(modelJSON) : null;
-        console.log(visualModel);
-
+    #initialize(visualModel) {
         this.#setupManagers(visualModel);
     }
 
@@ -77,35 +74,41 @@ export default class ModelContext {
      */
     #setupManagers(visualModel) {
         // Setup workspace manager and its views
+        
+
+        this.managers.visualModel = new VisualModelManager(this, visualModel);
+        this.managers.model = new ModelManager(this);
+        this.managers.modelling = new ModellingManager(this); 
+        
+        this.managers.arcTracing = new ArcTracingManager(this);
+        this.managers.rbsBounds = new RBSBoundsManager(this);
+        this.managers.dragAndDrop = new DragAndDropManager(this);
+        
+        this.managers.transform = new TransformManager(this);
+        this.managers.export = new ExportManager(this);
+
         const workspaceManager = new WorkspaceManager(this);
-
-
-        this.managers = {
-            model: new ModelManager(this),
-            visualModel: new VisualModelManager(this, visualModel),
-            modelling: new ModellingManager(this), 
-            drawing: new DrawingViewManager(this, 
-                { drawingSVG: workspaceManager.getDrawingSVG() }),
-            arcTracing: new ArcTracingManager(this),
-            rbsBounds: new RBSBoundsManager(this),
-            dragAndDrop: new DragAndDropManager(this),
-            userEvents: new UserEventsManager(this,
-                { drawingSVG: workspaceManager.getDrawingSVG() }),
-            transform: new TransformManager(this),
-            workspace: workspaceManager,
-            export: new ExportManager(this),
-            panels: {
-                palette: new PalettePanelManager(this, workspaceManager.getPanelRootElement("palette")),
-                properties: new PropertiesPanelManager(this, workspaceManager.getPanelRootElement("properties")),
-                execute: new ExecutePanelManager(this, workspaceManager.getPanelRootElement("execute")),
-                verifications: new VerificationsPanelManager(this, workspaceManager.getPanelRootElement("verifications"))
-            },
+        this.managers.workspace = workspaceManager;
+        this.managers.userEvents = new UserEventsManager(this,
+            { drawingSVG: workspaceManager.getDrawingSVG() });
+        this.managers.drawing = new DrawingViewManager(this,
+            { drawingSVG: workspaceManager.getDrawingSVG() });
+        this.managers.panels = {
+            palette: new PalettePanelManager(this, workspaceManager.getPanelRootElement("palette")),
+            properties: new PropertiesPanelManager(this, workspaceManager.getPanelRootElement("properties")),
+            execute: new ExecutePanelManager(this, workspaceManager.getPanelRootElement("execute")),
+            verifications: new VerificationsPanelManager(this, workspaceManager.getPanelRootElement("verifications"))
         };
 
         this.managers.modelling.loadModel();
     }
 
+    
+    getModelName() {
+        return this.managers.visualModel.getModelName();
+    }
+
     static fromJSON(json) {
-        return new ModelContext(json.id, json.model);
+        return new ModelContext(json.id, VisualRDLTModel.fromJSON(json.model));
     }
 }

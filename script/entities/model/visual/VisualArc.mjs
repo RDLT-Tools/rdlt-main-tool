@@ -31,7 +31,7 @@ export default class VisualArc {
 
 
     /**
-     * @param {{ C: string, L: number, fromVertexUID: number, toVertexUID: number }} options 
+     * @param {{ C: string, L: number, fromVertexUID: number, toVertexUID: number, geometry, styles }} options 
      */
     constructor(options = {}) {
         const { uid, C, L, fromVertexUID, toVertexUID, geometry, styles } = options || {};

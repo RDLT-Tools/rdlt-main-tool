@@ -67,7 +67,7 @@ export default class ArcSVGBuilder {
             this.#labelElement.element.classList.add("diagram");
     
             const arcCutoutID = `arc-${Date.now()}-${Math.floor(Math.random()*10000)}-cutout`
-            arcElement.setAttribute("mask", `url(#${arcCutoutID})`);
+            // arcElement.setAttribute("mask", `url(#${arcCutoutID})`);
 
             this.#labelMaskElement = makeSVGElement("rect", {
                 x: 0, y: 0, width: 100, height: 100, 
