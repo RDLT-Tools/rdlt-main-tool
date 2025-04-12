@@ -111,7 +111,7 @@ export default class DrawingViewManager {
         const arcBuilder = new ArcSVGBuilder();
 
         this.#setArcProps(arcBuilder, arc);
-        this.#setArcGeometry(arcBuilder, arc.geometry, arc.styles.connectorEnd.thickness, vertex1Geometry, vertex2Geometry);
+        this.#setArcGeometry(arcBuilder, arc, vertex1Geometry, vertex2Geometry);
         this.#setArcStyles(arcBuilder, arc.styles);
 
         this.#builders.arcs[id] = arcBuilder;
@@ -200,16 +200,16 @@ export default class DrawingViewManager {
     }
 
     /**
- * @param {number} id
+    * @param {number} id
      * @param {ArcGeometry} geometry
      * @param {ComponentGeometry} vertex1Geometry
      * @param {ComponentGeometry} vertex2Geometry
      */
-    updateArcGeometry(id, geometry, connectorEndThickness, vertex1Geometry, vertex2Geometry) {
-        const arcBuilder = this.#getArcBuilder(id);
+    updateArcGeometry(arc, vertex1Geometry, vertex2Geometry) {
+        const arcBuilder = this.#getArcBuilder(arc.uid);
         if(!arcBuilder) return;
 
-        this.#setArcGeometry(arcBuilder, geometry, connectorEndThickness, vertex1Geometry, vertex2Geometry);
+        this.#setArcGeometry(arcBuilder, arc, vertex1Geometry, vertex2Geometry);
     }
     
 
@@ -264,30 +264,49 @@ export default class DrawingViewManager {
     
     /**
      * @param {ArcSVGBuilder} builder 
-     * @param {ArcGeometry} geometry 
+     * @param {VisualArc} arc 
      * @param {ComponentGeometry} vertex1Geometry 
      * @param {ComponentGeometry} vertex2Geometry 
      */
-    #setArcGeometry(builder, geometry, connectorEndThickness, vertex1Geometry, vertex2Geometry) {
+    #setArcGeometry(builder, arc, vertex1Geometry, vertex2Geometry) {
+        const geometry = arc.geometry;
+        const connectorEndThickness = arc.styles.connectorEnd.thickness;
+         
         const startRadius = vertex1Geometry.size/2;
         const start = vertex1Geometry.position;
         
         const endRadius = vertex2Geometry.size/2;
         const end = vertex2Geometry.position;
         
-        const points = [ start, ...geometry.waypoints, end ];
-        builder.setWaypoints(points, startRadius, endRadius);
+        let points = [ start ];
 
-        // Set connector end invisible if last segment's length is less than connectorEndThickness
-        if(getDistance(points[points.length-2], end) >= connectorEndThickness*2) {
-            builder.setConnectorEndVisible(true);
-            builder.updateConnectorEndPosition(connectorEndThickness, end, endRadius, points[points.length-2]);
+        if(arc.form === "self-loop") {
+            const controlPoint = arc.controlPoint;
+            points.push({ 
+                x: vertex1Geometry.position.x + controlPoint.x,
+                y: vertex1Geometry.position.y + controlPoint.y,
+            });
         } else {
-            builder.setConnectorEndVisible(false);
+            points.push(...geometry.waypoints, end);
+        }
+
+        const drawn = builder.drawPath(arc.form, points, startRadius, endRadius);
+
+        if(arc.form !== "self-loop") {
+            // Set connector end invisible if last segment's length is less than connectorEndThickness
+            if(getDistance(points[points.length-2], end) >= connectorEndThickness*2) {
+                builder.setConnectorEndVisible(true);
+                builder.updateConnectorEndPosition(connectorEndThickness, end, endRadius, points[points.length-2]);
+            } else {
+                builder.setConnectorEndVisible(false);
+            }
+        } else {
+            const intersections = drawn.intersections;
+            builder.updateConnectorEndPosition(connectorEndThickness, end, endRadius, intersections[1]);
         }
 
         builder.updateLabelPosition(
-            points, geometry.arcLabel.baseSegmentIndex,
+            arc.form, points, geometry.arcLabel.baseSegmentIndex,
             geometry.arcLabel.footFracDistance, geometry.arcLabel.perpDistance, 
             startRadius, endRadius);
     }
@@ -345,21 +364,24 @@ export default class DrawingViewManager {
         this.#builders.arcTracing.element.style.display = "initial";
 
         const arcTracingBuilder = this.#builders.arcTracing;
-        this.#setArcGeometry(arcTracingBuilder, new ArcGeometry(), new ArcStyles().connectorEnd.thickness, 
+        this.#setArcGeometry(arcTracingBuilder, new VisualArc({ fromVertexUID: -1, toVertexUID: -2 }), 
             vertex1Geometry, new ComponentGeometry({
                 position: targetPoint, size: 1
             }));
     }
 
     /**
-     * @param {ComponentGeometry} vertex1Geometry 
-     * @param {ComponentGeometry} vertex2Geometry 
+     * @param {VisualComponent} vertex1 
+     * @param {VisualComponent} vertex2 
      */
-    traceArcToVertex(vertex1Geometry, vertex2Geometry) {
+    traceArcToVertex(vertex1, vertex2) {
         this.#builders.arcTracing.element.style.display = "initial";
 
         const arcTracingBuilder = this.#builders.arcTracing;
-        this.#setArcGeometry(arcTracingBuilder, new ArcGeometry(), new ArcStyles().connectorEnd.thickness, vertex1Geometry, vertex2Geometry);
+        this.#setArcGeometry(arcTracingBuilder, new VisualArc({
+            fromVertexUID: vertex1.uid,
+            toVertexUID: vertex2.uid
+        }), vertex1.geometry, vertex2.geometry);
     }
 
     endTracing() {

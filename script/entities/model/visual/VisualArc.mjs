@@ -70,6 +70,16 @@ export default class VisualArc {
         };
     }
 
+    get form() {
+        if(this.fromVertexUID === this.toVertexUID) return "self-loop";
+
+        return "straight";
+    }
+
+    get controlPoint() {
+        return { x: 20, y: -65 };
+    }
+
     static fromJSON(json) {
         return new VisualArc({
             ...json,
