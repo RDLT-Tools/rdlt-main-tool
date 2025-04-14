@@ -385,7 +385,7 @@ export default class ModellingManager {
      * @param {VisualComponent} visualComponent 
      */
     #displayNewComponent(visualComponent) {
-        const componentElement = this.context.managers.drawing.addComponent(visualComponent);
+        const componentElement = this.context.managers.drawing.addVertex(visualComponent);
         this.context.managers.userEvents.registerComponent(visualComponent.uid, componentElement);
 
         if(visualComponent.isRBSCenter) {

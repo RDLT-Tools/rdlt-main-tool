@@ -120,10 +120,18 @@ export default class ComponentSVGBuilder {
                 fontSize: 20
             });
 
+            this.#outerLabel = new TextSVGBuilder("", {
+                align: "middle", vAlign: "central", 
+                x: this.boundWidth/2,
+                y: this.boundHeight + 2,
+                fontSize: 14
+            });
+
             this.#element = makeGroupSVG([
                 groupBounds,
                 this.#componentElement,
-                this.#centerLabel.element
+                this.#centerLabel.element,
+                this.#outerLabel.element
             ], { className: "component" });
         }
     }
