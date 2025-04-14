@@ -220,10 +220,12 @@ export function traverseArc(args, states, cache) {
     const maxT = getMaxT(incomingArcs, T);
     const reachableArcs = new Set();
 
-    // 2. Update T of every recently checked incoming arc
+    // 2. Update T of every recently checked incoming arc whose C != epsilon
     for(const incomingArcUID of incomingArcs) {
         if(!isArcPreviouslyChecked(incomingArcUID, CTIndicator)) continue;
-        
+        const incomingArc = arcMap[incomingArcUID];
+        if(isEpsilon(incomingArc.C) && arcUID !== incomingArcUID) continue;
+
         const t = T[incomingArcUID];
         t[t.length-1] = maxT;
 
