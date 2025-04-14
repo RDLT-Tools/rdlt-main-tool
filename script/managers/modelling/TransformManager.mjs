@@ -60,11 +60,8 @@ export default class TransformManager {
         const offsetX = x - startX;
         const offsetY = y - startY;
 
-        const modellingManager = this.context.managers.modelling;
-        const { zoomFactor } = modellingManager.modellingStates.view;
-
-        const absOffsetX = offsetX/zoomFactor;
-        const absOffsetY = offsetY/zoomFactor;
+        const absOffsetX = offsetX;
+        const absOffsetY = offsetY;
 
         const initialPositions = this.states.moveInitialPositions;
         const newPositions = {};
@@ -77,7 +74,7 @@ export default class TransformManager {
             newPositions[id] = { x: nx, y: ny };
         }
 
-        modellingManager.updateComponentsPositions(newPositions);
+        this.context.managers.modelling.updateComponentsPositions(newPositions);
     }
 
     endMovement() {

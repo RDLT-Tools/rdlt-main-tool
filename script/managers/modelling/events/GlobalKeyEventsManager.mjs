@@ -1,3 +1,5 @@
+import { setHasExact } from "../../../utils.mjs";
+
 export class GlobalKeyEventsManager {
 
     /** @typedef {"Shift" | "Control" | "+" | "-"} Keys */
@@ -10,6 +12,11 @@ export class GlobalKeyEventsManager {
     /** @type {Set<Keys>} */
     static #heldKeys = new Set();
 
+    static overridenKeys = [
+        [ "Control", "=" ],
+        [ "Control", "-" ],
+    ];
+
     static initialize() {
         document.addEventListener("keydown", (event) => {
             if(document.activeElement.tagName !== "BODY") {
@@ -19,7 +26,12 @@ export class GlobalKeyEventsManager {
 
             GlobalKeyEventsManager.#heldKeys.add(event.key);
             GlobalKeyEventsManager.#notifyListeners();
-            event.preventDefault();
+
+            if(GlobalKeyEventsManager.overridenKeys.some(
+                keyset => setHasExact(GlobalKeyEventsManager.#heldKeys, ...keyset)
+            )) {
+                event.preventDefault();
+            }
         });
 
         document.addEventListener("keyup", (event) => {
