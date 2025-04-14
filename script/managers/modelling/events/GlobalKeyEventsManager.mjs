@@ -1,0 +1,61 @@
+export class GlobalKeyEventsManager {
+
+    /** @typedef {"Shift" | "Control" | "+" | "-"} Keys */
+    /** @typedef {-1 | 0 | 1} ScrollDirection */
+    /** @typedef {(keys: Set<Keys>, scrollDirection: ScrollDirection, cursorPosition: { x: number, y: number }) => void} KeyEventsHandler */
+    
+    /** @type {{ element: HTMLElement, handler: KeyEventsHandler }[]} */
+    static #listeners = [];
+
+    /** @type {Set<Keys>} */
+    static #heldKeys = new Set();
+
+    static initialize() {
+        document.addEventListener("keydown", (event) => {
+            if(document.activeElement.tagName !== "BODY") {
+                GlobalKeyEventsManager.#heldKeys.clear();
+                return;
+            }
+
+            GlobalKeyEventsManager.#heldKeys.add(event.key);
+            GlobalKeyEventsManager.#notifyListeners();
+            event.preventDefault();
+        });
+
+        document.addEventListener("keyup", (event) => {
+            if(document.activeElement.tagName !== "BODY") {
+                GlobalKeyEventsManager.#heldKeys.clear();
+                return;
+            }
+
+            GlobalKeyEventsManager.#heldKeys.delete(event.key);
+            GlobalKeyEventsManager.#notifyListeners();
+        });
+    }
+
+    static #notifyListeners(scrollDirection = 0, cursorPosition = null) {
+        for(const { element, handler } of GlobalKeyEventsManager.#listeners) {
+            requestAnimationFrame(() => {
+                const { width, height } = element.getBoundingClientRect();
+                if(width === 0 || height === 0) return;
+    
+                handler(GlobalKeyEventsManager.#heldKeys, scrollDirection, cursorPosition);
+            });
+        }
+    }
+
+    /**
+     * 
+     * @param {HTMLElement} element 
+     * @param {KeyEventsHandler} handler 
+     */
+    static listen(element, handler) {
+        this.#listeners.push({ element, handler });
+        element.addEventListener("wheel", (event) => {
+            this.#notifyListeners(Math.sign(event.deltaY || 0), {
+                x: event.clientX, y: event.clientY
+            });
+            event.preventDefault();
+        });
+    }
+}

@@ -39,7 +39,7 @@ export default class TextSVGBuilder {
      * @param {{ fontSize: number | string, fontFamily: string, align: TextAlign, vAlign: TextVerticalAlign, x: number, y: number }} props 
      */
     constructor(text, props = {}) {
-        const { fontSize, fontFamily, color, align, vAlign, x = 0, y = 0 } = props;
+        const { fontSize, fontFamily, color, align, vAlign, x = 0, y = 0, strokeWidth = 2} = props;
 
         this.#element = makeSVGElement("text");
         this.text = text;
@@ -49,10 +49,12 @@ export default class TextSVGBuilder {
         this.position = { x, y };
         this.align = align;
         this.vAlign = vAlign;
+        this.strokeWidth = strokeWidth;
 
         this.element.setAttribute("stroke", "white");
-        this.element.setAttribute("stroke-width", "4");
         this.element.setAttribute("paint-order", "stroke fill");
+        this.element.setAttribute("stroke-linejoin", "round");
+        this.element.setAttribute("stroke-linecap", "round");
     }
 
     get text() { return this.#text; }
@@ -108,6 +110,10 @@ export default class TextSVGBuilder {
 
     set width(width) {
         this.#element.setAttribute("width", width);
+    }
+
+    set strokeWidth(strokeWidth) {
+        this.element.setAttribute("stroke-width", strokeWidth*2);
     }
 
     copy() {

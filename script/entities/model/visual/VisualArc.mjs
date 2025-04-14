@@ -31,7 +31,7 @@ export default class VisualArc {
 
 
     /**
-     * @param {{ C: string, L: number, fromVertexUID: number, toVertexUID: number }} options 
+     * @param {{ C: string, L: number, fromVertexUID: number, toVertexUID: number, geometry, styles }} options 
      */
     constructor(options = {}) {
         const { uid, C, L, fromVertexUID, toVertexUID, geometry, styles } = options || {};
@@ -68,6 +68,16 @@ export default class VisualArc {
             geometry: this.geometry.toJSON(),
             styles: this.styles.toJSON()
         };
+    }
+
+    get form() {
+        if(this.fromVertexUID === this.toVertexUID) return "self-loop";
+
+        return "straight";
+    }
+
+    get controlPoint() {
+        return { x: 20, y: -65 };
     }
 
     static fromJSON(json) {

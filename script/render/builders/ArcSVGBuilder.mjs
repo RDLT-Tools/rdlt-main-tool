@@ -1,6 +1,6 @@
 import TextSVGBuilder from "./TextSVGBuilder.mjs";
 import SVGAssetsRepository from "./SVGAssetsRepository.mjs";
-import { getDistance, makeGroupSVG, makeSVGElement, radiansToDegrees } from "./utils.mjs";
+import { getCircleIntersections, getDistance, makeGroupSVG, makeSVGElement, radiansToDegrees } from "./utils.mjs";
 
 
 export default class ArcSVGBuilder {
@@ -36,13 +36,32 @@ export default class ArcSVGBuilder {
         this.#origin = origin;
         const arcColor = origin === "tracing" ? "#aaaaaa" : "black";
 
+        
+        // const connectorEndDefs = makeSVGElement("defs", {}, [
+        //     makeSVGElement("marker", { 
+        //         id: "arrow",
+        //         markerWidth: "20",
+        //         markerHeight: "20",
+        //         refX: "5",
+        //         refY: "5",
+        //         orient: "auto",
+        //         markerUnits: "strokeWidth"
+        //     }, [ 
+        //         // makeSVGElement("path", { d: "M 0 0 L 10 5 L 0 10 z", fill: "black" })
+        //         makeSVGElement("polygon", { points: "0 0, 10 3.5, 0 7", fill: "black" })
+        //     ])
+        // ]);
+
         this.#pathElement = makeSVGElement("path", {
             d: "",
             stroke: arcColor,
-            fill: "none"
+            fill: "none",
+            "marker-end": "url(#arrow)",
+            "marker-start": "url(#arrow)"
         });
 
         this.#pathElement.classList.add("arc-path");
+
 
         this.#connectorEndElement = makeSVGElement("polygon", {
             points: "",
@@ -51,6 +70,7 @@ export default class ArcSVGBuilder {
         });
 
         const arcElement = makeGroupSVG([
+            // connectorEndDefs,
             this.#pathElement,
             this.#connectorEndElement
         ], { className: "diagram" });
@@ -61,13 +81,14 @@ export default class ArcSVGBuilder {
                 align: "middle", vAlign: "central", 
                 x: 0,
                 y: 0,
-                fontSize: 16
+                fontSize: 16,
+                strokeWidth: 3.5
             });
 
             this.#labelElement.element.classList.add("diagram");
     
             const arcCutoutID = `arc-${Date.now()}-${Math.floor(Math.random()*10000)}-cutout`
-            arcElement.setAttribute("mask", `url(#${arcCutoutID})`);
+            // arcElement.setAttribute("mask", `url(#${arcCutoutID})`);
 
             this.#labelMaskElement = makeSVGElement("rect", {
                 x: 0, y: 0, width: 100, height: 100, 
@@ -144,50 +165,34 @@ export default class ArcSVGBuilder {
 
 
     /**
+     * @param {"straight" | "elbowed" | "self-loop"} form
      * @param {{ x: number, y: number }[]} points - all points, including center of incidental vertices
      * @param {number} startRadius 
      * @param {number} endRadius 
      */
-    setWaypoints(points, startRadius = 0, endRadius = 0) {
-        const poc1 = this.#getPointOfContact(
-            points[0], startRadius, points[1]);
+    drawPath(form, points, startRadius = 0, endRadius = 0) {
+        let d = "";
+        let drawPoints = [];
+        const response = {};
 
-        if(isNaN(poc1.x) || isNaN(poc1.y)) return;
-
-        const poc2 = this.#getPointOfContact(
-            points[points.length-1], endRadius, points[points.length-2]);
-
-        // Draw line from poc1 to poc2 along points excluding vertex centers
-        const drawPoints = [ poc1, ...points.slice(1, -1), poc2 ];
-        
-        let d = `M ${poc1.x} ${poc1.y}`;
-        for(let i = 1; i < drawPoints.length; i++) {
-            const { x, y } = drawPoints[i];
-            d += ` L ${x} ${y}`;
-        }
-
-        this.#pathElement.setAttribute("d", d);
-
-        if(this.#origin === "model") {
-            this.#hoverPathElement.setAttribute("d", d);
-            this.#selectedPathElement.setAttribute("d", d);
-            this.#triggerPathElement.setAttribute("d", d);
+        if([ "straight", "elbowed" ].includes(form)) {
+            const poc1 = this.#getPointOfContact(
+                points[0], startRadius, points[1]);
     
-            // Update waypoint points
-            this.#waypointsElement.innerHTML = "";
-            for(let i = 0; i < drawPoints.length; i++) {
+            if(isNaN(poc1.x) || isNaN(poc1.y)) return;
+    
+            const poc2 = this.#getPointOfContact(
+                points[points.length-1], endRadius, points[points.length-2]);
+    
+            // Draw line from poc1 to poc2 along points excluding vertex centers
+            drawPoints = [ poc1, ...points.slice(1, -1), poc2 ];
+            
+            d = `M ${poc1.x} ${poc1.y}`;
+            for(let i = 1; i < drawPoints.length; i++) {
                 const { x, y } = drawPoints[i];
-                const waypointElement = SVGAssetsRepository.loadArcSelectedSVGElement().querySelector("circle");
-                waypointElement.classList.add("arc-waypoint");
-                waypointElement.setAttribute("cx", x);
-                waypointElement.setAttribute("cy", y);
-                
-                if(i === 0 || i === drawPoints.length-1) {
-                    waypointElement.setAttribute("data-nomove", "");
-                }
-
-                this.#waypointsElement.appendChild(waypointElement);
+                d += ` L ${x} ${y}`;
             }
+
             
             // Update bounds
             const startX = Math.min(...drawPoints.map(p => p.x));
@@ -198,10 +203,65 @@ export default class ArcSVGBuilder {
                 start: { x: startX, y: startY },
                 end: { x: endX, y: endY },
             }
+        } else if(form === "self-loop") {
+            const vertexCenter = points[0];
+            const absControlPoint = points[1];
+
+            const vertexRadius = startRadius;
+            const controlDistance = getDistance(vertexCenter, absControlPoint);
+            const arcDistance = (controlDistance**2 + vertexRadius**2)/(2*controlDistance);
+            const arcRadius = Math.sqrt(arcDistance**2 - vertexRadius**2);
+            
+            const arcCenter = this.#getPointOfContact(vertexCenter, arcDistance, absControlPoint);
+
+            const [ poc1, poc2 ] = getCircleIntersections(vertexRadius, vertexCenter, arcRadius, arcCenter);
+            response.intersections = [ poc1, poc2 ];
+
+            d = `M${poc1.x} ${poc1.y} A ${arcRadius} ${arcRadius} 0 1 1 ${poc2.x} ${poc2.y}`;
+
+            this.#bounds = {
+                start: { 
+                    x: arcCenter.x - arcRadius,
+                    y: arcCenter.y - arcRadius,
+                },
+                end: { 
+                    x: arcCenter.x + arcRadius,
+                    y: arcCenter.y + arcRadius,
+                }
+            };
+        }
+
+        this.#pathElement.setAttribute("d", d);
+
+        if(this.#origin === "model") {
+            this.#hoverPathElement.setAttribute("d", d);
+            this.#selectedPathElement.setAttribute("d", d);
+            this.#triggerPathElement.setAttribute("d", d);
+
+            this.#waypointsElement.innerHTML = "";
+            if(form === "elbowed") {
+                // Update waypoint points
+                for(let i = 0; i < drawPoints.length; i++) {
+                    const { x, y } = drawPoints[i];
+                    const waypointElement = SVGAssetsRepository.loadArcSelectedSVGElement().querySelector("circle");
+                    waypointElement.classList.add("arc-waypoint");
+                    waypointElement.setAttribute("cx", x);
+                    waypointElement.setAttribute("cy", y);
+                    
+                    if(i === 0 || i === drawPoints.length-1) {
+                        waypointElement.setAttribute("data-nomove", "");
+                    }
+
+                    this.#waypointsElement.appendChild(waypointElement);
+                }
+            }
+            
         } else if(this.#origin === "aes") {
             this.#aesHighlightPathElement.setAttribute("d", d);
             this.#aesClickableElement.setAttribute("d", d);
         }
+
+        return response;
 
     }
 
@@ -273,40 +333,45 @@ export default class ArcSVGBuilder {
         this.#connectorEndElement.style.display = isVisible ? "initial" : "none";
     }
 
-    updateLabelPosition(points, baseSegmentIndex, footFracDistance, perpDistance, startRadius, endRadius) {
+    updateLabelPosition(form, points, baseSegmentIndex, footFracDistance, perpDistance, startRadius, endRadius) {
         if(!this.#labelElement) return;
 
-        // Change endpoints to points of contact
-        points[0] = this.#getPointOfContact(points[0], startRadius, points[1]);
-        points[points.length-1] = this.#getPointOfContact(
-            points[points.length-1], endRadius, points[points.length-2]);
+        if(form === "self-loop") {
+            this.#labelElement.position = points[1];
+        } else {
+            // Change endpoints to points of contact
+            points[0] = this.#getPointOfContact(points[0], startRadius, points[1]);
+            points[points.length-1] = this.#getPointOfContact(
+                points[points.length-1], endRadius, points[points.length-2]);
 
-        const baseSegmentStart = points[baseSegmentIndex];
-        const baseSegmentEnd = points[baseSegmentIndex+1];
+            const baseSegmentStart = points[baseSegmentIndex];
+            const baseSegmentEnd = points[baseSegmentIndex+1];
 
-        const footX = baseSegmentStart.x + footFracDistance*(baseSegmentEnd.x - baseSegmentStart.x);
-        const footY = baseSegmentStart.y + footFracDistance*(baseSegmentEnd.y - baseSegmentStart.y);
+            const footX = baseSegmentStart.x + footFracDistance*(baseSegmentEnd.x - baseSegmentStart.x);
+            const footY = baseSegmentStart.y + footFracDistance*(baseSegmentEnd.y - baseSegmentStart.y);
 
-        const segmentSlope = (baseSegmentStart.y - baseSegmentEnd.y) / (baseSegmentStart.x - baseSegmentEnd.x);
-        const perpAngle = Math.atan(-1/segmentSlope) + (baseSegmentStart.y < baseSegmentEnd.y ? Math.PI : 0);
-        const labelX = footX + Math.cos(perpAngle)*perpDistance;
-        const labelY = footY + Math.sin(perpAngle)*perpDistance;
+            const segmentSlope = (baseSegmentStart.y - baseSegmentEnd.y) / (baseSegmentStart.x - baseSegmentEnd.x);
+            const perpAngle = Math.atan(-1/segmentSlope) + (baseSegmentStart.y < baseSegmentEnd.y ? Math.PI : 0);
+            const labelX = footX + Math.cos(perpAngle)*perpDistance;
+            const labelY = footY + Math.sin(perpAngle)*perpDistance;
 
-        this.#labelElement.position = { x: labelX, y: labelY };
+            this.#labelElement.position = { x: labelX, y: labelY };
+        }
 
-        requestAnimationFrame(() => {
-            const { width, height } = this.#labelElement.element.getBBox();
-            const clipoutWidth = width + 10;
-            const clipoutHeight = height + 6;
-            const clipoutX = labelX - clipoutWidth/2;
-            const clipoutY = labelY - clipoutHeight/2;
 
-            if(isNaN(clipoutX) || isNaN(clipoutY)) return;
+        // requestAnimationFrame(() => {
+        //     const { width, height } = this.#labelElement.element.getBBox();
+        //     const clipoutWidth = width + 10;
+        //     const clipoutHeight = height + 6;
+        //     const clipoutX = labelX - clipoutWidth/2;
+        //     const clipoutY = labelY - clipoutHeight/2;
 
-            this.#labelMaskElement.setAttribute("transform", `translate(${clipoutX}, ${clipoutY})`);
-            this.#labelMaskElement.setAttribute("height", clipoutHeight);
-            this.#labelMaskElement.setAttribute("width", clipoutWidth);
-        });
+        //     if(isNaN(clipoutX) || isNaN(clipoutY)) return;
+
+        //     this.#labelMaskElement.setAttribute("transform", `translate(${clipoutX}, ${clipoutY})`);
+        //     this.#labelMaskElement.setAttribute("height", clipoutHeight);
+        //     this.#labelMaskElement.setAttribute("width", clipoutWidth);
+        // });
     }
 
     setIsSelected(isSelected) {

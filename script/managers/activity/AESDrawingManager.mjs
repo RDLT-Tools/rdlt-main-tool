@@ -80,6 +80,9 @@ export class AESDrawingManager {
      * @returns {ArcSVGBuilder} 
      */
     #addArc(arc, vertex1Geometry, vertex2Geometry) {
+        const geometry = arc.geometry;
+        const connectorEndThickness = arc.styles.connectorEnd.thickness;
+        
         const id = arc.uid;
         const arcBuilder = new ArcSVGBuilder("aes");
 
@@ -92,20 +95,35 @@ export class AESDrawingManager {
         const endRadius = vertex2Geometry.size/2;
         const end = vertex2Geometry.position;
         
-        const points = [ start, ...arc.geometry.waypoints, end ];
-        arcBuilder.setWaypoints(points, startRadius, endRadius);
+        let points = [ start ];
 
-        // Set connector end invisible if last segment's length is less than connectorEndThickness
-        const connectorEndThickness = arc.styles.connectorEnd.thickness;
-        if(getDistance(points[points.length-2], end) >= connectorEndThickness*2) {
-            arcBuilder.setConnectorEndVisible(true);
-            arcBuilder.updateConnectorEndPosition(connectorEndThickness, end, endRadius, points[points.length-2]);
+        if(arc.form === "self-loop") {
+            const controlPoint = arc.controlPoint;
+            points.push({ 
+                x: vertex1Geometry.position.x + controlPoint.x,
+                y: vertex1Geometry.position.y + controlPoint.y,
+            });
         } else {
-            arcBuilder.setConnectorEndVisible(false);
+            points.push(...geometry.waypoints, end);
+        }
+
+        const drawn = arcBuilder.drawPath(arc.form, points, startRadius, endRadius);
+
+        if(arc.form !== "self-loop") {
+            // Set connector end invisible if last segment's length is less than connectorEndThickness
+            if(getDistance(points[points.length-2], end) >= connectorEndThickness*2) {
+                arcBuilder.setConnectorEndVisible(true);
+                arcBuilder.updateConnectorEndPosition(connectorEndThickness, end, endRadius, points[points.length-2]);
+            } else {
+                arcBuilder.setConnectorEndVisible(false);
+            }
+        } else {
+            const intersections = drawn.intersections;
+            arcBuilder.updateConnectorEndPosition(connectorEndThickness, end, endRadius, intersections[1]);
         }
 
         arcBuilder.updateLabelPosition(
-            points, arc.geometry.arcLabel.baseSegmentIndex,
+            arc.form, points, arc.geometry.arcLabel.baseSegmentIndex,
             arc.geometry.arcLabel.footFracDistance, arc.geometry.arcLabel.perpDistance, 
             startRadius, endRadius);
 

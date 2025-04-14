@@ -91,8 +91,8 @@ export class TabManager {
         this.tabGroupManager.onTabClosed(this.id);
     }
 
-    static load(context, id, title, tabButtonElement, tabAreaElement) {
-        const tabManager = new TabManager(context, null, id, title);
+    static load(context, id, title, tabButtonElement, tabAreaElement, dismissable = false) {
+        const tabManager = new TabManager(context, null, id, title, dismissable);
         tabManager.tabButtonElement = tabButtonElement;
         tabManager.tabAreaElement = tabAreaElement;
 

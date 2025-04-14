@@ -51,10 +51,6 @@ export default class ModellingManager {
             isArcTracing: false
         },
         highlightStart: null,
-        view: {
-            zoomFactor: 1,
-            zoomedOffset: { x: 0, y: 0 }
-        }
     };
 
     loadModel() {
@@ -296,16 +292,6 @@ export default class ModellingManager {
             Math.max(x1, x2), Math.max(y1, y2)
         );
     }
-
-    convertDrawingToAbsolutePosition(x, y) {
-        const { zoomFactor, zoomedOffset: { x: ox, y: oy } } = this.modellingStates.view;
-
-        return { 
-            x: (x + ox)/zoomFactor,
-            y: (y + oy)/zoomFactor,
-        };
-    }
-
     
     #stopHighlighting(x, y) {
         const { x: sx, y: sy } = this.modellingStates.highlightStart;
@@ -315,13 +301,10 @@ export default class ModellingManager {
         this.modellingStates.highlightStart = null;
         this.context.managers.drawing.hideHighlight();
 
-        const { x: startX, y: startY } = this.convertDrawingToAbsolutePosition(
-            Math.min(sx, x), Math.min(sy, y)
-        );
-
-        const { x: endX, y: endY } = this.convertDrawingToAbsolutePosition(
-            Math.max(sx, x), Math.max(sy, y)
-        );
+        const startX = Math.min(sx, x);
+        const startY = Math.min(sy, y);
+        const endX = Math.max(sx, x);
+        const endY = Math.max(sy, y);
 
         this.#clearSelection();
 
@@ -467,7 +450,7 @@ export default class ModellingManager {
         for(const arc of incidentArcs) {
             const vertex1Geometry = this.getComponentById(arc.fromVertexUID).geometry;
             const vertex2Geometry = this.getComponentById(arc.toVertexUID).geometry;
-            this.context.managers.drawing.updateArcGeometry(arc.uid, arc.geometry, arc.styles.connectorEnd.thickness, vertex1Geometry, vertex2Geometry);
+            this.context.managers.drawing.updateArcGeometry(arc, vertex1Geometry, vertex2Geometry);
         }
 
         // Update properties panel values, if selected
@@ -483,14 +466,13 @@ export default class ModellingManager {
      */
     addArc(fromVertexUID, toVertexUID, props, geometry, styles, thenSelect = false) {
         const visualArc = this.context.managers.visualModel.addArc(fromVertexUID, toVertexUID, props, geometry, styles);
+        this.#displayNewArc(visualArc);
 
         if(thenSelect) {
             this.#clearSelection();
             this.#addArcToSelection(visualArc.uid);
             this.#refreshSelected();
         }
-
-        this.#displayNewArc(visualArc);
 
         this.#notifyModelStructureChangesListeners();
         this.#saveModel();
@@ -594,7 +576,7 @@ export default class ModellingManager {
     traceArcToVertex(fromVertexUID, toVertexUID) {
         const startVertex = this.getComponentById(fromVertexUID);
         const endVertex = this.getComponentById(toVertexUID);
-        this.context.managers.drawing.traceArcToVertex(startVertex.geometry, endVertex.geometry);
+        this.context.managers.drawing.traceArcToVertex(startVertex, endVertex);
     }
 
     #endArcTracing() {
@@ -666,12 +648,4 @@ export default class ModellingManager {
     #saveModel() {
         LocalSessionManager.saveModel(this.context);
     }
-
-
-    test() {
-        // this.#addComponentToSelection(2);
-        this.#addComponentToSelection(1);
-        this.#refreshSelected();
-    }
-
 }

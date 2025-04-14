@@ -19,6 +19,12 @@ export class TabGroupManager {
     /** @type {string} */
     #activeTab;
 
+    /** @type {(tabID) => void} */
+    onTabSelectedListener;
+
+    /** @type {(tabID) => void} */
+    onTabClosedListener;
+
     /**
      * 
      * @param {ModelContext} context 
@@ -69,6 +75,9 @@ export class TabGroupManager {
 
         this.#activeTab = id;
         tabManager.setActive(true);
+        if(this.onTabSelectedListener) {
+            this.onTabSelectedListener(id);
+        }
     }
 
     onTabClosed(id) {
@@ -77,6 +86,10 @@ export class TabGroupManager {
             if(this.#activeTab === id) {
                 this.selectTab(this.#tabs[this.#tabs.length-1].id);
             }
+        }
+
+        if(this.onTabClosedListener) {
+            this.onTabClosedListener(id);
         }
     }
 }

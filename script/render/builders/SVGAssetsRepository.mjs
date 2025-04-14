@@ -7,7 +7,7 @@ export default class SVGAssetsRepository {
      */
     static cache;
 
-    static TEMPLATES_DIR = "/assets/templates";
+    static TEMPLATES_DIR = location.href.split("/").slice(0, -1).join("/") + "/assets/templates";
 
     static async initialize() {
         SVGAssetsRepository.cache = {

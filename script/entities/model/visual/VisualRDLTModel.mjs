@@ -102,14 +102,16 @@ export default class VisualRDLTModel {
     constructor(options = {}) {
         const { name, components, arcs } = options || {};
         
-        this.#name = name || "New RDLT Model";
+        this.#name = name || "Untitled Model";
 
         if(components) {
             for(const component of components) this.addComponent(component);
+            this.VERTEX_ID_COUNTER = Math.max(...components.map(c => c.uid), 0) + 1;
         }
-
+        
         if(arcs) {
             for(const arc of arcs) this.addArc(arc);
+            this.ARC_ID_COUNTER = Math.max(...arcs.map(c => c.uid), 0) + 1;
         }
     }
 

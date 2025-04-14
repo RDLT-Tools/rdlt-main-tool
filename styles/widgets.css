@@ -134,7 +134,7 @@ input[type="checkbox"] {
 
 
 .tab-area:not(.active) {
-    display: none;
+    display: none !important;
 }
 
 

@@ -14,7 +14,34 @@ body {
   width: 100%;
 }
 
-body > header {
+body > main {
+  flex: 1;
+  border-bottom: 1.7px solid #838383;
+  padding-bottom: 8px;
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+body > footer {
+  align-items: flex-start !important;
+  background-color: #f8f8f8;
+}
+
+body > footer .tab-button {
+  transform: translateY(-1.8px) !important;
+  border-bottom-width: 1.7px !important;
+  border-radius: 0 0 3px 3px !important;
+  border-top-width: 0;
+}
+
+.model-context {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.model-context > header {
   display: flex;
   padding: 10px 15px 10px 30px;
   border-bottom: 1.7px solid #838383;
@@ -42,13 +69,13 @@ header section.action-buttons {
   justify-content: right;
 }
 
-body > .tab-buttons {
+.model-context > .tab-buttons {
   padding-left: 330px;
   z-index: 100;
   background-color: #f8f8f8;
 }
 
-body > main {
+.model-context > main {
   flex: 1;
   width: 100%;
   background-color: #f8f8f8;
@@ -56,7 +83,7 @@ body > main {
   min-height: 0;
 }
 
-body > main > .subworkspace {
+.model-context > main > .subworkspace {
   height: 100%;
   width: 100%;
   display: flex;
@@ -65,7 +92,7 @@ body > main > .subworkspace {
   min-height: 0;
 }
 
-body > main > .subworkspace > aside {
+.model-context > main > .subworkspace > aside {
   width: 320px;
   border-top: solid 1.7px #838383;
 
@@ -74,14 +101,14 @@ body > main > .subworkspace > aside {
   box-sizing: border-box;
 }
 
-body > main > .subworkspace > aside > .panel-tabs {
+.model-context > main > .subworkspace > aside > .panel-tabs {
   flex: 1;
   background-color: #ffffff;
   border-top: 1.7px solid #838383;
   min-height: 0;
 }
 
-body > main > .subworkspace > main {
+.model-context > main > .subworkspace > main {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -90,15 +117,15 @@ body > main > .subworkspace > main {
   background-color: #ffffff;
 }
 
-body > main > .subworkspace > main > main {
+.model-context > main > .subworkspace > main > main {
   flex: 1;
 }
 
-body > main > .subworkspace > main > .drawing {
+.model-context > main > .subworkspace > main > .drawing {
   flex: 1;
 }
 
-body > main > .subworkspace > main .drawing > svg {
+.model-context > main > .subworkspace > main .drawing > svg {
   height: 100%;
   width: 100%;
   display: block;
@@ -232,9 +259,9 @@ svg .arctracing-hover {
   transition: opacity 100ms ease;
 }
 
-body > main[data-evt-ishighlighting] svg .arctracing-hover,
-body > main[data-evt-ishighlighting] svg .component-hover,
-body > main[data-evt-isarctracing] svg .arctracing-hover {
+.model-context > main[data-evt-ishighlighting] svg .arctracing-hover,
+.model-context > main[data-evt-ishighlighting] svg .component-hover,
+.model-context > main[data-evt-isarctracing] svg .arctracing-hover {
   display: none;
   pointer-events: none;
 }

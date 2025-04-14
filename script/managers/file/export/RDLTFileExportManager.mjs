@@ -184,8 +184,8 @@ export default class RDLTFileExportManager {
      * @returns {string} - format: `<vuid> <id> <type> <M(v)>`
      */
     static serializeComponent(component) {
-        const { uid, identifier, type, isRBSCenter } = component;
-        return `${uid} ${RDLTFileExportManager.serializeString(identifier)} ${type[0]} ${isRBSCenter ? 1 : 0}`;
+        const { uid, identifier, type, isRBSCenter, label } = component;
+        return `${uid} ${RDLTFileExportManager.serializeString(identifier)} ${type[0]} ${isRBSCenter ? 1 : 0} ${RDLTFileExportManager.serializeString(label)}`;
     }
 
     /**
