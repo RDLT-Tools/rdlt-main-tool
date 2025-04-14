@@ -9,6 +9,9 @@ import ComponentSVGBuilder from "../../render/builders/ComponentSVGBuilder.mjs";
 import HighlightSVGBuilder from "../../render/builders/HighlightSVGBuilder.mjs";
 import RBSSVGBuilder from "../../render/builders/RBSSVGBuilder.mjs";
 import { getDistance } from "../../render/builders/utils.mjs";
+import ModelContext from "../model/ModelContext.mjs";
+import { LocalSessionManager } from "../session/LocalSessionManager.mjs";
+import { DrawingViewportManager } from "./drawing/DrawingViewportManager.mjs";
 
 export default class DrawingViewManager {
     /** @type { ModelContext } */
@@ -38,6 +41,9 @@ export default class DrawingViewManager {
         arcTracing: null
     };
 
+    /** @type {DrawingViewportManager} */
+    viewport;
+
     /**
      * @param {ModelContext} context
      * @param {{ drawingSVG: SVGElement }} options 
@@ -52,6 +58,10 @@ export default class DrawingViewManager {
         this.#builders.arcTracing.element.classList.add("arc-tracing");
         this.#builders.arcTracing.element.style.display = "none";
         this.#drawingSVG.appendChild(this.#builders.arcTracing.element);
+
+        const drawingStates = LocalSessionManager.loadDrawingStates(this.context.id);
+        this.viewport = new DrawingViewportManager(this.#drawingSVG, drawingStates);
+        this.viewport.onUpdateListener = (states) => LocalSessionManager.saveDrawingStates(this.context.id, states);
     }
 
     highlightOver(ix, iy, fx, fy) {

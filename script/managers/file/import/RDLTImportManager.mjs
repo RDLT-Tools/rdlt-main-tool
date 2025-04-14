@@ -16,8 +16,6 @@ export default class RDLTImportManager {
     static loadRDLTModel(raw) {
         const parsed = parseRDLTFileToJSON(raw);
 
-        console.log(parsed);
-
         /**
          * @type {{ 
          *      fonts: { [fontClassID: number]: TextStyle }, 

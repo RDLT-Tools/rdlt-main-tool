@@ -1,5 +1,6 @@
 import VisualRDLTModel from "./entities/model/visual/VisualRDLTModel.mjs";
 import ModelContext from "./managers/model/ModelContext.mjs";
+import { GlobalKeyEventsManager } from "./managers/modelling/events/GlobalKeyEventsManager.mjs";
 import { LocalSessionManager } from "./managers/session/LocalSessionManager.mjs";
 import { TabGroupManager } from "./managers/workspace/TabGroupManager.mjs";
 import { TabManager } from "./managers/workspace/TabManager.mjs";
@@ -40,6 +41,7 @@ export default class App {
         App.#contextsTabGroupManager.onTabSelectedListener = (id) => {
             App.#states.currentContextID = id;
             App.saveStates();
+            App.notifySelectedContext(id);
         };
         App.#contextsTabGroupManager.onTabClosedListener = (id) => {
             const context = App.contexts.find(c => c.id === id);
@@ -54,6 +56,8 @@ export default class App {
                 App.addContext();
             }
         };
+
+        GlobalKeyEventsManager.initialize();
     }
 
     static #initializeContexts() {
@@ -104,11 +108,19 @@ export default class App {
         LocalSessionManager.saveAppStates(App.#states);
     }
 
+    static notifySelectedContext(contextID) {
+        const context = this.contexts.find(c => c.id === contextID);
+        if(!context) return;
+
+        context.onContextOpened();
+    }
+
     static selectContext(id) {
         if(!id) return;
 
         App.#states.currentContextID = id;
         App.#contextsTabGroupManager.selectTab(App.#states.currentContextID);
         App.saveStates();
+        App.notifySelectedContext(id);
     }
 }

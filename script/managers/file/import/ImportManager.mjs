@@ -20,8 +20,6 @@ export default class ImportManager {
         const visualModel = RDLTImportManager.loadRDLTModel(raw);
         if(!visualModel) return;
 
-        console.log(visualModel);
-
         App.addContext(visualModel);
     }
 

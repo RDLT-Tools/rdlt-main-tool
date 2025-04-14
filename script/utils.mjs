@@ -148,3 +148,36 @@ export function generateUniqueID() {
 
     return `${timestamp}${randomChars}`;
 }
+
+export function setHasExact(setA, ...elements) {
+    if (setA.size !== elements.length) return false;
+    for (const elem of elements) {
+        if (!setA.has(elem)) return false;
+    }
+
+    return true;
+}
+
+/**
+ * 
+ * @param {SVGElement} svgElement 
+ * @param {number} mouseX 
+ * @param {number} mouseY 
+ * @returns 
+ */
+export function getAbsoluteSVGCoordinates(svgElement, viewX, viewY) {
+    const { width, height } = svgElement.getBoundingClientRect();
+    let { baseVal: { x: vx, y: vy, width: vw, height: vh } } = svgElement.viewBox;
+    
+    if(!vx) vx = 0;
+    if(!vy) vy = 0;
+    if(!vw) vw = width;
+    if(!vh) vh = height;
+
+    const zoom = width / vw;
+
+    return { 
+        x: viewX/zoom + vx, 
+        y: viewY/zoom + vy
+    };
+}

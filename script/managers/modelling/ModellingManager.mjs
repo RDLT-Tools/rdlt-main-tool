@@ -51,10 +51,6 @@ export default class ModellingManager {
             isArcTracing: false
         },
         highlightStart: null,
-        view: {
-            zoomFactor: 1,
-            zoomedOffset: { x: 0, y: 0 }
-        }
     };
 
     loadModel() {
@@ -296,16 +292,6 @@ export default class ModellingManager {
             Math.max(x1, x2), Math.max(y1, y2)
         );
     }
-
-    convertDrawingToAbsolutePosition(x, y) {
-        const { zoomFactor, zoomedOffset: { x: ox, y: oy } } = this.modellingStates.view;
-
-        return { 
-            x: (x + ox)/zoomFactor,
-            y: (y + oy)/zoomFactor,
-        };
-    }
-
     
     #stopHighlighting(x, y) {
         const { x: sx, y: sy } = this.modellingStates.highlightStart;
@@ -315,13 +301,10 @@ export default class ModellingManager {
         this.modellingStates.highlightStart = null;
         this.context.managers.drawing.hideHighlight();
 
-        const { x: startX, y: startY } = this.convertDrawingToAbsolutePosition(
-            Math.min(sx, x), Math.min(sy, y)
-        );
-
-        const { x: endX, y: endY } = this.convertDrawingToAbsolutePosition(
-            Math.max(sx, x), Math.max(sy, y)
-        );
+        const startX = Math.min(sx, x);
+        const startY = Math.min(sy, y);
+        const endX = Math.max(sx, x);
+        const endY = Math.max(sy, y);
 
         this.#clearSelection();
 

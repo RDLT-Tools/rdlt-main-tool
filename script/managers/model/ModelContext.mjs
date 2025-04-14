@@ -108,6 +108,10 @@ export default class ModelContext {
         return this.managers.visualModel.getModelName();
     }
 
+    onContextOpened() {
+        this.managers.drawing.viewport.refresh();
+    }
+
     static fromJSON(json) {
         return new ModelContext(json.id, VisualRDLTModel.fromJSON(json.model));
     }

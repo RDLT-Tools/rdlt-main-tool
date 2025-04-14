@@ -70,4 +70,12 @@ export class LocalSessionManager {
 
         return contextsJSON;
     }
+
+    static loadDrawingStates(contextID) {
+        return LocalSessionManager.#get(`rdlt-tool-drawing-states-${contextID}`);
+    }
+
+    static saveDrawingStates(contextID, states) {
+        return LocalSessionManager.#set(`rdlt-tool-drawing-states-${contextID}`, states);
+    }
 }

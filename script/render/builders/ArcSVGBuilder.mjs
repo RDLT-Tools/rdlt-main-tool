@@ -81,7 +81,8 @@ export default class ArcSVGBuilder {
                 align: "middle", vAlign: "central", 
                 x: 0,
                 y: 0,
-                fontSize: 16
+                fontSize: 16,
+                strokeWidth: 3.5
             });
 
             this.#labelElement.element.classList.add("diagram");

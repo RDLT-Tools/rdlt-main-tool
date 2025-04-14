@@ -1,3 +1,4 @@
+import { getAbsoluteSVGCoordinates } from "../../../utils.mjs";
 import UserEventsManager from "./UserEventsManager.mjs";
 
 export default class MouseEventsManager {
@@ -46,8 +47,8 @@ export default class MouseEventsManager {
     }
 
     #getRelativeDrawingPosition(x, y) {
-        const { x: ox, y: oy } = this.#drawingSVG.getBoundingClientRect();
-        return { x: x - ox, y: y - oy };
+        const { x: ox, y: oy} = this.#drawingSVG.getBoundingClientRect();
+        return getAbsoluteSVGCoordinates(this.#drawingSVG, x - ox, y - oy);
     }
 
     /**
