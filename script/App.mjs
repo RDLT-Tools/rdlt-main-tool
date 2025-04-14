@@ -71,7 +71,7 @@ export default class App {
             App.#addContextTab(context);
         }
 
-        if(!App.#states.currentContextID) {
+        if(!App.#states.currentContextID || !App.contexts.find(c => c.id === App.#states.currentContextID)) {
             App.#states.currentContextID = App.contexts[0]?.id || null;
         }
 
