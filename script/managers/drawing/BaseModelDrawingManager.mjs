@@ -2,12 +2,13 @@ import VisualArc from "../../entities/model/visual/VisualArc.mjs";
 import VisualComponent from "../../entities/model/visual/VisualComponent.mjs";
 import ArcSVGBuilder from "../../render/builders/ArcSVGBuilder.mjs";
 import ComponentSVGBuilder from "../../render/builders/ComponentSVGBuilder.mjs";
+import RBSSVGBuilder from "../../render/builders/RBSSVGBuilder.mjs";
 import { getDistance } from "../../render/builders/utils.mjs";
 import { DrawingViewportManager } from "./DrawingViewportManager.mjs";
 
 export class BaseModelDrawingManager {
     /**
-     * @typedef {"model" | "aes"} DrawingOrigin
+     * @typedef {"model" | "aes" | "vs"} DrawingOrigin
      */
     origin;
 
@@ -18,11 +19,13 @@ export class BaseModelDrawingManager {
      * @type {{
      *    vertices: { [id: string | number]: ComponentSVGBuilder },
      *    arcs: { [id: string]: ArcSVGBuilder },
+     *    rbs: { [centerUID: string]: RBSSVGBuilder },
      * }}
     */
     builders = {
         vertices: {},
         arcs: {},
+        rbs: {}
     };
 
     /** @type {DrawingViewportManager} */
@@ -47,8 +50,14 @@ export class BaseModelDrawingManager {
      */
     setupComponents(vertices, arcs) {
         const vertexMap = {};
+        const rbsVertices = {};
+
         for(const vertex of vertices) {
             vertexMap[vertex.uid] = vertex;
+            if(vertex.isRBSCenter) {
+                rbsVertices[vertex.uid] = new Set();
+                rbsVertices[vertex.uid].add(vertex.uid);
+            }
         }
 
         // Add arcs
@@ -56,11 +65,22 @@ export class BaseModelDrawingManager {
             const vertex1Geometry = vertexMap[arc.fromVertexUID].geometry;
             const vertex2Geometry = vertexMap[arc.toVertexUID].geometry;
             this.addArc(arc, vertex1Geometry, vertex2Geometry);
+
+            if(!arc.C.trim()) {
+                rbsVertices[arc.fromVertexUID]?.add(arc.toVertexUID);
+            }
         }
 
         // Add vertices
         for(const vertex of vertices) {
             this.addVertex(vertex);
+        }
+
+        // Add RBSs
+        for(const centerVertexUID in rbsVertices) {
+            const vertices = [...rbsVertices[centerVertexUID]].map(uid => vertexMap[uid]);
+            const centerVertex = vertexMap[centerVertexUID];
+            this.#addRBS(centerVertex, vertices);
         }
     }
 
@@ -141,5 +161,33 @@ export class BaseModelDrawingManager {
         this.drawingSVG.appendChild(arcBuilder.element); 
 
         return arcBuilder;
+    }
+
+    /**
+     * @param {VisualComponent} centerComponent 
+     * @param {VisualComponent[]} vertices 
+     * @returns {RBSSVGBuilder}
+     */
+    #addRBS(centerComponent, vertices) {
+        const rbsBuilder = new RBSSVGBuilder();
+        rbsBuilder.setCenterIdentifier(centerComponent.identifier);
+        rbsBuilder.setBounds(this.#calculateRBSBounds(vertices));
+
+        this.builders.rbs[centerComponent.uid] = rbsBuilder;
+        this.drawingSVG.appendChild(rbsBuilder.element);
+
+        return rbsBuilder;
+    }
+
+    #calculateRBSBounds(vertices) {
+        const vertexBounds = vertices.map(c => c.geometry.bounds);
+        let minX = Math.min(...vertexBounds.map(b => b.minX));
+        let minY = Math.min(...vertexBounds.map(b => b.minY));
+        let maxX = Math.max(...vertexBounds.map(b => b.maxX));
+        let maxY = Math.max(...vertexBounds.map(b => b.maxY));
+
+        const bounds = { minX, minY, maxX, maxY };
+
+        return bounds;
     }
 }

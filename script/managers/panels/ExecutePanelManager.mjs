@@ -14,20 +14,28 @@ export default class ExecutePanelManager {
      *      root: HTMLDivElement,
      *      generateButton: HTMLButtonElement,
      *      simulateButton: HTMLButtonElement,
+     *  },
+     *  vertexSimplification: {
+     *      root: HTMLDivElement,
+    *       generateLevel1Button: HTMLButtonElement,
+    *       generateLevel2Button: HTMLButtonElement,
      *  }
      * }}
      */
     #views = {
-        activityExtraction: {}
+        activityExtraction: {},
+        vertexSimplification: {}
     };
 
     /**
      * @type {{
-     *  activityExtraction: Form
+     *  activityExtraction: Form,
+     *  vertexSimplification: Form
      * }}
      */
     #forms = {
-        activityExtraction: null
+        activityExtraction: null,
+        vertexSimplification: null
     };
 
     /**
@@ -43,6 +51,7 @@ export default class ExecutePanelManager {
 
     #initializeView() {
         this.#initializeAESection();
+        this.#initializeVSSection();
     }
 
     #initializeAESection() {
@@ -69,9 +78,32 @@ export default class ExecutePanelManager {
         });
     }
 
+    #initializeVSSection() {
+        const vsSectionRoot = this.#rootElement.querySelector("[data-section-id='vs']");
+        const vsSectionViews = this.#views.vertexSimplification;
+
+        vsSectionViews.root = vsSectionRoot;
+        vsSectionViews.generateLevel1Button = vsSectionRoot.querySelector("button[data-subaction='vs-generate-1']");
+        vsSectionViews.generateLevel2Button = vsSectionRoot.querySelector("button[data-subaction='vs-generate-2']");
+
+        vsSectionViews.generateLevel1Button.addEventListener("click", () => {
+            this.context.managers.workspace.startVertexSimplification(1);
+        });
+
+        vsSectionViews.generateLevel2Button.addEventListener("click", () => {
+            const { rbs } = this.#forms.vertexSimplification.getValues();
+            if(!rbs) return;
+
+            this.context.managers.workspace.startVertexSimplification(2, Number(rbs));
+        });
+    }
+
     #initializeForms() {
         this.#forms.activityExtraction = new Form(this.#views.activityExtraction.root)
             .setFieldNames([ 'name', 'source', 'sink', 'mode' ]);
+
+        this.#forms.vertexSimplification = new Form(this.#views.vertexSimplification.root)
+            .setFieldNames([ 'rbs' ]);
     }
 
     refreshModelValues() {
@@ -86,5 +118,10 @@ export default class ExecutePanelManager {
         this.#forms.activityExtraction.getFieldElement("sink").innerHTML = 
             potentialSinkVertices.map(vertex => `<option value="${vertex.uid}">${vertex.identifier}</option>`).join("");
 
+
+        // Refresh RBS centers list
+        const rbsCenters = this.context.managers.visualModel.getAllComponents().filter(c => c.isRBSCenter);
+        this.#forms.vertexSimplification.getFieldElement("rbs").innerHTML =
+            rbsCenters.map(vertex => `<option value="${vertex.uid}">${vertex.identifier}</option>`).join("");
     }
 }

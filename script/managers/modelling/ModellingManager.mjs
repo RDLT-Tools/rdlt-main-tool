@@ -55,6 +55,7 @@ export default class ModellingManager {
 
     loadModel() {
         const visualModelManager = this.context.managers.visualModel;
+
         visualModelManager.getAllArcs().map(arc => this.#displayNewArc(arc));
         visualModelManager.getAllComponents().map(vertex => this.#displayNewComponent(vertex));
 
@@ -413,6 +414,8 @@ export default class ModellingManager {
             } else {
                 drawingManager.removeRBS(id);
             }
+
+            this.#notifyModelStructureChangesListeners();
         }
 
         if('identifier' in props && component.isRBSCenter) {

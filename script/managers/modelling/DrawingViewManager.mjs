@@ -20,14 +20,13 @@ export default class DrawingViewManager extends BaseModelDrawingManager {
 
     /**
      * @type {{
-     *    rbs: { [centerUID: string]: RBSSVGBuilder },
+     *    
      *    highlight: HighlightSVGBuilder,
      *    dragging: { component: ComponentSVGBuilder },
      *    arcTracing: ArcSVGBuilder
      * }}
      */
     #extraBuilders = {
-        rbs: {},
         highlight: null,
         dragging: {
             component: null
@@ -382,7 +381,7 @@ export default class DrawingViewManager extends BaseModelDrawingManager {
         const rbsBuilder = new RBSSVGBuilder();
         rbsBuilder.setCenterIdentifier(centerComponent.identifier);
         this.#setRBSBounds(rbsBuilder, bounds);
-        this.#extraBuilders.rbs[centerComponent.uid] = rbsBuilder;
+        this.builders.rbs[centerComponent.uid] = rbsBuilder;
 
         this.drawingSVG.appendChild(rbsBuilder.element);
 
@@ -403,25 +402,25 @@ export default class DrawingViewManager extends BaseModelDrawingManager {
      * @param {{ minX, minY, maxX, maxY }} bounds 
      */
     updateRBSBounds(centerUID, bounds) {
-        const rbsBuilder = this.#extraBuilders.rbs[centerUID];
+        const rbsBuilder = this.builders.rbs[centerUID];
         if(!rbsBuilder) return;
 
         this.#setRBSBounds(rbsBuilder, bounds);
     }
 
     updateRBSCenterIdentifier(centerUID, identifier) {
-        const rbsBuilder = this.#extraBuilders.rbs[centerUID];
+        const rbsBuilder = this.builders.rbs[centerUID];
         if(!rbsBuilder) return;
 
         rbsBuilder.setCenterIdentifier(identifier);
     }
 
     removeRBS(centerUID) {
-        const rbsBuilder = this.#extraBuilders.rbs[centerUID];
+        const rbsBuilder = this.builders.rbs[centerUID];
         if(!rbsBuilder) return;
 
         this.drawingSVG.removeChild(rbsBuilder.element);
-        delete this.#extraBuilders.rbs[centerUID];
+        delete this.builders.rbs[centerUID];
     }
 
     /**

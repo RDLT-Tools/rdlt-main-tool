@@ -408,6 +408,23 @@ export default class VisualRDLTModel {
         };
     }
 
+    static fromSimpleModel(components, arcs) {
+        return new VisualRDLTModel({
+            components: components.map(c => new VisualComponent({
+                uid: c.uid,
+                type: c.type,
+                isRBSCenter: c.isRBSCenter
+            })),
+            arcs: arcs.map(a => new VisualArc({
+                uid: a.uid,
+                fromVertexUID: a.fromVertexUID,
+                toVertexUID: a.toVertexUID,
+                C: a.C,
+                L: a.C
+            }))
+        });
+    }
+
     static fromJSON(json) {
         const visualRDLTModel = new VisualRDLTModel({
             name: json.name,

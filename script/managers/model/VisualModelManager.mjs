@@ -190,6 +190,10 @@ export default class VisualModelManager {
         return this.#visualModel.copy();
     }
 
+    toSimpleModel() {
+        return this.#visualModel.toSimpleModel();
+    }
+
     getModelJSON() {
         return this.#visualModel.toJSON();
     }

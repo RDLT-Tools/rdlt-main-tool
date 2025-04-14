@@ -252,6 +252,28 @@
                                             </div>
                                         </main>
                                     </div>
+                                    <div class="collapsible" data-section-id="vs">
+                                        <header>Expanded Vertex Simplification</header>
+                                        <main>
+                                            <table>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Level 1</td>
+                                                        <td><button data-subaction="vs-generate-1"><i class="fas fa-eye"></i> Generate</button></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Level 2</td>
+                                                        <td>
+                                                            <select name="rbs">
+                                                                <option>x1</option>
+                                                            </select>
+                                                            <button data-subaction="vs-generate-2"><i class="fas fa-eye"></i> Generate</button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </main>
+                                    </div>
                                 </div>
                                 <div class="tab-area panel" data-tab-id="verifications" data-panel-id="verifications">
                                     <header>
@@ -452,7 +474,25 @@
                             </aside>
                         </div>
                     </template>
-                    
+                    <template data-tab-template-id="vs">
+                        <div class="subworkspace tab-area vs-subworkspace">
+                            <main class="vs-main">
+                                <header>
+                                    <div>
+                                        <h1>Vertex Simplification</h1>
+                                        <div>Level 1</div>
+                                    </div>
+                                    <div></div>
+                                    <div></div>
+                                </header>
+                                <main>
+                                    <section class="drawing">
+                                        <svg></svg>
+                                    </section>
+                                </main>
+                            </main>
+                        </div>
+                    </template>
                 </main>
             </section>
         </template>
