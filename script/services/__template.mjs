@@ -3,7 +3,7 @@
  * 
  * @param {{ 
  *      vertices: { uid, identifier }[],
- *      arcs: { uid, fromVertexUID, toVertexUID }[] 
+ *      arcs: { uid, fromVertexUID, toVertexUID, C, L }[] 
  * }} model 
  * 
  * @returns {{

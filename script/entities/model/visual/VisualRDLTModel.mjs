@@ -404,6 +404,7 @@ export default class VisualRDLTModel {
                 uid: a.uid,
                 fromVertexUID: a.fromVertexUID,
                 toVertexUID: a.toVertexUID,
+                C: a.C, L: a.L
             }))
         };
     }

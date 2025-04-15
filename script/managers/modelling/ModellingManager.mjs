@@ -420,6 +420,8 @@ export default class ModellingManager {
 
         if('identifier' in props && component.isRBSCenter) {
             drawingManager.updateRBSCenterIdentifier(id, component.identifier);
+
+            this.#notifyModelStructureChangesListeners();
         }
 
         this.#saveModel();
