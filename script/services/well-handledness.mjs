@@ -1,3 +1,5 @@
+import { processRDLT } from "./Well-handledness/src/Main.js";
+
 /**
  *
  * @param {{
@@ -35,9 +37,10 @@ export function verifyWellHandledness(model, source, sink, type) {
   // TODO: Implement free choiceness
   console.log("Clicked verification button for well-handledness");
   console.log({ model, source, sink, type });
+  processRDLT(model);
 
   return {
-    title: "Free-Choiceness",
+    title: "Well-Handledness",
     instances: [
       {
         name: "Main Model",
