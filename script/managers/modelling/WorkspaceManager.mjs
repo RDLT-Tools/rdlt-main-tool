@@ -3,6 +3,7 @@ import { AESimulationManager } from "../activity/AESimulationManager.mjs";
 import ImportManager from "../file/import/ImportManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import { VerificationsResultManager } from "../verifications/VerificationsResultManager.mjs";
+import { VertexSimplificationManager } from "../vsimp/VertexSimplificationManager.mjs";
 import { TabGroupManager } from "../workspace/TabGroupManager.mjs";
 import { TabManager } from "../workspace/TabManager.mjs";
 
@@ -214,7 +215,7 @@ export default class WorkspaceManager {
         ));
         
         this.tabs.left.selectTab("palette");
-        this.tabs.right.selectTab("properties");
+        this.tabs.right.selectTab("execute");
 
     }
 
@@ -253,6 +254,10 @@ export default class WorkspaceManager {
         return this.#addTemplatedSubworkspace(`ver-${verID}`, title, "ver");
     }
 
+    addVSSubworkspace(vsID, title) {
+        return this.#addTemplatedSubworkspace(`vs-${vsID}`, title, "vs");
+    }
+
     /** @param {{ name, source, sink, mode }} configs */
     startAESimulation(configs) {
         return new AESimulationManager(this.context, configs, 
@@ -264,5 +269,13 @@ export default class WorkspaceManager {
         return new VerificationsResultManager(this.context, result,
             visualModel
         );
+    }
+
+    /**
+     * @param {1 | 2} level 
+     * @returns {VertexSimplificationManager}
+     */
+    startVertexSimplification(level, rbsCenterUID = null) {
+        return new VertexSimplificationManager(this.context, level, rbsCenterUID);
     }
 }

@@ -11,29 +11,22 @@ import RBSSVGBuilder from "../../render/builders/RBSSVGBuilder.mjs";
 import { getDistance } from "../../render/builders/utils.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import { LocalSessionManager } from "../session/LocalSessionManager.mjs";
-import { DrawingViewportManager } from "./drawing/DrawingViewportManager.mjs";
+import { BaseModelDrawingManager } from "../drawing/BaseModelDrawingManager.mjs";
 
-export default class DrawingViewManager {
+export default class DrawingViewManager extends BaseModelDrawingManager {
     /** @type { ModelContext } */
     context;
 
-    /** @type {SVGElement} */
-    #drawingSVG;
 
     /**
      * @type {{
-     *    components: { [id: string | number]: ComponentSVGBuilder },
-     *    arcs: { [id: string]: ArcSVGBuilder },
-     *    rbs: { [centerUID: string]: RBSSVGBuilder },
+     *    
      *    highlight: HighlightSVGBuilder,
      *    dragging: { component: ComponentSVGBuilder },
      *    arcTracing: ArcSVGBuilder
      * }}
      */
-    #builders = {
-        components: {},
-        arcs: {},
-        rbs: {},
+    #extraBuilders = {
         highlight: null,
         dragging: {
             component: null
@@ -41,41 +34,39 @@ export default class DrawingViewManager {
         arcTracing: null
     };
 
-    /** @type {DrawingViewportManager} */
-    viewport;
-
     /**
      * @param {ModelContext} context
      * @param {{ drawingSVG: SVGElement }} options 
      */
     constructor(context, options = {}) {
+        super(options.drawingSVG, "model");
+
         this.context = context;
-        this.#drawingSVG = options.drawingSVG;
 
         // Initialize reusable builders
-        this.#builders.arcTracing = new ArcSVGBuilder("tracing");
-        this.#setArcStyles(this.#builders.arcTracing, new ArcStyles());
-        this.#builders.arcTracing.element.classList.add("arc-tracing");
-        this.#builders.arcTracing.element.style.display = "none";
-        this.#drawingSVG.appendChild(this.#builders.arcTracing.element);
+        this.#extraBuilders.arcTracing = new ArcSVGBuilder("tracing");
+        this.#setArcStyles(this.#extraBuilders.arcTracing, new ArcStyles());
+        this.#extraBuilders.arcTracing.element.classList.add("arc-tracing");
+        this.#extraBuilders.arcTracing.element.style.display = "none";
+        this.drawingSVG.appendChild(this.#extraBuilders.arcTracing.element);
 
         const drawingStates = LocalSessionManager.loadDrawingStates(this.context.id);
-        this.viewport = new DrawingViewportManager(this.#drawingSVG, drawingStates);
+        this.viewport.setStates(drawingStates);
         this.viewport.onUpdateListener = (states) => LocalSessionManager.saveDrawingStates(this.context.id, states);
     }
 
     highlightOver(ix, iy, fx, fy) {
-        if(!this.#builders.highlight) {
+        if(!this.#extraBuilders.highlight) {
             // Setup highlight
-            this.#builders.highlight = new HighlightSVGBuilder();
-            this.#drawingSVG.appendChild(this.#builders.highlight.element);
+            this.#extraBuilders.highlight = new HighlightSVGBuilder();
+            this.drawingSVG.appendChild(this.#extraBuilders.highlight.element);
         }
 
-        this.#builders.highlight.highlightOver(ix, iy, fx, fy);
+        this.#extraBuilders.highlight.highlightOver(ix, iy, fx, fy);
     }
 
     hideHighlight() {
-        this.#builders.highlight?.hide();
+        this.#extraBuilders.highlight?.hide();
     }
 
     /**
@@ -83,7 +74,7 @@ export default class DrawingViewManager {
      * @returns {ComponentSVGBuilder | null} 
      */
     #getComponentBuilder(id) {
-        return this.#builders.components[id] || null;
+        return this.builders.vertices[id] || null;
     }
 
     /**
@@ -91,24 +82,16 @@ export default class DrawingViewManager {
      * @returns {ArcSVGBuilder | null} 
      */
     #getArcBuilder(id) {
-        return this.#builders.arcs[id] || null;
+        return this.builders.arcs[id] || null;
     }
 
     /**
-     * @param {VisualComponent} component 
+     * @param {VisualComponent} vertex 
      * @returns {SVGGElement}
      */
-    addComponent(component) {
-        const id = component.uid;
-        const componentBuilder = new ComponentSVGBuilder(component.type);
-        this.#setComponentProps(componentBuilder, component);
-        this.#setComponentStyles(componentBuilder, component.styles);
-        this.#setComponentGeometry(componentBuilder, component.geometry);
-        
-        this.#builders.components[id] = componentBuilder;
-        this.#drawingSVG.appendChild(componentBuilder.element);
-
-        return componentBuilder.element;
+    addVertex(vertex) {
+        const vertexBuilder = super.addVertex(vertex);
+        return vertexBuilder.element;
     }
 
     /**
@@ -117,21 +100,12 @@ export default class DrawingViewManager {
      * @returns {SVGGElement} 
      */
     addArc(arc, vertex1Geometry, vertex2Geometry) {
-        const id = arc.uid;
-        const arcBuilder = new ArcSVGBuilder();
-
-        this.#setArcProps(arcBuilder, arc);
-        this.#setArcGeometry(arcBuilder, arc, vertex1Geometry, vertex2Geometry);
-        this.#setArcStyles(arcBuilder, arc.styles);
-
-        this.#builders.arcs[id] = arcBuilder;
-        this.#drawingSVG.appendChild(arcBuilder.element);
-
+        const arcBuilder = super.addArc(arc, vertex1Geometry, vertex2Geometry);
         return arcBuilder.element;
     }
 
     getArcBounds(id) {
-        const arcBuilder = this.#builders.arcs[id];
+        const arcBuilder = this.builders.arcs[id];
         return arcBuilder.getBounds();
     }
 
@@ -155,7 +129,7 @@ export default class DrawingViewManager {
         if(!arcBuilder) return;
 
         arcBuilder.element.remove();
-        delete this.#builders.arcs[id];
+        delete this.builders.arcs[id];
     }
 
     
@@ -196,7 +170,7 @@ export default class DrawingViewManager {
         if(!componentBuilder) return;
 
         componentBuilder.element.remove();
-        delete this.#builders.components[id];
+        delete this.builders.vertices[id];
     }
 
     /**
@@ -344,25 +318,25 @@ export default class DrawingViewManager {
         
         this.#setComponentGeometry(componentBuilder, geometry);
         this.#setComponentStyles(componentBuilder, styles);
-        this.#builders.dragging.component = componentBuilder;
-        this.#drawingSVG.appendChild(componentBuilder.element);
+        this.#extraBuilders.dragging.component = componentBuilder;
+        this.drawingSVG.appendChild(componentBuilder.element);
 
         return componentBuilder.element;
     }
 
     moveDraggingComponent(x, y) {
-        const draggingComponentBuilder = this.#builders.dragging.component;
+        const draggingComponentBuilder = this.#extraBuilders.dragging.component;
         if(!draggingComponentBuilder) return;
 
         draggingComponentBuilder.setPosition(x, y);
     }
 
     destroyDraggingComponent() {
-        const draggingComponentBuilder = this.#builders.dragging.component;
+        const draggingComponentBuilder = this.#extraBuilders.dragging.component;
         if(!draggingComponentBuilder) return;
 
-        this.#drawingSVG.removeChild(draggingComponentBuilder.element);
-        this.#builders.dragging.component = null;
+        this.drawingSVG.removeChild(draggingComponentBuilder.element);
+        this.#extraBuilders.dragging.component = null;
     }
 
     /**
@@ -371,9 +345,9 @@ export default class DrawingViewManager {
      * @param {{ x: number, y: number }} targetPoint 
      */
     traceArcToPoint(vertex1Geometry, targetPoint) {
-        this.#builders.arcTracing.element.style.display = "initial";
+        this.#extraBuilders.arcTracing.element.style.display = "initial";
 
-        const arcTracingBuilder = this.#builders.arcTracing;
+        const arcTracingBuilder = this.#extraBuilders.arcTracing;
         this.#setArcGeometry(arcTracingBuilder, new VisualArc({ fromVertexUID: -1, toVertexUID: -2 }), 
             vertex1Geometry, new ComponentGeometry({
                 position: targetPoint, size: 1
@@ -385,9 +359,9 @@ export default class DrawingViewManager {
      * @param {VisualComponent} vertex2 
      */
     traceArcToVertex(vertex1, vertex2) {
-        this.#builders.arcTracing.element.style.display = "initial";
+        this.#extraBuilders.arcTracing.element.style.display = "initial";
 
-        const arcTracingBuilder = this.#builders.arcTracing;
+        const arcTracingBuilder = this.#extraBuilders.arcTracing;
         this.#setArcGeometry(arcTracingBuilder, new VisualArc({
             fromVertexUID: vertex1.uid,
             toVertexUID: vertex2.uid
@@ -395,7 +369,7 @@ export default class DrawingViewManager {
     }
 
     endTracing() {
-        this.#builders.arcTracing.element.style.display = "none";
+        this.#extraBuilders.arcTracing.element.style.display = "none";
     }
 
     /**
@@ -407,9 +381,9 @@ export default class DrawingViewManager {
         const rbsBuilder = new RBSSVGBuilder();
         rbsBuilder.setCenterIdentifier(centerComponent.identifier);
         this.#setRBSBounds(rbsBuilder, bounds);
-        this.#builders.rbs[centerComponent.uid] = rbsBuilder;
+        this.builders.rbs[centerComponent.uid] = rbsBuilder;
 
-        this.#drawingSVG.appendChild(rbsBuilder.element);
+        this.drawingSVG.appendChild(rbsBuilder.element);
 
         return rbsBuilder.element;
     }
@@ -428,25 +402,25 @@ export default class DrawingViewManager {
      * @param {{ minX, minY, maxX, maxY }} bounds 
      */
     updateRBSBounds(centerUID, bounds) {
-        const rbsBuilder = this.#builders.rbs[centerUID];
+        const rbsBuilder = this.builders.rbs[centerUID];
         if(!rbsBuilder) return;
 
         this.#setRBSBounds(rbsBuilder, bounds);
     }
 
     updateRBSCenterIdentifier(centerUID, identifier) {
-        const rbsBuilder = this.#builders.rbs[centerUID];
+        const rbsBuilder = this.builders.rbs[centerUID];
         if(!rbsBuilder) return;
 
         rbsBuilder.setCenterIdentifier(identifier);
     }
 
     removeRBS(centerUID) {
-        const rbsBuilder = this.#builders.rbs[centerUID];
+        const rbsBuilder = this.builders.rbs[centerUID];
         if(!rbsBuilder) return;
 
-        this.#drawingSVG.removeChild(rbsBuilder.element);
-        delete this.#builders[centerUID];
+        this.drawingSVG.removeChild(rbsBuilder.element);
+        delete this.builders.rbs[centerUID];
     }
 
     /**

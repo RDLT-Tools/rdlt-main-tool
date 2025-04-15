@@ -208,6 +208,10 @@ header section.action-buttons {
   opacity: 0.5;
 }
 
+.panel[data-panel-id="execute"] [data-section-id="vs"] table tr > td:last-child {
+  text-align: right;
+}
+
 .palette-group {
   display: flex;
   flex-wrap: wrap;
@@ -526,4 +530,9 @@ svg .arc-waypoint:not([data-nomove]) {
 
 .aes-subworkspace .panel[data-tab-id="profile"] table tr td:first-child {
     width: 30px;
+}
+
+.vs-subworkspace .drawing {
+  height: 100%;
+  width: 100%;
 }

@@ -1,5 +1,5 @@
-import { setHasExact } from "../../../utils.mjs";
-import { GlobalKeyEventsManager } from "../events/GlobalKeyEventsManager.mjs";
+import { setHasExact } from "../../utils.mjs";
+import { GlobalKeyEventsManager } from "../modelling/events/GlobalKeyEventsManager.mjs";
 
 export class DrawingViewportManager {
     
@@ -87,6 +87,13 @@ export class DrawingViewportManager {
 
     refresh() {
         this.#updateViewport();
+    }
+
+    setStates(states) {
+        requestAnimationFrame(() => {
+            this.#view.states = states;
+            this.#updateViewport();
+        });
     }
 
     getAbsolutePosition(x, y) {

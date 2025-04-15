@@ -55,6 +55,7 @@ export default class ModellingManager {
 
     loadModel() {
         const visualModelManager = this.context.managers.visualModel;
+
         visualModelManager.getAllArcs().map(arc => this.#displayNewArc(arc));
         visualModelManager.getAllComponents().map(vertex => this.#displayNewComponent(vertex));
 
@@ -385,7 +386,7 @@ export default class ModellingManager {
      * @param {VisualComponent} visualComponent 
      */
     #displayNewComponent(visualComponent) {
-        const componentElement = this.context.managers.drawing.addComponent(visualComponent);
+        const componentElement = this.context.managers.drawing.addVertex(visualComponent);
         this.context.managers.userEvents.registerComponent(visualComponent.uid, componentElement);
 
         if(visualComponent.isRBSCenter) {
@@ -413,10 +414,14 @@ export default class ModellingManager {
             } else {
                 drawingManager.removeRBS(id);
             }
+
+            this.#notifyModelStructureChangesListeners();
         }
 
         if('identifier' in props && component.isRBSCenter) {
             drawingManager.updateRBSCenterIdentifier(id, component.identifier);
+
+            this.#notifyModelStructureChangesListeners();
         }
 
         this.#saveModel();

@@ -6,7 +6,7 @@ import { getCircleIntersections, getDistance, makeGroupSVG, makeSVGElement, radi
 export default class ArcSVGBuilder {
 
     /**
-     * @typedef {"model" | "tracing" | "aes"} DrawingOrigin
+     * @typedef {"model" | "tracing" | "aes" | "vs"} DrawingOrigin
      * @type {DrawingOrigin}
      */
     #origin;
@@ -76,7 +76,7 @@ export default class ArcSVGBuilder {
         ], { className: "diagram" });
 
 
-        if(["model", "aes"].includes(origin)) {
+        if(["model", "aes", "vs"].includes(origin)) {
             this.#labelElement = new TextSVGBuilder("", {
                 align: "middle", vAlign: "central", 
                 x: 0,
@@ -148,6 +148,12 @@ export default class ArcSVGBuilder {
                 this.#element = makeGroupSVG([
                     this.#aesHighlightPathElement,
                     this.#aesClickableElement,
+                    labelMaskBoundsElement,
+                    arcElement,
+                    this.#labelElement.element,
+                ], { className: "arc" });
+            } else if(origin === "vs") {
+                this.#element = makeGroupSVG([
                     labelMaskBoundsElement,
                     arcElement,
                     this.#labelElement.element,
