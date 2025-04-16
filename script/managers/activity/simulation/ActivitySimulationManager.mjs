@@ -16,7 +16,7 @@ export class ActivitySimulationManager {
      * @typedef {number} ArcUID
      * @typedef {number} VertexUID
      * @typedef {{ [timestep: number]: Set<ArcUID> }} ActivityProfile
-     * @typedef {{ name: string, source: VertexUID, sink: VertexUID, profile: ActivityProfile }} Activity
+     * @typedef {{ id: string, name: string, source: VertexUID, sink: VertexUID, profile: ActivityProfile }} Activity
      * @type {Activity} 
     */
     #activity;

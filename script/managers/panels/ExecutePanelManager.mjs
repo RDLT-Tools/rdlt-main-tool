@@ -1,4 +1,4 @@
-import { Form } from "../../utils.mjs";
+import { buildElement, Form } from "../../utils.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 
 export default class ExecutePanelManager {
@@ -10,6 +10,11 @@ export default class ExecutePanelManager {
 
     /**
      * @type {{
+     *  activities: {
+     *      root: HTMLDivElement,
+     *      table: HTMLTableElement,
+     *      importButton: HTMLButtonElement
+     *  },
      *  activityExtraction: {
      *      root: HTMLDivElement,
      *      generateButton: HTMLButtonElement,
@@ -23,6 +28,7 @@ export default class ExecutePanelManager {
      * }}
      */
     #views = {
+        activities: {},
         activityExtraction: {},
         vertexSimplification: {}
     };
@@ -50,8 +56,20 @@ export default class ExecutePanelManager {
     }
 
     #initializeView() {
+        this.#initializeActivitiesSection();
         this.#initializeAESection();
         this.#initializeVSSection();
+    }
+
+    #initializeActivitiesSection() {
+        const activitiesSectionRoot = this.#rootElement.querySelector("[data-section-id='activities']");
+        const activitiesSectionViews = this.#views.activities;
+
+        activitiesSectionViews.root = activitiesSectionRoot;
+        activitiesSectionViews.table = activitiesSectionRoot.querySelector("table");
+        activitiesSectionViews.importButton = activitiesSectionRoot.querySelector("button[data-subaction='import']");
+
+        activitiesSectionViews.importButton.addEventListener("click", () => this.context.managers.activities.importActivity());
     }
 
     #initializeAESection() {
@@ -104,6 +122,35 @@ export default class ExecutePanelManager {
 
         this.#forms.vertexSimplification = new Form(this.#views.vertexSimplification.root)
             .setFieldNames([ 'rbs' ]);
+    }
+
+    /** @param {{ id, name, source, sink, origin: "aes" | "direct" | "ae" | "import", profile }[]} activities */
+    refreshActivitiesList(activities) {
+        const activitiesManager = this.context.managers.activities;
+        
+        const tableBody = this.#views.activities.table.querySelector("tbody");
+        tableBody.innerHTML = "";
+
+        for(const activity of activities) {
+            const viewButton = buildElement("button", { classname: "icon" }, [ buildElement("i", { classname: "fas fa-eye" }) ]);
+            const simulateButton = buildElement("button", { classname: "icon" }, [ buildElement("i", { classname: "fas fa-play" }) ]);
+            const deleteButton = buildElement("button", { classname: "icon" }, [ buildElement("i", { classname: "fas fa-close" }) ]);
+            
+            simulateButton.addEventListener("click", () => activitiesManager.simulateActivity(activity.id));
+            deleteButton.addEventListener("click", () => activitiesManager.deleteActivity(activity.id));
+            
+            const actRow = buildElement("tr", {}, [
+                buildElement("td", {}, [
+                    buildElement("div", { classname: "activity-name" }, [ activity.name ]),
+                    buildElement("div", { classname: "activity-origin" }, [
+                        { aes: "Simulated", direct: "Direct Input", ae: "Generated", import: "From File" }[activity.origin] || ""
+                    ]),
+                ]),
+                buildElement("td", {}, [ simulateButton, deleteButton ])
+            ]);
+
+            tableBody.appendChild(actRow);
+        }
     }
 
     refreshModelValues() {

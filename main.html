@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
     <link rel="stylesheet" href="./styles/main.css" />
+    <link rel="stylesheet" href="./styles/panels.css" />
     <link rel="stylesheet" href="./styles/widgets.css" />
 
     <script type="module" src="./script/main.mjs"></script>
@@ -216,6 +217,17 @@
                                     </div>
                                 </div>
                                 <div class="tab-area panel" data-tab-id="execute" data-panel-id="execute">
+                                    <div class="collapsible" data-section-id="activities">
+                                        <header>Activities</header>
+                                        <main>
+                                            <table>
+                                                <tbody></tbody>
+                                            </table>
+                                            <div class="action-buttons">
+                                                <button data-subaction="import"><i class="fas fa-file-lines"></i>&nbsp; Import Activity</button>
+                                            </div>
+                                        </main>
+                                    </div>
                                     <div class="collapsible" data-section-id="ae">
                                         <header>Activity Extraction</header>
                                         <main>

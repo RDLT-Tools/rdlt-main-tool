@@ -14,6 +14,7 @@ import ExportManager from "../file/export/ExportManager.mjs";
 import ExecutePanelManager from "../panels/ExecutePanelManager.mjs";
 import VisualRDLTModel from "../../entities/model/visual/VisualRDLTModel.mjs";
 import VerificationsPanelManager from "../panels/VerificationsPanelManager.mjs";
+import { ActivitiesManager } from "../activity/ActivitiesManager.mjs";
 
 export default class ModelContext {
     
@@ -39,7 +40,8 @@ export default class ModelContext {
      *  userEvents: UserEventsManager,
      *  transform: TransformManager,
      *  workspace: WorkspaceManager,
-     *  export: ExportManager
+     *  export: ExportManager,
+     *  activities: ActivitiesManager,
      *  panels: PanelManagersGroup,
      * }}
     */
@@ -86,6 +88,7 @@ export default class ModelContext {
         
         this.managers.transform = new TransformManager(this);
         this.managers.export = new ExportManager(this);
+        this.managers.activities = new ActivitiesManager(this);
 
         const workspaceManager = new WorkspaceManager(this);
         this.managers.workspace = workspaceManager;

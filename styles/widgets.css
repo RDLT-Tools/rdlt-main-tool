@@ -41,6 +41,25 @@ button.action:disabled {
     pointer-events: none;
 }
 
+button.icon {
+    border: none;
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+    height: 32px;
+    width: 32px;
+
+    text-align: center;
+    font-size: 14px;
+    border-radius: 16px;
+    margin: 0;
+    transition: background-color 100ms ease;
+}
+
+button.icon:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
 
 .v-divider {
     height: 95%;
