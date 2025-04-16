@@ -1,6 +1,6 @@
-import { AESStep } from "../../entities/activity/AESStep.mjs";
-import { TabGroupManager } from "../workspace/TabGroupManager.mjs";
-import { TabManager } from "../workspace/TabManager.mjs";
+import { AESStep } from "../../../entities/activity/AESStep.mjs";
+import { TabGroupManager } from "../../workspace/TabGroupManager.mjs";
+import { TabManager } from "../../workspace/TabManager.mjs";
 import { AESimulationManager } from "./AESimulationManager.mjs";
 
 export class AESSubworkspaceManager {

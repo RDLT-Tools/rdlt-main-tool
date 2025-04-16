@@ -1,5 +1,6 @@
 import App from "../../App.mjs";
-import { AESimulationManager } from "../activity/AESimulationManager.mjs";
+import { AESimulationManager } from "../activity/extraction/AESimulationManager.mjs";
+import { ActivitySimulationManager } from "../activity/simulation/ActivitySimulationManager.mjs";
 import ImportManager from "../file/import/ImportManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import { VerificationsResultManager } from "../verifications/VerificationsResultManager.mjs";
@@ -258,9 +259,20 @@ export default class WorkspaceManager {
         return this.#addTemplatedSubworkspace(`vs-${vsID}`, title, "vs");
     }
 
+    addASSubworkspace(asID) {
+        return this.#addTemplatedSubworkspace(`as-${asID}`, "Activity Simulation", "as");
+    }
+
     /** @param {{ name, source, sink, mode }} configs */
     startAESimulation(configs) {
         return new AESimulationManager(this.context, configs, 
+            this.context.managers.visualModel.makeCopy()
+        );
+    }
+
+    /** @param {{ name, source, sink, profile }} activity */
+    startActivitySimulation(activity) {
+        return new ActivitySimulationManager(this.context, activity, 
             this.context.managers.visualModel.makeCopy()
         );
     }
