@@ -171,12 +171,12 @@ export default class ArcSVGBuilder {
 
 
     /**
-     * @param {"straight" | "elbowed" | "self-loop"} form
+     * @param {"straight" | "elbowed" | "self-loop" | "curved"} form
      * @param {{ x: number, y: number }[]} points - all points, including center of incidental vertices
      * @param {number} startRadius 
      * @param {number} endRadius 
      */
-    drawPath(form, points, startRadius = 0, endRadius = 0) {
+    drawPath(form, points, startRadius = 0, endRadius = 0, curveDeviation = 0) {
         let d = "";
         let drawPoints = [];
         const response = {};
@@ -235,6 +235,37 @@ export default class ArcSVGBuilder {
                     y: arcCenter.y + arcRadius,
                 }
             };
+        } else if(form === "curved") {
+            const vertex1Center = points[0];
+            const vertex2Center = points[1];
+            const midX = (vertex1Center.x + vertex2Center.x)/2;
+            const midY = (vertex1Center.y + vertex2Center.y)/2;
+            const centersAngle = Math.atan((vertex2Center.y-vertex1Center.y)/(vertex2Center.x-vertex1Center.x))
+                + (vertex2Center.x < vertex1Center.x ? Math.PI : 0);
+            const midAngle = centersAngle;
+
+            // Get control point
+            const controlPoint = {
+                x: midX - curveDeviation*Math.sin(midAngle),
+                y: midY + curveDeviation*Math.cos(midAngle)
+            };
+            
+            // Get points of contact
+            const poc1 = this.#getPointOfContact(vertex1Center, startRadius, controlPoint);
+            const poc2 = this.#getPointOfContact(vertex2Center, startRadius, controlPoint);
+
+            // Get protrusion distance (how far the poc is from the bezier control point)
+            const pd1 = 0.5 * getDistance(poc1, controlPoint);
+            const pd2 = 0.5 * getDistance(poc2, controlPoint);
+
+            // Get bezier control points
+            const bez1 = this.#getPointOfContact(vertex1Center, startRadius + pd1, controlPoint);
+            const bez2 = this.#getPointOfContact(vertex2Center, startRadius + pd2, controlPoint);
+
+            d = `M${poc1.x} ${poc1.y} C ${bez1.x} ${bez1.y}, ${bez2.x} ${bez2.y}, ${poc2.x} ${poc2.y}`;
+
+            response.controlPoint = controlPoint;
+            response.cubicBezierPoints = [ poc1, bez1, bez2, poc2 ];
         }
 
         this.#pathElement.setAttribute("d", d);
@@ -302,6 +333,22 @@ export default class ArcSVGBuilder {
         return { x: pocX, y: pocY };
     }
 
+    #interpolateCubicBezier(t, p0, p1, p2, p3) {
+        const x = 
+            Math.pow(1 - t, 3) * p0.x +
+            3 * Math.pow(1 - t, 2) * t * p1.x +
+            3 * (1 - t) * Math.pow(t, 2) * p2.x +
+            Math.pow(t, 3) * p3.x;
+        
+        const y = 
+            Math.pow(1 - t, 3) * p0.y +
+            3 * Math.pow(1 - t, 2) * t * p1.y +
+            3 * (1 - t) * Math.pow(t, 2) * p2.y +
+            Math.pow(t, 3) * p3.y;
+        
+        return { x, y };
+    }
+
     setStrokeWidth(strokeWidth) {
         this.#pathElement.setAttribute("stroke-width", strokeWidth);
         
@@ -344,6 +391,8 @@ export default class ArcSVGBuilder {
 
         if(form === "self-loop") {
             this.#labelElement.position = points[1];
+        } else if(form === "curved") {
+            this.#labelElement.position = this.#interpolateCubicBezier(footFracDistance, ...points);
         } else {
             // Change endpoints to points of contact
             points[0] = this.#getPointOfContact(points[0], startRadius, points[1]);

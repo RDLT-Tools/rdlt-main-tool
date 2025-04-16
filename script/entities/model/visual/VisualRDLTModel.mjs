@@ -276,6 +276,7 @@ export default class VisualRDLTModel {
             this.#arcConnections[arc.fromVertexUID][arc.toVertexUID] = new Set([ arc.uid ]);
         else this.#arcConnections[arc.fromVertexUID][arc.toVertexUID].add(arc.uid);
 
+        this.#refreshArcOrders(arc.fromVertexUID, arc.toVertexUID);
 
         // Reset cache for affected components
         delete this.#cache.incidentArcs[arc.fromVertexUID];
@@ -284,6 +285,20 @@ export default class VisualRDLTModel {
         delete this.#cache.rbsComponents[arc.fromVertexUID];
 
         return arc;
+    }
+
+    getCoincidingArcs(fromVertexUID, toVertexUID) {
+        return this.#arcs.filter(arc => arc.fromVertexUID === fromVertexUID
+            && arc.toVertexUID === toVertexUID);
+    }
+
+    #refreshArcOrders(fromVertexUID, toVertexUID) {
+        const coincidingArcs = this.getCoincidingArcs(fromVertexUID, toVertexUID);
+        for(let index = 0; index < coincidingArcs.length; index++) {
+            const arc = coincidingArcs[index];
+            arc.order.index = index;
+            arc.order.count = coincidingArcs.length;
+        }
     }
 
     /**
@@ -337,6 +352,8 @@ export default class VisualRDLTModel {
 
         this.#arcs = this.#arcs.filter(arc => arc.uid !== arcUID);
         this.#arcConnections[arc.fromVertexUID]?.[arc.toVertexUID]?.delete(arcUID);
+
+        this.#refreshArcOrders(arc.fromVertexUID, arc.toVertexUID);
 
         delete this.#cache.incidentArcs[arc.fromVertexUID];
         delete this.#cache.incidentArcs[arc.toVertexUID];

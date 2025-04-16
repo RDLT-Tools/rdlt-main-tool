@@ -29,6 +29,9 @@ export default class VisualArc {
     /** @type {ArcStyles} */
     styles;
 
+    /** @type {{ index: number, count: number }} */
+    order = { index: 0, count: 1 };
+
 
     /**
      * @param {{ uid: number, C: string, L: number, fromVertexUID: number, toVertexUID: number, geometry, styles }} options 
