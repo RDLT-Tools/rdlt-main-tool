@@ -263,8 +263,24 @@ export default class ArcSVGBuilder {
 
             d = `M${poc1.x} ${poc1.y} C ${bez1.x} ${bez1.y}, ${bez2.x} ${bez2.y}, ${poc2.x} ${poc2.y}`;
 
+
+            const cubicBezierPoints = [ poc1, bez1, bez2, poc2 ];
+            const pointsX = cubicBezierPoints.map(p => p.x);
+            const pointsY = cubicBezierPoints.map(p => p.y);
+            this.#bounds = {
+                start: {
+                    x: Math.min(...pointsX),
+                    y: Math.min(...pointsY),
+                },
+                end: {
+                    x: Math.max(...pointsX),
+                    y: Math.max(...pointsY),
+                }
+            }
+
             response.controlPoint = controlPoint;
-            response.cubicBezierPoints = [ poc1, bez1, bez2, poc2 ];
+            response.cubicBezierPoints = cubicBezierPoints;
+            
         }
 
         this.#pathElement.setAttribute("d", d);
