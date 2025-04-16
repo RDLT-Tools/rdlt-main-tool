@@ -3,7 +3,7 @@ import VisualComponent from "../../entities/model/visual/VisualComponent.mjs";
 import ArcSVGBuilder from "../../render/builders/ArcSVGBuilder.mjs";
 import ComponentSVGBuilder from "../../render/builders/ComponentSVGBuilder.mjs";
 import RBSSVGBuilder from "../../render/builders/RBSSVGBuilder.mjs";
-import { getDistance } from "../../render/builders/utils.mjs";
+import { getDistance, makeGroupSVG } from "../../render/builders/utils.mjs";
 import { DrawingViewportManager } from "./DrawingViewportManager.mjs";
 
 export class BaseModelDrawingManager {
@@ -32,6 +32,19 @@ export class BaseModelDrawingManager {
     viewport;
 
     /**
+     * @type {{
+     *      vertices: SVGGElement,
+     *      arcs: SVGGElement,
+     *      rbs: SVGGElement,
+     * }}
+     */
+    groups = {
+        vertices: null,
+        arcs: null,
+        rbs: null
+    };
+
+    /**
      * 
      * @param {SVGElement} drawingSVGElement 
      * @param {DrawingOrigin} origin 
@@ -39,7 +52,22 @@ export class BaseModelDrawingManager {
     constructor(drawingSVGElement, origin = "model") {
         this.origin = origin;
         this.drawingSVG = drawingSVGElement;
+
+
         
+        this.#initialize();
+    }
+
+
+    #initialize() {
+        this.groups.vertices = makeGroupSVG([], { className: "group-vertices" });
+        this.groups.arcs = makeGroupSVG([], { className: "group-arcs" });
+        this.groups.rbs = makeGroupSVG([], { className: "group-rbs" });
+        
+        this.drawingSVG.appendChild(this.groups.rbs);
+        this.drawingSVG.appendChild(this.groups.arcs);
+        this.drawingSVG.appendChild(this.groups.vertices);
+
         this.viewport = new DrawingViewportManager(this.drawingSVG);
     }
 
@@ -97,7 +125,7 @@ export class BaseModelDrawingManager {
         vertexBuilder.setPosition(vertex.geometry.position.x, vertex.geometry.position.y);
 
         this.builders.vertices[id] = vertexBuilder;
-        this.drawingSVG.appendChild(vertexBuilder.element);
+        this.groups.vertices.appendChild(vertexBuilder.element);
 
         return vertexBuilder;
     }
@@ -158,7 +186,7 @@ export class BaseModelDrawingManager {
             .setConnectorEndThickness(arc.styles.connectorEnd.thickness);
 
         this.builders.arcs[id] = arcBuilder;
-        this.drawingSVG.appendChild(arcBuilder.element); 
+        this.groups.arcs.appendChild(arcBuilder.element); 
 
         return arcBuilder;
     }
@@ -174,7 +202,7 @@ export class BaseModelDrawingManager {
         rbsBuilder.setBounds(this.#calculateRBSBounds(vertices));
 
         this.builders.rbs[centerComponent.uid] = rbsBuilder;
-        this.drawingSVG.appendChild(rbsBuilder.element);
+        this.groups.rbs.appendChild(rbsBuilder.element);
 
         return rbsBuilder;
     }

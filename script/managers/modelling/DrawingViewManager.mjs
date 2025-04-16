@@ -383,7 +383,7 @@ export default class DrawingViewManager extends BaseModelDrawingManager {
         this.#setRBSBounds(rbsBuilder, bounds);
         this.builders.rbs[centerComponent.uid] = rbsBuilder;
 
-        this.drawingSVG.appendChild(rbsBuilder.element);
+        this.groups.rbs.appendChild(rbsBuilder.element);
 
         return rbsBuilder.element;
     }
@@ -419,7 +419,7 @@ export default class DrawingViewManager extends BaseModelDrawingManager {
         const rbsBuilder = this.builders.rbs[centerUID];
         if(!rbsBuilder) return;
 
-        this.drawingSVG.removeChild(rbsBuilder.element);
+        rbsBuilder.element.remove();
         delete this.builders.rbs[centerUID];
     }
 
