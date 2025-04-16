@@ -287,13 +287,14 @@ export default class VisualRDLTModel {
         return arc;
     }
 
-    getCoincidingArcs(fromVertexUID, toVertexUID) {
-        return this.#arcs.filter(arc => arc.fromVertexUID === fromVertexUID
-            && arc.toVertexUID === toVertexUID);
+    getCoincidingArcs(vertex1UID, vertex2UID) {
+        return this.#arcs.filter(arc => 
+            (arc.fromVertexUID === vertex1UID && arc.toVertexUID === vertex2UID) || 
+            (arc.fromVertexUID === vertex2UID && arc.toVertexUID === vertex1UID));
     }
 
-    #refreshArcOrders(fromVertexUID, toVertexUID) {
-        const coincidingArcs = this.getCoincidingArcs(fromVertexUID, toVertexUID);
+    #refreshArcOrders(vertex1UID, vertex2UID) {
+        const coincidingArcs = this.getCoincidingArcs(vertex1UID, vertex2UID);
         for(let index = 0; index < coincidingArcs.length; index++) {
             const arc = coincidingArcs[index];
             arc.order.index = index;

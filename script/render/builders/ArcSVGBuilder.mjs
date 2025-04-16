@@ -240,8 +240,7 @@ export default class ArcSVGBuilder {
             const vertex2Center = points[1];
             const midX = (vertex1Center.x + vertex2Center.x)/2;
             const midY = (vertex1Center.y + vertex2Center.y)/2;
-            const centersAngle = Math.atan((vertex2Center.y-vertex1Center.y)/(vertex2Center.x-vertex1Center.x))
-                + (vertex2Center.x < vertex1Center.x ? Math.PI : 0);
+            const centersAngle = Math.atan((vertex2Center.y-vertex1Center.y)/(vertex2Center.x-vertex1Center.x));
             const midAngle = centersAngle;
 
             // Get control point
