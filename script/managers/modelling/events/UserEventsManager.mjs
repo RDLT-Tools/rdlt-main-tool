@@ -1,6 +1,8 @@
 import MouseEventsManager from "./MouseEventsManager.mjs";
 import KeyEventsManager from "./KeyEventsManager.mjs";
 import ModelContext from "../../model/ModelContext.mjs";
+import { GlobalKeyEventsManager } from "./GlobalKeyEventsManager.mjs";
+import { setHasExact } from "../../../utils.mjs";
 
 export default class UserEventsManager {
     /** @type { ModelContext } */
@@ -27,6 +29,14 @@ export default class UserEventsManager {
         this.#keyEventsManager = new KeyEventsManager(this);
 
         this.#mouseEventsManager.registerDrawingSVG(this.#drawingSVG);
+
+        GlobalKeyEventsManager.listen(this.#drawingSVG, (keys) => {
+            if(setHasExact(keys, "Backspace") || setHasExact(keys, "Delete")) {
+                this.context.managers.modelling.onDrawingViewUserEvent("key-delete");
+            } else if(setHasExact(keys, "Control", "a")) {
+                this.context.managers.modelling.onDrawingViewUserEvent("key-selectall");
+            }
+        });
     }
 
     /**

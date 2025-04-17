@@ -288,7 +288,8 @@ export default class ArcSVGBuilder {
         }
 
         this.#pathElement.setAttribute("d", d);
-        this.#highlightPathElement.setAttribute("d", d);
+        
+        if(this.#origin !== "tracing") this.#highlightPathElement.setAttribute("d", d);
 
         if(this.#origin === "model") {
             this.#hoverPathElement.setAttribute("d", d);
