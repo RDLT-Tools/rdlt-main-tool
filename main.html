@@ -453,7 +453,7 @@
                         </div>
                     </template>
                     <template data-tab-template-id="ver">
-                        <div class="subworkspace tab-area">
+                        <div class="subworkspace tab-area ver-subworkspace">
                             <main class="ver-main">
                                 <header>
                                     <div>
@@ -466,7 +466,6 @@
                                 </header>
                                 <main>
                                     <section class="drawing">
-                                        <svg></svg>
                                     </section>
                                 </main>
                             </main>
@@ -477,47 +476,43 @@
                                 <main class="panel-tabs">
                                     <div class="tab-area panel" data-tab-id="result" data-panel-id="result">
                                         <header>
-                                            <h2>Separability</h2>
+                                            <h2>Result</h2>
                                         </header>
-                                        <br/>
-                                        <div class="collapsible">
+                                        <div class="conclusion-chip">
+                                            <div class="conclusion-title">Some title</div>
+                                            <div class="conclusion-description">Some description</div>
+                                        </div>
+                                        <div class="collapsible" data-ver-section="criteria">
                                             <header>Criteria</header>
                                             <main>
                                                 <table>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td>Y</td>
-                                                            <td>Valid L values</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>N</td>
-                                                            <td>Valid C values</td>
-                                                        </tr>
-                                                    </tbody>
+                                                    <tbody></tbody>
                                                 </table>
                                             </main>
                                         </div> 
-                                        <div class="collapsible">
+                                        <div class="collapsible" data-ver-section="v-arcs">
                                             <header>Violating Arcs</header>
+                                            <main>
+                                                <table>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </main>
+                                        </div> 
+                                        <div class="collapsible" data-ver-section="v-vertices">
+                                            <header>Violating Vertices</header>
                                             <main>
                                                 <table>
                                                     <tbody>
                                                         <tr>
-                                                            <td><div class="arc-tag">
-                                                                <div>x1</div>
-                                                                <div>x2</div>
-                                                            </div></td>
+                                                            <td><div class="vertex-tag">x1</div></td>
                                                         </tr>
                                                         <tr>
-                                                            <td><div class="arc-tag">
-                                                                <div>x1</div>
-                                                                <div>x2</div>
-                                                            </div></td>
+                                                            <td><div class="vertex-tag">x2</div></td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
                                             </main>
-                                        </div> 
+                                        </div>
                                     </div>
                                 </main>
                             </aside>

@@ -20,7 +20,7 @@ export default class ArcSVGBuilder {
     #triggerPathElement;
     #selectedPathElement;
     #waypointsElement;
-    #aesHighlightPathElement;
+    #highlightPathElement;
     #aesClickableElement;
 
     #bounds = {
@@ -104,6 +104,11 @@ export default class ArcSVGBuilder {
                 ])
             ]);
 
+            
+            this.#highlightPathElement = this.#pathElement.cloneNode(true);
+            this.#highlightPathElement.classList.remove("arc-path");
+            this.#highlightPathElement.classList.add("arc-highlight");
+
 
             if(origin === "model") {
                 this.#triggerPathElement = makeSVGElement("path", {
@@ -126,6 +131,7 @@ export default class ArcSVGBuilder {
     
                 this.#element = makeGroupSVG([
                     labelMaskBoundsElement,
+                    this.#highlightPathElement,
                     arcElement,
                     this.#triggerPathElement,
                     this.#hoverPathElement,
@@ -134,9 +140,6 @@ export default class ArcSVGBuilder {
                     this.#waypointsElement
                 ], { className: "arc" });
             } else if(origin === "aes") {
-                this.#aesHighlightPathElement = this.#pathElement.cloneNode(true);
-                this.#aesHighlightPathElement.classList.remove("arc-path");
-                this.#aesHighlightPathElement.classList.add("arc-aes-highlight");
                 
                 this.#aesClickableElement = makeSVGElement("path", {
                     d: "",
@@ -146,7 +149,7 @@ export default class ArcSVGBuilder {
                 })
 
                 this.#element = makeGroupSVG([
-                    this.#aesHighlightPathElement,
+                    this.#highlightPathElement,
                     this.#aesClickableElement,
                     labelMaskBoundsElement,
                     arcElement,
@@ -155,6 +158,7 @@ export default class ArcSVGBuilder {
             } else if(origin === "vs") {
                 this.#element = makeGroupSVG([
                     labelMaskBoundsElement,
+                    this.#highlightPathElement,
                     arcElement,
                     this.#labelElement.element,
                 ], { className: "arc" });
@@ -284,6 +288,7 @@ export default class ArcSVGBuilder {
         }
 
         this.#pathElement.setAttribute("d", d);
+        this.#highlightPathElement.setAttribute("d", d);
 
         if(this.#origin === "model") {
             this.#hoverPathElement.setAttribute("d", d);
@@ -309,7 +314,6 @@ export default class ArcSVGBuilder {
             }
             
         } else if(this.#origin === "aes") {
-            this.#aesHighlightPathElement.setAttribute("d", d);
             this.#aesClickableElement.setAttribute("d", d);
         }
 

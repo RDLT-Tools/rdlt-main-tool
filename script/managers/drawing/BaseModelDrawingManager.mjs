@@ -45,6 +45,11 @@ export class BaseModelDrawingManager {
         rbs: null
     };
 
+    #highlights = {
+        vertices: new Set(),
+        arcs: new Set()
+    };
+
     /**
      * 
      * @param {SVGElement} drawingSVGElement 
@@ -91,8 +96,10 @@ export class BaseModelDrawingManager {
 
         // Add arcs
         for(const arc of arcs) {
-            const vertex1Geometry = vertexMap[arc.fromVertexUID].geometry;
-            const vertex2Geometry = vertexMap[arc.toVertexUID].geometry;
+            const vertex1Geometry = vertexMap[arc.fromVertexUID]?.geometry;
+            const vertex2Geometry = vertexMap[arc.toVertexUID]?.geometry;
+            if(!vertex1Geometry || !vertex2Geometry) continue;
+            
             this.addArc(arc, vertex1Geometry, vertex2Geometry);
 
             if(!arc.C.trim()) {
@@ -257,5 +264,42 @@ export class BaseModelDrawingManager {
         const bounds = { minX, minY, maxX, maxY };
 
         return bounds;
+    }
+
+    
+
+    highlightVertex(vertexUID) {
+        const vertexBuilder = this.builders.vertices[vertexUID];
+        if(!vertexBuilder) return;
+
+        vertexBuilder.element.classList.add("active");
+        this.#highlights.vertices.add(vertexUID);
+    }
+
+    highlightArc(arcUID) {
+        const arcBuilder = this.builders.arcs[arcUID];
+        if(!arcBuilder) return;
+
+        arcBuilder.element.classList.add("active");
+        this.#highlights.arcs.add(arcUID);
+    }
+
+    clearHighlights() {
+        for(const highlightedVertexUID of this.#highlights.vertices) {
+            const vertexBuilder = this.builders.vertices[highlightedVertexUID];
+            if(!vertexBuilder) continue;
+
+            vertexBuilder.element.classList.remove("active");
+        } 
+
+        for(const highlightedArcUID of this.#highlights.arcs) {
+            const arcBuilder = this.builders.arcs[highlightedArcUID];
+            if(!arcBuilder) continue;
+
+            arcBuilder.element.classList.remove("active");
+        }
+
+        this.#highlights.vertices.clear();
+        this.#highlights.arcs.clear();
     }
 }

@@ -1,3 +1,5 @@
+import { makeSVGElement } from "../../render/builders/utils.mjs";
+import { buildElement } from "../../utils.mjs";
 import { TabGroupManager } from "../workspace/TabGroupManager.mjs";
 import { TabManager } from "../workspace/TabManager.mjs";
 import { VerificationsResultManager } from "./VerificationsResultManager.mjs";
@@ -15,13 +17,15 @@ export class VERSubworkspaceManager {
      *      main: HTMLDivElement,
      *      buttons: { actions: { [action: string]: HTMLButtonElement } },
      *      header: { title: HTMLSpanElement, instanceSelector: HTMLSelectElement },
-     *      panels: { [panelID: string]: HTMLDivElement }
+     *      panels: { [panelID: string]: HTMLDivElement },
+     *      svg: SVGElement[]
      * }}
      */
     #view = {
         header: {},
         buttons: { actions: {} },
-        panels: {}
+        panels: {},
+        svg: []
     };
 
     /** 
@@ -63,6 +67,34 @@ export class VERSubworkspaceManager {
                 this.#view.buttons.actions[action] = button;
                 button.addEventListener("click", () => this.#onActionClicked(action));
         });
+
+        // Initialize header
+        this.#view.header.title.innerHTML = this.#verManager.result.title;
+
+        const instances = this.#verManager.result.instances;
+
+        // Initialize SVGs
+        const drawingView = this.#rootAreaElement.querySelector(".drawing");
+        for(const instance of instances) {
+            const instanceSVG = makeSVGElement("svg");
+            drawingView.appendChild(instanceSVG);
+            this.#view.svg.push(instanceSVG);
+        }
+
+        // Initialize instance selector
+        const instanceSelector = this.#view.header.instanceSelector;
+        instanceSelector.innerHTML = "";
+        for(let i = 0; i < instances.length; i++) {
+            const instance = instances[i];
+            const option = buildElement("option", { value: i }, [ instance.name ]);
+            instanceSelector.appendChild(option);
+        }
+
+        instanceSelector.addEventListener("change", () => {
+            const selectedIndex = Number(instanceSelector.value);
+            this.#verManager.displayInstanceResult(selectedIndex);
+        });
+
     }
 
     #onActionClicked(action) {
@@ -84,5 +116,9 @@ export class VERSubworkspaceManager {
         ));
         
         this.#tabs.right.selectTab("result");
+    }
+
+    getInstanceSVG(index) {
+        return this.#view.svg[index];
     }
 }

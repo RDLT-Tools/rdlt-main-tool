@@ -119,10 +119,17 @@ header section.action-buttons {
   flex: 1;
 }
 
+.model-context > main > .subworkspace > main .drawing {
+  position: relative;
+}
+
 .model-context > main > .subworkspace > main .drawing > svg {
   height: 100%;
   width: 100%;
   display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 #tmp {
@@ -326,7 +333,7 @@ svg .arc-waypoint:not([data-nomove]) {
   opacity: 0.5;
 }
 
-.aes-subworkspace .arc-aes-highlight {
+.aes-subworkspace .arc-highlight {
   transition: all 200ms ease;
   stroke-width: 12;
   stroke-linecap: round;
@@ -378,22 +385,22 @@ svg .arc-waypoint:not([data-nomove]) {
   stroke: #74d8e0;
 }
 
-[data-aes-current-action="start"] .arc.active .arc-aes-highlight {
+[data-aes-current-action="start"] .arc.active .arc-highlight {
   stroke: #7eeb83;
 }
-[data-aes-current-action="explore"] .arc.active .arc-aes-highlight {
+[data-aes-current-action="explore"] .arc.active .arc-highlight {
   stroke: #e2d971;
 }
-[data-aes-current-action="check"] .arc.active .arc-aes-highlight {
+[data-aes-current-action="check"] .arc.active .arc-highlight {
   stroke: #e153e6;
 }
-[data-aes-current-action="traverse"] .arc.active .arc-aes-highlight {
+[data-aes-current-action="traverse"] .arc.active .arc-highlight {
   stroke: #3a81de;
 }
-[data-aes-current-action="end-fail"] .arc.active .arc-aes-highlight {
+[data-aes-current-action="end-fail"] .arc.active .arc-highlight {
   stroke: #ff5050;
 }
-[data-aes-current-action="end-sink"] .arc.active .arc-aes-highlight {
+[data-aes-current-action="end-sink"] .arc.active .arc-highlight {
   stroke: #74d8e0;
 }
 
@@ -432,18 +439,15 @@ svg .arc-waypoint:not([data-nomove]) {
   cursor: default;
 }
 
-.vs-subworkspace .drawing {
+.vs-subworkspace .drawing,
+.as-subworkspace .drawing,
+.ver-subworkspace .drawing {
   height: 100%;
   width: 100%;
 }
 
-.as-subworkspace .drawing {
-  height: 100%;
-  width: 100%;
-}
 
-
-.as-subworkspace .arc-aes-highlight {
+.as-subworkspace .arc-highlight {
   transition: all 200ms ease;
   stroke-width: 12;
   stroke-linecap: round;
@@ -451,9 +455,42 @@ svg .arc-waypoint:not([data-nomove]) {
   opacity: 0.5;
 }
 
-.as-subworkspace .arc.active .arc-aes-highlight {
+.as-subworkspace .arc.active .arc-highlight {
   stroke: #3a81de;
 }
 
+.ver-subworkspace .criteria-row .fa-check {
+  color: green;
+}
 
+.ver-subworkspace .criteria-row .fa-close {
+  color: red;
+}
 
+.ver-subworkspace .drawing > svg:not(.active) {
+  display: none !important;
+}
+
+.ver-subworkspace .component-circle {
+  transition: all 300ms ease;
+  fill-opacity: 1;
+  stroke-width: 15;
+  stroke: transparent;
+  opacity: 0.5;
+}
+
+.ver-subworkspace .arc-highlight {
+  transition: all 200ms ease;
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke: transparent;
+  opacity: 0.5;
+}
+
+.ver-subworkspace .arc.active .arc-highlight {
+  stroke: #ff5050;
+}
+
+.ver-subworkspace .component.active .component-circle {
+  stroke: #ff5050;
+}
