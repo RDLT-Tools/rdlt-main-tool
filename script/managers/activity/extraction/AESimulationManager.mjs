@@ -1,3 +1,4 @@
+import Activity from "../../../entities/activity/Activity.mjs";
 import { AESStep } from "../../../entities/activity/AESStep.mjs";
 import VisualRDLTModel from "../../../entities/model/visual/VisualRDLTModel.mjs";
 import { backtrack, buildArcMap, buildArcsAdjacencyMatrix, buildVertexMap, checkArc, iterateAtVertex, traverseArc } from "../../../services/aes.mjs";
@@ -393,7 +394,7 @@ export class AESimulationManager {
         const result = this.#getCurrentStep().action;
         const pass = result === "end-sink";
 
-        const activity = {
+        const activity = new Activity({
             name, source: this.configs.source,
             sink: this.configs.sink,
             origin: "aes",
@@ -406,7 +407,7 @@ export class AESimulationManager {
                     "The activity failed to reach the sink"
             },
             profile: this.getStatesAtStepIndex(this.#states.currentStepIndex).activityProfile
-        };
+        });
 
         this.context.managers.activities.addActivity(activity);
         this.context.managers.workspace.gotoMainModel();

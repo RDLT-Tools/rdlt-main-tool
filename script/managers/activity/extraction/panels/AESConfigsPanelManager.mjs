@@ -14,7 +14,7 @@ export class AESConfigsPanelManager {
         this.#rootElement = rootElement;
     }
 
-    /** @param {{ name, source: VisualComponent, sink: VisualComponent, mode}} activity */
+    /** @param {{ name, source: VisualComponent, sink: VisualComponent, mode}} configs */
     displayConfigs(configs) {
         // Setup properties
         const nameView = this.#rootElement.querySelector(`input[name="name"]`);

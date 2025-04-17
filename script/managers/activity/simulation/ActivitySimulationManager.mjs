@@ -1,3 +1,4 @@
+import Activity from "../../../entities/activity/Activity.mjs";
 import VisualRDLTModel from "../../../entities/model/visual/VisualRDLTModel.mjs";
 import { generateUniqueID } from "../../../utils.mjs";
 import ModelContext from "../../model/ModelContext.mjs";
@@ -14,10 +15,6 @@ export class ActivitySimulationManager {
     id;
 
     /** 
-     * @typedef {number} ArcUID
-     * @typedef {number} VertexUID
-     * @typedef {{ [timestep: number]: Set<ArcUID> }} ActivityProfile
-     * @typedef {{ id: string, name: string, source: VertexUID, sink: VertexUID, profile: ActivityProfile }} Activity
      * @type {Activity} 
     */
     #activity;
@@ -86,13 +83,7 @@ export class ActivitySimulationManager {
 
         
         this.#subworkspaceManager.setup(this.configs);
-
-        const source = this.context.managers.visualModel.getComponent(this.#activity.source);
-        const sink = this.context.managers.visualModel.getComponent(this.#activity.sink);
-        this.#panels.details.displayActivityDetails({
-            ...this.#activity,
-            source, sink
-        });
+        this.#panels.details.displayActivityDetails(this.#activity);
 
         this.#panels.profile.displayProfileList(this.#activity.profile);
         this.setCurrentTimestep(1);
@@ -146,5 +137,9 @@ export class ActivitySimulationManager {
         return [
             vertexFrom?.identifier || "",
             vertexTo?.identifier || "" ];
+    }
+
+    getComponent(uid) {
+        return this.context.managers.visualModel.getComponent(uid);
     }
 }

@@ -1,3 +1,4 @@
+import Activity from "../../../../entities/activity/Activity.mjs";
 import VisualComponent from "../../../../entities/model/visual/VisualComponent.mjs";
 import { ActivitySimulationManager } from "../ActivitySimulationManager.mjs";
 
@@ -14,7 +15,7 @@ export class ASDetailsPanelManager {
         this.#rootElement = rootElement;
     }
 
-    /** @param {{ name, source: VisualComponent, sink: VisualComponent, origin, conclusion: { pass, title, description }}} activity */
+    /** @param {Activity} activity */
     displayActivityDetails(activity) {
         // Setup conclusion chip
         const conclusionChip = this.#rootElement.querySelector(".conclusion-chip");
@@ -42,14 +43,17 @@ export class ASDetailsPanelManager {
         const sinkTextView = sinkRootView.querySelector("span");
         const originView = this.#rootElement.querySelector(`[data-as-detail="origin"]`);
 
+        const source = this.#simulationManager.getComponent(activity.source);
+        const sink = this.#simulationManager.getComponent(activity.sink);
+
         nameView.innerHTML = activity.name;
-        sourceTextView.innerHTML = activity.source.identifier;
-        sinkTextView.innerHTML = activity.sink.identifier;
+        sourceTextView.innerHTML = source.identifier;
+        sinkTextView.innerHTML = sink.identifier;
         originView.innerHTML = {
             ae: "Generated", aes: "Simulated", direct: "Direct Input", import: "From File"
         }[activity.origin] || "-";
 
-        sourceRootView.setAttribute("data-vertex-type", activity.source.type);
-        sinkRootView.setAttribute("data-vertex-type", activity.sink.type);        
+        sourceRootView.setAttribute("data-vertex-type", source.type);
+        sinkRootView.setAttribute("data-vertex-type", sink.type);     
     }
 }

@@ -1,4 +1,5 @@
 import App from "../../App.mjs";
+import Activity from "../../entities/activity/Activity.mjs";
 import { AESimulationManager } from "../activity/extraction/AESimulationManager.mjs";
 import { ActivitySimulationManager } from "../activity/simulation/ActivitySimulationManager.mjs";
 import ImportManager from "../file/import/ImportManager.mjs";
@@ -142,7 +143,7 @@ export default class WorkspaceManager {
                 App.addContext();
             break;
             case "upload":
-                ImportManager.importRDLTFile();
+                this.context.managers.import.importRDLTFile();
             break;
             case "download":
                 this.context.managers.export.exportToPNGImage();
@@ -279,7 +280,7 @@ export default class WorkspaceManager {
         );
     }
 
-    /** @param {{ name, source, sink, profile }} activity */
+    /** @param {Activity} activity */
     startActivitySimulation(activity) {
         return new ActivitySimulationManager(this.context, activity, 
             this.context.managers.visualModel.makeCopy()

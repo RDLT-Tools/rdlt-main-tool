@@ -1,5 +1,6 @@
 import App from "../../../App.mjs";
 import ModelContext from "../../model/ModelContext.mjs";
+import ActivityImportManager from "./ActivityImportManager.mjs";
 import RDLTImportManager from "./RDLTImportManager.mjs";
 
 export default class ImportManager {
@@ -13,8 +14,8 @@ export default class ImportManager {
         this.context = context;
     }
 
-    static async importRDLTFile() {
-        const raw = await ImportManager.#importFileThenRead();
+    async importRDLTFile() {
+        const raw = await this.#importFileThenRead();
         if(!raw) return;
 
         const visualModel = RDLTImportManager.loadRDLTModel(raw);
@@ -23,7 +24,17 @@ export default class ImportManager {
         App.addContext(visualModel);
     }
 
-    static #importFileThenRead(accept = ".txt") {
+    async importActivityFile() {
+        const raw = await this.#importFileThenRead();
+        if(!raw) return;
+
+        const activity = ActivityImportManager.loadActivity(raw);
+        if(!activity) return;
+
+        this.context.managers.activities.addActivity(activity);
+    }
+
+    #importFileThenRead(accept = ".txt") {
         return new Promise(resolve => {
             const importField = document.createElement("input");
             importField.setAttribute("type", "file");

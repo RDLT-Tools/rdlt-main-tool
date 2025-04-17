@@ -1,3 +1,4 @@
+import Activity from "../../entities/activity/Activity.mjs";
 import { buildElement, Form } from "../../utils.mjs";
 import { ActivitiesManager } from "../activity/ActivitiesManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
@@ -132,7 +133,7 @@ export default class ExecutePanelManager {
             .setFieldNames([ 'rbs' ]);
     }
 
-    /** @param {{ id, name, source, sink, conclusion: { pass }, origin: "aes" | "direct" | "ae" | "import", profile }[]} activities */
+    /** @param {Activity[]} activities */
     refreshActivitiesList(activities) {
         const activitiesManager = this.context.managers.activities;
         
@@ -142,9 +143,11 @@ export default class ExecutePanelManager {
         for(const activity of activities) {
             const viewButton = buildElement("button", { classname: "icon" }, [ buildElement("i", { classname: "fas fa-eye" }) ]);
             const simulateButton = buildElement("button", { classname: "icon" }, [ buildElement("i", { classname: "fas fa-play" }) ]);
+            const downloadButton = buildElement("button", { classname: "icon" }, [ buildElement("i", { classname: "fas fa-arrow-down" }) ]);
             const deleteButton = buildElement("button", { classname: "icon" }, [ buildElement("i", { classname: "fas fa-close" }) ]);
             
             simulateButton.addEventListener("click", () => activitiesManager.simulateActivity(activity.id));
+            downloadButton.addEventListener("click", () => this.context.managers.export.exportActivityToTextFile(activity));
             deleteButton.addEventListener("click", () => activitiesManager.deleteActivity(activity.id));
 
             const passed = activity.conclusion?.pass || false;
@@ -158,7 +161,7 @@ export default class ExecutePanelManager {
                         { aes: "Simulated", direct: "Direct Input", ae: "Generated", import: "From File" }[activity.origin] || ""
                     ]),
                 ]),
-                buildElement("td", {}, [ simulateButton, deleteButton ])
+                buildElement("td", {}, [ simulateButton, downloadButton, deleteButton ])
             ]);
 
             tableBody.appendChild(actRow);

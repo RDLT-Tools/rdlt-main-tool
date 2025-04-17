@@ -1,3 +1,4 @@
+import Activity from "../../entities/activity/Activity.mjs";
 import VisualRDLTModel from "../../entities/model/visual/VisualRDLTModel.mjs";
 import { backtrack, buildArcMap, buildArcsAdjacencyMatrix, buildVertexMap, checkArc, iterateAtVertex, traverseArc } from "../../services/aes.mjs";
 import { generateUniqueID, pickRandomFromSet } from "../../utils.mjs";
@@ -8,23 +9,6 @@ export class ActivitiesManager {
     context;
     
     /** 
-     * @typedef {number} ArcUID
-     * @typedef {number} VertexUID
-     * @typedef {{ [timestep: number]: Set<ArcUID> }} ActivityProfile
-     * @typedef {"aes" | "direct" | "ae" | "import"} ActivityOrigin
-     * @typedef {{ 
-     *      id: string, 
-     *      name: string, 
-     *      origin: ActivityOrigin, 
-     *      source: VertexUID, 
-     *      sink: VertexUID, 
-     *      conclusion: { 
-     *          pass: boolean,
-     *          title: string,
-     *          description: string
-     *      }, 
-     *      profile: ActivityProfile 
-     * }} Activity
      * @type {Activity[]}
     */
     #activities = [];
@@ -109,8 +93,7 @@ export class ActivitiesManager {
 
         const pass = conclusion === "end-sink";
 
-        const activity = {
-            id: generateUniqueID(),
+        const activity = new Activity({
             name: configs.name,
             source: configs.source,
             sink: configs.sink,
@@ -124,7 +107,7 @@ export class ActivitiesManager {
                     "The activity failed to reach the sink"
             },
             profile: aeStates.activityProfile
-        };
+        });
 
         this.addActivity(activity);
     }
@@ -133,14 +116,12 @@ export class ActivitiesManager {
      * @param {Activity} activity 
      */
     addActivity(activity) {
-        if(!activity.id) activity.id = generateUniqueID();
-        
         this.#activities.push(activity);
         this.#refreshActivitiesList();
     }
 
     importActivity() {
-        console.log("About to import a new activity");
+        this.context.managers.import.importActivityFile();
     }
 
     simulateActivity(activityID) {
