@@ -1,4 +1,5 @@
 import { AESStep } from "../../../entities/activity/AESStep.mjs";
+import { Form } from "../../../utils.mjs";
 import { TabGroupManager } from "../../workspace/TabGroupManager.mjs";
 import { TabManager } from "../../workspace/TabManager.mjs";
 import { AESimulationManager } from "./AESimulationManager.mjs";
@@ -16,13 +17,15 @@ export class AESSubworkspaceManager {
      *      main: HTMLDivElement,
      *      buttons: { actions: { [action: string]: HTMLButtonElement } },
      *      header: { modeLabel: HTMLElement, label: HTMLSpanElement, arcTag: HTMLDivElement, vertexTag: HTMLDivElement, main: HTMLDivElement },
-     *      panels: { [panelID: string]: HTMLDivElement }
+     *      panels: { [panelID: string]: HTMLDivElement },
+     *      forms: { configs: Form }
      * }}
      */
     #view = {
         header: {},
         buttons: { actions: {} },
-        panels: {}
+        panels: {},
+        forms: { configs: null }
     };
 
     /** 
@@ -39,6 +42,7 @@ export class AESSubworkspaceManager {
         this.#rootAreaElement = rootAreaElement;
         this.#initializeView();
         this.#initializeTabs();
+        this.#initializeForms();
     }
 
     #initializeView() {
@@ -86,6 +90,10 @@ export class AESSubworkspaceManager {
             case "repeat": 
                 this.#simulationManager.reselectArc();
             break;
+            case "save":
+                const name = this.#view.forms.configs.getFieldValue("name");
+                this.#simulationManager.saveActivity(name);
+            break;
         }
     }
 
@@ -125,8 +133,14 @@ export class AESSubworkspaceManager {
             rightPanelsTabAreaContainer.querySelector(".tab-area[data-tab-id='profile']")
         ));
         
-        this.#tabs.left.selectTab("steps");
+        this.#tabs.left.selectTab("configs");
         this.#tabs.right.selectTab("states");
+    }
+
+    #initializeForms() {
+        // Initialize configurations form
+        this.#view.forms.configs = new Form(this.#view.panels["configs"])
+            .setFieldNames(["name"]);
     }
 
     /** @param {{ mode }} configs */

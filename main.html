@@ -334,7 +334,44 @@
                                     <div class="tab-button" data-tab-id="steps">Steps</div>
                                 </section>
                                 <main class="panel-tabs">
-                                    <div class="tab-area panel" data-tab-id="configs">Configs panel</div>
+                                    <div class="tab-area panel" data-tab-id="configs" data-panel-id="configs">
+                                        <div class="collapsible">
+                                            <header>Properties</header>
+                                            <main>
+                                                <div class="input-group">
+                                                    <label>Activity Name</label>
+                                                    <input name="name" placeholder="Set a name for the activity" class="full-width" name="C" />
+                                                </div>
+                                                <div class="input-group columns full-width">
+                                                    <div style="flex: 1">
+                                                        <label>Source</label>
+                                                        <div data-aes-detail="source" class="vertex-display" style="display: flex; gap: 6px; align-items: center;">
+                                                            <img data-vertex-type="boundary" height="20" src="./assets/templates/components/boundary.svg">
+                                                            <img data-vertex-type="entity" height="20" src="./assets/templates/components/entity.svg">
+                                                            <img data-vertex-type="controller" height="20" src="./assets/templates/components/controller.svg">
+                                                            <span></span>
+                                                        </div>
+                                                    </div>
+                                                    <div style="flex: 1">
+                                                        <label>Sink</label>
+                                                        <div data-aes-detail="sink" class="vertex-display" style="display: flex; gap: 6px; align-items: center;">
+                                                            <img data-vertex-type="boundary" height="20" src="./assets/templates/components/boundary.svg">
+                                                            <img data-vertex-type="entity" height="20" src="./assets/templates/components/entity.svg">
+                                                            <img data-vertex-type="controller" height="20" src="./assets/templates/components/controller.svg">
+                                                            <span></span>
+                                                        </div>
+                                                    </div>
+                                                    <div style="flex: 2">
+                                                        <label>Mode</label>
+                                                        <span data-aes-detail="mode"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="section-action-buttons">
+                                                    <button data-aes-action="save"><i class="fas fa-save"></i>&nbsp; Save Activity</button>
+                                                </div>
+                                            </main>
+                                        </div>
+                                    </div>
                                     <div class="tab-area panel" data-tab-id="steps" data-panel-id="steps">
                                         <header><h2>Activity Extraction Steps</h2></header>
                                         <main>
@@ -509,16 +546,49 @@
                         <div class="subworkspace tab-area as-subworkspace">
                             <aside class="left-panels">
                                 <section class="tab-buttons">
-                                    <div class="tab-button" data-tab-id="profile">Activity Profile</div>
+                                    <div class="tab-button" data-tab-id="details">Details</div>
                                 </section>
                                 <main class="panel-tabs">
-                                    <div class="tab-area panel" data-tab-id="profile" data-panel-id="profile">
-                                        <header><h2>Activity Profile</h2></header>
+                                    <div class="tab-area panel" data-tab-id="details" data-panel-id="details">
+                                        <header><h2>Activity Details</h2></header>
                                         <main>
-                                            <table>
-                                                <thead><tr></tr></thead>
-                                                <tbody></tbody>
-                                            </table>
+                                            <div class="conclusion-chip">
+                                                <div class="conclusion-title">Some title</div>
+                                                <div class="conclusion-description">Some description</div>
+                                            </div>
+                                            <div class="collapsible">
+                                                <header>Properties</header>
+                                                <main>
+                                                    <div class="input-group">
+                                                        <label>Activity Name</label>
+                                                        <div data-as-detail="name">Some Activity 1</div>
+                                                    </div>
+                                                    <div class="input-group columns full-width">
+                                                        <div>
+                                                            <label>Source</label>
+                                                            <div data-as-detail="source" class="vertex-display" style="display: flex; gap: 6px; align-items: center;">
+                                                                <img data-vertex-type="boundary" height="20" src="./assets/templates/components/boundary.svg">
+                                                                <img data-vertex-type="entity" height="20" src="./assets/templates/components/entity.svg">
+                                                                <img data-vertex-type="controller" height="20" src="./assets/templates/components/controller.svg">
+                                                                <span>x1</span>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label>Sink</label>
+                                                            <div data-as-detail="sink" class="vertex-display" style="display: flex; gap: 6px; align-items: center;">
+                                                                <img data-vertex-type="boundary" height="20" src="./assets/templates/components/boundary.svg">
+                                                                <img data-vertex-type="entity" height="20" src="./assets/templates/components/entity.svg">
+                                                                <img data-vertex-type="controller" height="20" src="./assets/templates/components/controller.svg">
+                                                                <span>x2</span>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label>Origin</label>
+                                                            <span data-as-detail="origin">Simulated</span>
+                                                        </div>
+                                                    </div>
+                                                </main>
+                                            </div>
                                         </main>
                                     </div>
                                 </main>
@@ -540,6 +610,22 @@
                                     </section>
                                 </main>
                             </main>
+                            <aside class="right-panels">
+                                <section class="tab-buttons">
+                                    <div class="tab-button" data-tab-id="profile">Activity Profile</div>
+                                </section>
+                                <main class="panel-tabs">
+                                    <div class="tab-area panel" data-tab-id="profile" data-panel-id="profile">
+                                        <header><h2>Activity Profile</h2></header>
+                                        <main>
+                                            <table>
+                                                <thead><tr></tr></thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </main>
+                                    </div>
+                                </main>
+                            </aside>
                             
                         </div>
                     </template>

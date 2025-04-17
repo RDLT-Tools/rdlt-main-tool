@@ -246,6 +246,15 @@ export default class WorkspaceManager {
 
         return tabManager;
     }
+    
+    gotoMainModel() {
+        this.tabs.subworkspaces.selectTab("main-model");
+    }
+
+    showPanel(panelID) {
+        this.tabs.left.selectTab(panelID);
+        this.tabs.right.selectTab(panelID);
+    }
 
     addAESSubworkspace(aesID) {
         return this.#addTemplatedSubworkspace(`aes-${aesID}`, "Activity Extraction", "aes");

@@ -84,15 +84,22 @@ export class ASSubworkspaceManager {
 
 
         this.#tabs.left = new TabGroupManager(this, leftPanelsTabButtonsContainer, leftPanelsTabAreaContainer);
-        // this.#tabs.right = new TabGroupManager(this, rightPanelsTabButtonsContainer, rightPanelsTabAreaContainer);
+        this.#tabs.right = new TabGroupManager(this, rightPanelsTabButtonsContainer, rightPanelsTabAreaContainer);
         
         this.#tabs.left.loadTab(TabManager.load(
-            this, "profile", "Activity Profile",
-            leftPanelsTabButtonsContainer.querySelector(".tab-button[data-tab-id='profile']"),
-            leftPanelsTabAreaContainer.querySelector(".tab-area[data-tab-id='profile']")
+            this, "details", "Activity Details",
+            leftPanelsTabButtonsContainer.querySelector(".tab-button[data-tab-id='details']"),
+            leftPanelsTabAreaContainer.querySelector(".tab-area[data-tab-id='details']")
         ));
         
-        this.#tabs.left.selectTab("profile");
+        this.#tabs.right.loadTab(TabManager.load(
+            this, "profile", "Activity Profile",
+            rightPanelsTabButtonsContainer.querySelector(".tab-button[data-tab-id='profile']"),
+            rightPanelsTabAreaContainer.querySelector(".tab-area[data-tab-id='profile']")
+        ));
+        
+        this.#tabs.left.selectTab("details");
+        this.#tabs.right.selectTab("profile");
     }
 
     

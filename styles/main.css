@@ -426,6 +426,12 @@ svg .arc-waypoint:not([data-nomove]) {
 .aes-subworkspace[data-aes-current-action="check"] [data-tab-id="states"] tr.active { background-color: rgba(225, 83, 230, 0.1);} 
 .aes-subworkspace[data-aes-current-action="traverse"] [data-tab-id="states"] tr.active { background-color: rgba(58, 129, 222, 0.1);} 
 
+.aes-subworkspace:not([data-aes-current-action="end-fail"], [data-aes-current-action="end-sink"]) button[data-aes-action="save"] {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: default;
+}
+
 .vs-subworkspace .drawing {
   height: 100%;
   width: 100%;

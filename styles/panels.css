@@ -135,3 +135,12 @@
     opacity: 0.6;
     margin-top: 2px;
 }
+
+.panel[data-panel-id="execute"] [data-section-id="activities"] table tr .data-passed-message {
+  color: green;
+  font-weight: bold;
+}
+
+.panel[data-panel-id="execute"] [data-section-id="activities"] table tr:not([data-passed="true"]) .data-passed-message {
+  color: red;
+}

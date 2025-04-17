@@ -1,4 +1,5 @@
 import { buildElement, Form } from "../../utils.mjs";
+import { ActivitiesManager } from "../activity/ActivitiesManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 
 export default class ExecutePanelManager {
@@ -81,7 +82,14 @@ export default class ExecutePanelManager {
         aeSectionViews.simulateButton = aeSectionRoot.querySelector("button[data-subaction='simulate']");
 
         aeSectionViews.generateButton.addEventListener("click", () => {
-            console.log("About to start activity extraction");
+            const { name, source, sink } = this.#forms.activityExtraction.getValues();
+            if(!name.trim() || !source || !sink) return;
+
+            this.context.managers.activities.generateActivity({ 
+                name, 
+                source: Number(source), 
+                sink: Number(sink) 
+            });
         });
 
         aeSectionViews.simulateButton.addEventListener("click", () => {
@@ -124,7 +132,7 @@ export default class ExecutePanelManager {
             .setFieldNames([ 'rbs' ]);
     }
 
-    /** @param {{ id, name, source, sink, origin: "aes" | "direct" | "ae" | "import", profile }[]} activities */
+    /** @param {{ id, name, source, sink, conclusion: { pass }, origin: "aes" | "direct" | "ae" | "import", profile }[]} activities */
     refreshActivitiesList(activities) {
         const activitiesManager = this.context.managers.activities;
         
@@ -138,11 +146,15 @@ export default class ExecutePanelManager {
             
             simulateButton.addEventListener("click", () => activitiesManager.simulateActivity(activity.id));
             deleteButton.addEventListener("click", () => activitiesManager.deleteActivity(activity.id));
-            
-            const actRow = buildElement("tr", {}, [
+
+            const passed = activity.conclusion?.pass || false;
+
+            const actRow = buildElement("tr", { "data-passed": passed }, [
                 buildElement("td", {}, [
                     buildElement("div", { classname: "activity-name" }, [ activity.name ]),
                     buildElement("div", { classname: "activity-origin" }, [
+                        buildElement("span", { classname: "data-passed-message" }, [ passed ? "Passed" : "Failed" ]),
+                        " • ",
                         { aes: "Simulated", direct: "Direct Input", ae: "Generated", import: "From File" }[activity.origin] || ""
                     ]),
                 ]),

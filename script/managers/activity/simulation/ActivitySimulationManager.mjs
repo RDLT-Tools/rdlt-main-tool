@@ -3,6 +3,7 @@ import { generateUniqueID } from "../../../utils.mjs";
 import ModelContext from "../../model/ModelContext.mjs";
 import { ASDrawingManager } from "./ASDrawingManager.mjs";
 import { ASSubworkspaceManager } from "./ASSubworkspaceManager.mjs";
+import { ASDetailsPanelManager } from "./panels/ASDetailsPanelManager.mjs";
 import { ASProfilePanelManager } from "./panels/ASProfilePanelManager.mjs";
 
 export class ActivitySimulationManager {
@@ -32,6 +33,7 @@ export class ActivitySimulationManager {
 
     /** 
      * @type {{
+     *      details: ASDetailsPanelManager,
      *      profile: ASProfilePanelManager,
      * }} 
      * */
@@ -74,6 +76,7 @@ export class ActivitySimulationManager {
         this.#subworkspaceManager = new ASSubworkspaceManager(this, rootElement);
 
         this.#panels = {
+            details: new ASDetailsPanelManager(this, rootElement.querySelector(".panel[data-panel-id='details']")),
             profile: new ASProfilePanelManager(this, rootElement.querySelector(".panel[data-panel-id='profile']")),
         };
 
@@ -83,6 +86,13 @@ export class ActivitySimulationManager {
 
         
         this.#subworkspaceManager.setup(this.configs);
+
+        const source = this.context.managers.visualModel.getComponent(this.#activity.source);
+        const sink = this.context.managers.visualModel.getComponent(this.#activity.sink);
+        this.#panels.details.displayActivityDetails({
+            ...this.#activity,
+            source, sink
+        });
 
         this.#panels.profile.displayProfileList(this.#activity.profile);
         this.setCurrentTimestep(1);
