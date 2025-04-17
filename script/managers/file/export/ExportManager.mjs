@@ -18,9 +18,9 @@ export default class ExportManager {
     }
 
     exportToRDLTFile() {
-        const filename = sanitizeForFilename(visualModelManager.getModelName()) + ".txt";
         const visualModelManager = this.context.managers.visualModel;
-        return RDLTFileExportManager.exportToRDLTFile(visualModelManager);
+        const filename = sanitizeForFilename(visualModelManager.getModelName()) + ".txt";
+        return RDLTFileExportManager.exportToRDLTFile(filename, visualModelManager);
     }
     
     exportToPNGImage() {
