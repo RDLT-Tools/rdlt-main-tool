@@ -37,6 +37,10 @@ class R {
     );
   }
 
+  getArcs(start, end) {
+    return this.arcs.filter((arc) => arc.start === start && arc.end === end);
+  }
+
   getCAttr() {
     return this.c_attr;
   }
@@ -156,7 +160,7 @@ class R {
     this.RU.set(arc, RU);
   }
 
-  setEru(arc, erU) {
+  setERU(arc, erU) {
     this.eRU.set(arc, erU);
   }
 

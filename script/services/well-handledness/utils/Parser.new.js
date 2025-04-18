@@ -13,7 +13,7 @@ export function findRBSBridges(RDLT) {
     for (let arc of RDLT.arcs) {
       if (
         rdltCenters.has(arc.start) &&
-        arc.c === 0 &&
+        arc.c_attr == 0 &&
         !rbsVertices.has(arc.end)
       ) {
         rbsVertices.add(arc.end);
@@ -63,6 +63,8 @@ export function parseRDLT(model) {
   arcs.forEach((arc) => {
     let start = [...RDLT.vertices].find((v) => v.uID == arc.fromVertexUID);
     let end = [...RDLT.vertices].find((v) => v.uID == arc.toVertexUID);
+    let c_attr = arc.C;
+    let l_attr = arc.L;
     start.outgoing.push(end);
     end.incoming.push(start);
     const newArc = new Arc(
@@ -73,9 +75,11 @@ export function parseRDLT(model) {
       "0",
       parseInt(1)
     );
+    newArc.c_attr = arc.C !== "" ? arc.C : 0;
+    newArc.l_attr = arc.L;
     RDLT.arcs.push(newArc);
-    cAttributes[newArc] = 0;
-    lAttributes[newArc] = parseInt(1);
+    cAttributes[newArc] = newArc.c_attr;
+    lAttributes[newArc] = parseInt(newArc.l_attr);
   });
   RDLT.setAttributes(cAttributes, lAttributes);
   if (RDLT.centers) {

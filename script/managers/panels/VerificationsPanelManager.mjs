@@ -65,7 +65,6 @@ export default class VerificationsPanelManager {
   }
 
   #initializeView() {
-    this.#initializeWellHandlednessSection();
     this.#initializeFreeChoicenessSection();
     this.#initializeWellHandlednessSection();
   }
@@ -135,7 +134,7 @@ export default class VerificationsPanelManager {
       const simpleModel = modelSnapshot.toSimpleModel();
 
       const result = verifyWellHandledness(simpleModel, source, sink, type);
-
+      console.log("Verification complete", result);
       this.context.managers.workspace.showVerificationResults(
         result,
         modelSnapshot

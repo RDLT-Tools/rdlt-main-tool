@@ -16,21 +16,54 @@ function log(message) {
   console.log(message);
 }
 
-function verifyWellHandledness(R1, R2) {
+export function verify(R1, R2) {
   let isWellHandled = true;
+  const Violations = {
+    "Loop safe NCAs": [],
+    "Safe CAs": [],
+    "Equal L-values at AND joins": [],
+    "Not loop safe components": [],
+    "Not balanced": [],
+  };
 
   [R1, R2].forEach((R_obj) => {
-    if (hasLoopSafeNCAs(R_obj)) {
-      log(`${R_obj.name} has loop-safe NCAs`);
-      // if (hasSafeCAs(R_obj)) {
-      //   log(`${R_obj.name} has safe CAs`);
-      if (hasEqualLValuesAtAndJoins(R_obj)) {
-        log(`${R_obj.name} has equal L-values at AND joins`);
-        if (hasLoopSafeComponents(R_obj)) {
-          log(`${R_obj.name} has loop-safe components`);
+    if (R_obj.arcs.length > 0) {
+      const loopSafeNCAsResult = hasLoopSafeNCAs(R_obj);
+      Violations["Loop safe NCAs"] = loopSafeNCAsResult.entries;
+      const hasLoopSafeNCAsFlag = loopSafeNCAsResult.hasLoopSafeNCAs;
 
-          if (isBalanced(R_obj)) {
-            log(`${R_obj.name} is balanced`);
+      if (hasLoopSafeNCAsFlag) {
+        log(`${R_obj.name} Loop-safe NCAs`);
+
+        const safeCAsResult = hasSafeCAs(R_obj);
+        Violations["Safe CAs"] = safeCAsResult.entries;
+        const hasSafeCAsFlag = safeCAsResult.hasSafeCAs;
+        if (hasSafeCAsFlag) {
+          log(`${R_obj.name} has safe CAs`);
+
+          const hasEqualLValuesResult = hasEqualLValuesAtAndJoins(R_obj);
+          Violations["Equal L-values at AND joins"] =
+            hasEqualLValuesResult.entries;
+          const hasEqualLValuesFlag = hasEqualLValuesResult.hasEqualLValues;
+          if (hasEqualLValuesFlag) {
+            log(`${R_obj.name} has equal L-values at AND joins`);
+
+            const hasLoopSafeComponentsResult = hasLoopSafeComponents(R_obj);
+            Violations["Not loop safe components"] =
+              hasLoopSafeComponentsResult.entries;
+            const hasLoopSafeComponentsFlag =
+              hasLoopSafeComponentsResult.hasLoopSafeComponentsValues;
+            if (hasLoopSafeComponentsFlag) {
+              log(`${R_obj.name} has loop-safe components`);
+
+              if (isBalanced(R_obj)) {
+                log(`${R_obj.name} is balanced`);
+              } else {
+                isWellHandled = false;
+              }
+            } else {
+              isWellHandled = false;
+            }
           } else {
             isWellHandled = false;
           }
@@ -40,11 +73,9 @@ function verifyWellHandledness(R1, R2) {
       } else {
         isWellHandled = false;
       }
-      // } else {
-      //   isWellHandled = false;
-      // }
+      console.error("Violations:", Violations);
     } else {
-      isWellHandled = false;
+      log(`${R_obj.name} is empty`);
     }
   });
 
@@ -139,4 +170,6 @@ function preprocess(RDLT) {
 
 export function processRDLT(model) {
   let RDLT = parseRDLT(model);
+  const [R1, R2] = preprocess(RDLT);
+  return { RDLT, R1, R2 };
 }

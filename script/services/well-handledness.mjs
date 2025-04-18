@@ -1,4 +1,4 @@
-import { processRDLT } from "./Well-handledness/src/Main.js";
+import { processRDLT, verify } from "./Well-handledness/src/Main.js";
 
 /**
  *
@@ -37,19 +37,28 @@ export function verifyWellHandledness(model, source, sink, type) {
   // TODO: Implement free choiceness
   console.log("Clicked verification button for well-handledness");
   console.log({ model, source, sink, type });
-  processRDLT(model);
+  const { RDLT, R1, R2 } = processRDLT(model);
+  console.log("RDLT:", RDLT);
+  console.log("R1:", R1);
+  console.log("R2:", R2);
+  const isWellHandled = verify(R1, R2);
+
+  console.log("Verification complete");
 
   return {
-    title: "Well-Handledness",
+    title: "Well-Handlednessg",
     instances: [
       {
         name: "Main Model",
         evaluation: {
           conclusion: {
-            pass: false,
-            title: "The model is NOT free-choice",
-            description:
-              "It's not able to choose freely lorem ipsum dolor sit amet.",
+            pass: isWellHandled,
+            title: isWellHandled
+              ? "The model is well-handled"
+              : "The model is NOT well-handled",
+            description: isWellHandled
+              ? "The model satisfies well-handledness criteria."
+              : "The model violates well-handledness criteria.",
           },
           criteria: [
             {
