@@ -233,7 +233,7 @@ export function checkComplementarity(graph, splitPoints, joinPoints) {
     const isClosed = closedStructure.get(keyStr) || false;
     complementarityList.set(
       keyStr,
-      isValidCombination && isClosed ? "True" : "False"
+      isValidCombination && isClosed ? true : false
     );
   }
 

@@ -446,18 +446,33 @@ function isBalanced(R) {
     joinPoints
   );
 
+  let violations = [];
+
   for (const [key, value] of complementarityDict) {
-    const [split, join] = key;
+    let [split, join] = key.split("-");
+    split = splitPoints.find((sp) => sp.name === split);
+    join = joinPoints.find((jp) => jp.name === join);
     console.log(
       `Complementarity check for (${split.name}, ${join.name}): ${value}`
     );
     if (!value) {
       console.error(`Pair (${split.name}, ${join.name}) is not complementary`);
-      return false;
+      violations.push(...[split, join]);
     }
   }
 
-  return true;
+  if (violations.length > 0) {
+    // console.error("Complementarity violations found:", violations);
+    return {
+      hasLoopSafeComponentsValues: false,
+      entries: violations,
+    };
+  }
+
+  return {
+    isBalanced: true,
+    entries: violations,
+  };
 }
 
 export {

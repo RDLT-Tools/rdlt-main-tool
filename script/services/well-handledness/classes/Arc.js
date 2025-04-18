@@ -99,9 +99,9 @@ class Arc {
   }
 
   // Hash function alternative (JavaScript uses object keys for hashing)
-  getHash() {
-    return `${this._start}-${this._end}`;
-  }
+  // getHash() {
+  //   return `${this._start}-${this._end}`;
+  // }
 }
 
 export { Arc };

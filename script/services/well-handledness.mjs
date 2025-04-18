@@ -41,12 +41,12 @@ export function verifyWellHandledness(model, source, sink, type) {
   console.log("RDLT:", RDLT);
   console.log("R1:", R1);
   console.log("R2:", R2);
-  const isWellHandled = verify(R1, R2);
+  const { isWellHandled, Violations } = verify(R1, R2);
 
   console.log("Verification complete");
 
   return {
-    title: "Well-Handlednessg",
+    title: "Well-Handledness",
     instances: [
       {
         name: "Main Model",
@@ -62,23 +62,50 @@ export function verifyWellHandledness(model, source, sink, type) {
           },
           criteria: [
             {
-              pass: true,
-              description: "The constraints are valid",
+              pass: Violations["Loop safe NCAs"].length === 0,
+              description:
+                Violations["Loop safe NCAs"].length === 0
+                  ? "RDLT has loop-safe NCAs"
+                  : "RDLT has loop-unsafe NCAs",
             },
             {
-              pass: false,
-              description: "The L values are valid",
+              pass: Violations["Safe CAs"].length === 0,
+              description:
+                Violations["Safe CAs"].length === 0
+                  ? "RDLT has safe CAs"
+                  : "RDLT has unsafe CAs",
+            },
+            {
+              pass: Violations["Equal L-values at AND joins"].length === 0,
+              description:
+                Violations["Equal L-values at AND joins"].length === 0
+                  ? "RDLT has equal L-values at its AND joins"
+                  : "RDLT has unequal L-values at its AND joins",
+            },
+            {
+              pass: Violations["Not loop safe components"].length === 0,
+              description:
+                Violations["Not loop safe components"].length === 0
+                  ? "All components are loop-safe"
+                  : "A not loop-safe component was found",
+            },
+            {
+              pass: Violations["Not balanced"].length === 0,
+              description:
+                Violations["Not balanced"].length === 0
+                  ? "RDLT is balanced"
+                  : "RDLT is not balanced",
             },
           ],
           violating: {
-            arcs: [],
-            vertices: [1, 2],
+            arcs: [
+              ...Violations["Loop safe NCAs"],
+              ...Violations["Safe CAs"],
+              ...Violations["Equal L-values at AND joins"],
+              ...Violations["Not loop safe components"],
+            ].map((obj) => obj.id),
+            vertices: [...Violations["Not balanced"]].map((obj) => obj.uID),
           },
-        },
-        // for MAS only
-        model: {
-          vertices: [1, 2, 3, 4],
-          arcs: [1, 2, 3],
         },
       },
     ],
