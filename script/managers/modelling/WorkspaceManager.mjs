@@ -1,5 +1,7 @@
 import App from "../../App.mjs";
-import { AESimulationManager } from "../activity/AESimulationManager.mjs";
+import Activity from "../../entities/activity/Activity.mjs";
+import { AESimulationManager } from "../activity/extraction/AESimulationManager.mjs";
+import { ActivitySimulationManager } from "../activity/simulation/ActivitySimulationManager.mjs";
 import ImportManager from "../file/import/ImportManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import { VerificationsResultManager } from "../verifications/VerificationsResultManager.mjs";
@@ -141,7 +143,7 @@ export default class WorkspaceManager {
                 App.addContext();
             break;
             case "upload":
-                ImportManager.importRDLTFile();
+                this.context.managers.import.importRDLTFile();
             break;
             case "download":
                 this.context.managers.export.exportToPNGImage();
@@ -245,6 +247,15 @@ export default class WorkspaceManager {
 
         return tabManager;
     }
+    
+    gotoMainModel() {
+        this.tabs.subworkspaces.selectTab("main-model");
+    }
+
+    showPanel(panelID) {
+        this.tabs.left.selectTab(panelID);
+        this.tabs.right.selectTab(panelID);
+    }
 
     addAESSubworkspace(aesID) {
         return this.#addTemplatedSubworkspace(`aes-${aesID}`, "Activity Extraction", "aes");
@@ -258,9 +269,20 @@ export default class WorkspaceManager {
         return this.#addTemplatedSubworkspace(`vs-${vsID}`, title, "vs");
     }
 
+    addASSubworkspace(asID) {
+        return this.#addTemplatedSubworkspace(`as-${asID}`, "Activity Simulation", "as");
+    }
+
     /** @param {{ name, source, sink, mode }} configs */
     startAESimulation(configs) {
         return new AESimulationManager(this.context, configs, 
+            this.context.managers.visualModel.makeCopy()
+        );
+    }
+
+    /** @param {Activity} activity */
+    startActivitySimulation(activity) {
+        return new ActivitySimulationManager(this.context, activity, 
             this.context.managers.visualModel.makeCopy()
         );
     }

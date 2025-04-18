@@ -101,12 +101,6 @@ header section.action-buttons {
   box-sizing: border-box;
 }
 
-.model-context > main > .subworkspace > aside > .panel-tabs {
-  flex: 1;
-  background-color: #ffffff;
-  border-top: 1.7px solid #838383;
-  min-height: 0;
-}
 
 .model-context > main > .subworkspace > main {
   flex: 1;
@@ -125,92 +119,23 @@ header section.action-buttons {
   flex: 1;
 }
 
+.model-context > main > .subworkspace > main .drawing {
+  position: relative;
+}
+
 .model-context > main > .subworkspace > main .drawing > svg {
   height: 100%;
   width: 100%;
   display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 #tmp {
   display: none;
 }
 
-.panel {
-  padding: 24px;
-  box-sizing: border-box;
-  overflow-y: auto;
-  height: 100%;
-}
-
-.panel[data-panel-id="properties"] *[data-viewonly] {
-  display: none;
-}
-
-.panel[data-panel-id="properties"][data-view-component]
-  *[data-viewonly="component"],
-.panel[data-panel-id="properties"][data-view-arc] *[data-viewonly="arc"],
-.panel[data-panel-id="properties"][data-view-none] *[data-viewonly="none"] {
-  display: initial;
-}
-
-.panel[data-panel-id="properties"] *[data-viewonly] > header {
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.panel[data-panel-id="properties"] .arcvertices {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
-.panel[data-panel-id="properties"] .arcvertices-from > div,
-.panel[data-panel-id="properties"] .arcvertices-to > div {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.panel[data-panel-id="properties"] .arcvertices-from > div {
-  justify-content: flex-end;
-  padding-right: 16px;
-}
-
-.panel[data-panel-id="properties"] .arcvertices-from > div > div > div {
-  text-align: right;
-}
-
-.panel[data-panel-id="properties"] .arcvertices-arrow {
-  position: absolute;
-  top: 15px;
-  left: -15px;
-}
-
-.panel[data-panel-id="properties"] .arcvertices-arrow-container {
-  width: 0;
-  height: 0;
-  position: relative;
-}
-
-.panel[data-panel-id="properties"] .arcvertices-to > div {
-  justify-content: flex-start;
-  padding-left: 16px;
-}
-
-.panel[data-panel-id="properties"] .arcvertices .vertex-identifier {
-  font-size: 12px;
-}
-
-.panel[data-panel-id="properties"] .arcvertices .vertex-type {
-  font-size: 11px;
-  opacity: 0.5;
-}
-
-.panel[data-panel-id="execute"] [data-section-id="vs"] table tr > td:last-child {
-  text-align: right;
-}
 
 .palette-group {
   display: flex;
@@ -363,26 +288,6 @@ svg .arc-waypoint:not([data-nomove]) {
   width: 100%;
 }
 
-.aes-subworkspace .panel[data-tab-id="steps"] table,
-.aes-subworkspace .panel[data-tab-id="states"] table,
-.aes-subworkspace .panel[data-tab-id="profile"] table {
-  margin-top: 12px;
-}
-
-.aes-subworkspace .panel[data-tab-id="steps"] table thead tr > th:last-child,
-.aes-subworkspace .panel[data-tab-id="states"] table thead tr > th:last-child {
-  text-align: right;
-}
-
-.aes-subworkspace .panel[data-tab-id="steps"] table tbody tr > td:last-child {
-  font-size: 12px;
-  opacity: 0.5;
-  text-align: right;
-}
-
-.aes-subworkspace .panel[data-tab-id="steps"] table tr.active {
-  background-color: rgba(0, 0, 0, 0.05) !important;
-}
 
 .aes-subworkspace[data-aes-current-action="choosing"] .aes-status-view,
 .aes-subworkspace:not([data-aes-current-action="choosing"])
@@ -428,7 +333,7 @@ svg .arc-waypoint:not([data-nomove]) {
   opacity: 0.5;
 }
 
-.aes-subworkspace .arc-aes-highlight {
+.aes-subworkspace .arc-highlight {
   transition: all 200ms ease;
   stroke-width: 12;
   stroke-linecap: round;
@@ -480,22 +385,22 @@ svg .arc-waypoint:not([data-nomove]) {
   stroke: #74d8e0;
 }
 
-[data-aes-current-action="start"] .arc.active .arc-aes-highlight {
+[data-aes-current-action="start"] .arc.active .arc-highlight {
   stroke: #7eeb83;
 }
-[data-aes-current-action="explore"] .arc.active .arc-aes-highlight {
+[data-aes-current-action="explore"] .arc.active .arc-highlight {
   stroke: #e2d971;
 }
-[data-aes-current-action="check"] .arc.active .arc-aes-highlight {
+[data-aes-current-action="check"] .arc.active .arc-highlight {
   stroke: #e153e6;
 }
-[data-aes-current-action="traverse"] .arc.active .arc-aes-highlight {
+[data-aes-current-action="traverse"] .arc.active .arc-highlight {
   stroke: #3a81de;
 }
-[data-aes-current-action="end-fail"] .arc.active .arc-aes-highlight {
+[data-aes-current-action="end-fail"] .arc.active .arc-highlight {
   stroke: #ff5050;
 }
-[data-aes-current-action="end-sink"] .arc.active .arc-aes-highlight {
+[data-aes-current-action="end-sink"] .arc.active .arc-highlight {
   stroke: #74d8e0;
 }
 
@@ -528,11 +433,64 @@ svg .arc-waypoint:not([data-nomove]) {
 .aes-subworkspace[data-aes-current-action="check"] [data-tab-id="states"] tr.active { background-color: rgba(225, 83, 230, 0.1);} 
 .aes-subworkspace[data-aes-current-action="traverse"] [data-tab-id="states"] tr.active { background-color: rgba(58, 129, 222, 0.1);} 
 
-.aes-subworkspace .panel[data-tab-id="profile"] table tr td:first-child {
-    width: 30px;
+.aes-subworkspace:not([data-aes-current-action="end-fail"], [data-aes-current-action="end-sink"]) button[data-aes-action="save"] {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: default;
 }
 
-.vs-subworkspace .drawing {
+.vs-subworkspace .drawing,
+.as-subworkspace .drawing,
+.ver-subworkspace .drawing {
   height: 100%;
   width: 100%;
+}
+
+
+.as-subworkspace .arc-highlight {
+  transition: all 200ms ease;
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke: transparent;
+  opacity: 0.5;
+}
+
+.as-subworkspace .arc.active .arc-highlight {
+  stroke: #3a81de;
+}
+
+.ver-subworkspace .criteria-row .fa-check {
+  color: green;
+}
+
+.ver-subworkspace .criteria-row .fa-close {
+  color: red;
+}
+
+.ver-subworkspace .drawing > svg:not(.active) {
+  display: none !important;
+}
+
+.ver-subworkspace .component-circle {
+  transition: all 300ms ease;
+  fill-opacity: 1;
+  stroke-width: 15;
+  stroke: transparent;
+  opacity: 0.5;
+}
+
+.ver-subworkspace .arc-highlight {
+  transition: all 200ms ease;
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke: transparent;
+  opacity: 0.5;
+}
+
+.ver-subworkspace .arc.active .arc-highlight {
+  stroke: #ff5050;
+}
+
+.ver-subworkspace .component.active .component-circle {
+  stroke: #ff5050;
 }

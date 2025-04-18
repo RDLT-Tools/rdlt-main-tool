@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
     <link rel="stylesheet" href="./styles/main.css" />
+    <link rel="stylesheet" href="./styles/panels.css" />
     <link rel="stylesheet" href="./styles/widgets.css" />
 
     <script type="module" src="./script/main.mjs"></script>
@@ -216,6 +217,17 @@
                                     </div>
                                 </div>
                                 <div class="tab-area panel" data-tab-id="execute" data-panel-id="execute">
+                                    <div class="collapsible" data-section-id="activities">
+                                        <header>Activities</header>
+                                        <main>
+                                            <table>
+                                                <tbody></tbody>
+                                            </table>
+                                            <div class="action-buttons">
+                                                <button data-subaction="import"><i class="fas fa-file-lines"></i>&nbsp; Import Activity</button>
+                                            </div>
+                                        </main>
+                                    </div>
                                     <div class="collapsible" data-section-id="ae">
                                         <header>Activity Extraction</header>
                                         <main>
@@ -352,7 +364,44 @@
                                     <div class="tab-button" data-tab-id="steps">Steps</div>
                                 </section>
                                 <main class="panel-tabs">
-                                    <div class="tab-area panel" data-tab-id="configs">Configs panel</div>
+                                    <div class="tab-area panel" data-tab-id="configs" data-panel-id="configs">
+                                        <div class="collapsible">
+                                            <header>Properties</header>
+                                            <main>
+                                                <div class="input-group">
+                                                    <label>Activity Name</label>
+                                                    <input name="name" placeholder="Set a name for the activity" class="full-width" name="C" />
+                                                </div>
+                                                <div class="input-group columns full-width">
+                                                    <div style="flex: 1">
+                                                        <label>Source</label>
+                                                        <div data-aes-detail="source" class="vertex-display" style="display: flex; gap: 6px; align-items: center;">
+                                                            <img data-vertex-type="boundary" height="20" src="./assets/templates/components/boundary.svg">
+                                                            <img data-vertex-type="entity" height="20" src="./assets/templates/components/entity.svg">
+                                                            <img data-vertex-type="controller" height="20" src="./assets/templates/components/controller.svg">
+                                                            <span></span>
+                                                        </div>
+                                                    </div>
+                                                    <div style="flex: 1">
+                                                        <label>Sink</label>
+                                                        <div data-aes-detail="sink" class="vertex-display" style="display: flex; gap: 6px; align-items: center;">
+                                                            <img data-vertex-type="boundary" height="20" src="./assets/templates/components/boundary.svg">
+                                                            <img data-vertex-type="entity" height="20" src="./assets/templates/components/entity.svg">
+                                                            <img data-vertex-type="controller" height="20" src="./assets/templates/components/controller.svg">
+                                                            <span></span>
+                                                        </div>
+                                                    </div>
+                                                    <div style="flex: 2">
+                                                        <label>Mode</label>
+                                                        <span data-aes-detail="mode"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="section-action-buttons">
+                                                    <button data-aes-action="save"><i class="fas fa-save"></i>&nbsp; Save Activity</button>
+                                                </div>
+                                            </main>
+                                        </div>
+                                    </div>
                                     <div class="tab-area panel" data-tab-id="steps" data-panel-id="steps">
                                         <header><h2>Activity Extraction Steps</h2></header>
                                         <main>
@@ -434,7 +483,7 @@
                         </div>
                     </template>
                     <template data-tab-template-id="ver">
-                        <div class="subworkspace tab-area">
+                        <div class="subworkspace tab-area ver-subworkspace">
                             <main class="ver-main">
                                 <header>
                                     <div>
@@ -447,7 +496,6 @@
                                 </header>
                                 <main>
                                     <section class="drawing">
-                                        <svg></svg>
                                     </section>
                                 </main>
                             </main>
@@ -458,47 +506,43 @@
                                 <main class="panel-tabs">
                                     <div class="tab-area panel" data-tab-id="result" data-panel-id="result">
                                         <header>
-                                            <h2>Separability</h2>
+                                            <h2>Result</h2>
                                         </header>
-                                        <br/>
-                                        <div class="collapsible">
+                                        <div class="conclusion-chip">
+                                            <div class="conclusion-title">Some title</div>
+                                            <div class="conclusion-description">Some description</div>
+                                        </div>
+                                        <div class="collapsible" data-ver-section="criteria">
                                             <header>Criteria</header>
                                             <main>
                                                 <table>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td>Y</td>
-                                                            <td>Valid L values</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>N</td>
-                                                            <td>Valid C values</td>
-                                                        </tr>
-                                                    </tbody>
+                                                    <tbody></tbody>
                                                 </table>
                                             </main>
                                         </div> 
-                                        <div class="collapsible">
+                                        <div class="collapsible" data-ver-section="v-arcs">
                                             <header>Violating Arcs</header>
+                                            <main>
+                                                <table>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </main>
+                                        </div> 
+                                        <div class="collapsible" data-ver-section="v-vertices">
+                                            <header>Violating Vertices</header>
                                             <main>
                                                 <table>
                                                     <tbody>
                                                         <tr>
-                                                            <td><div class="arc-tag">
-                                                                <div>x1</div>
-                                                                <div>x2</div>
-                                                            </div></td>
+                                                            <td><div class="vertex-tag">x1</div></td>
                                                         </tr>
                                                         <tr>
-                                                            <td><div class="arc-tag">
-                                                                <div>x1</div>
-                                                                <div>x2</div>
-                                                            </div></td>
+                                                            <td><div class="vertex-tag">x2</div></td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
                                             </main>
-                                        </div> 
+                                        </div>
                                     </div>
                                 </main>
                             </aside>
@@ -521,6 +565,93 @@
                                     </section>
                                 </main>
                             </main>
+                        </div>
+                    </template>
+                    <template data-tab-template-id="as">
+                        <div class="subworkspace tab-area as-subworkspace">
+                            <aside class="left-panels">
+                                <section class="tab-buttons">
+                                    <div class="tab-button" data-tab-id="details">Details</div>
+                                </section>
+                                <main class="panel-tabs">
+                                    <div class="tab-area panel" data-tab-id="details" data-panel-id="details">
+                                        <header><h2>Activity Details</h2></header>
+                                        <main>
+                                            <div class="conclusion-chip">
+                                                <div class="conclusion-title">Some title</div>
+                                                <div class="conclusion-description">Some description</div>
+                                            </div>
+                                            <div class="collapsible">
+                                                <header>Properties</header>
+                                                <main>
+                                                    <div class="input-group">
+                                                        <label>Activity Name</label>
+                                                        <div data-as-detail="name">Some Activity 1</div>
+                                                    </div>
+                                                    <div class="input-group columns full-width">
+                                                        <div>
+                                                            <label>Source</label>
+                                                            <div data-as-detail="source" class="vertex-display" style="display: flex; gap: 6px; align-items: center;">
+                                                                <img data-vertex-type="boundary" height="20" src="./assets/templates/components/boundary.svg">
+                                                                <img data-vertex-type="entity" height="20" src="./assets/templates/components/entity.svg">
+                                                                <img data-vertex-type="controller" height="20" src="./assets/templates/components/controller.svg">
+                                                                <span>x1</span>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label>Sink</label>
+                                                            <div data-as-detail="sink" class="vertex-display" style="display: flex; gap: 6px; align-items: center;">
+                                                                <img data-vertex-type="boundary" height="20" src="./assets/templates/components/boundary.svg">
+                                                                <img data-vertex-type="entity" height="20" src="./assets/templates/components/entity.svg">
+                                                                <img data-vertex-type="controller" height="20" src="./assets/templates/components/controller.svg">
+                                                                <span>x2</span>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label>Origin</label>
+                                                            <span data-as-detail="origin">Simulated</span>
+                                                        </div>
+                                                    </div>
+                                                </main>
+                                            </div>
+                                        </main>
+                                    </div>
+                                </main>
+                            </aside>
+                            <main class="as-main">
+                                <header>
+                                    <div>
+                                        <h1>Activity Simulation</h1>
+                                    </div>
+                                    <div class="as-status-view"></div>
+                                    <div class="as-quick-controls">
+                                        <button data-as-action="prev"><i class="fas fa-backward-step"></i></button>
+                                        <button data-as-action="next"><i class="fas fa-forward-step"></i></button>
+                                    </div>
+                                </header>
+                                <main>
+                                    <section class="drawing">
+                                        <svg></svg>
+                                    </section>
+                                </main>
+                            </main>
+                            <aside class="right-panels">
+                                <section class="tab-buttons">
+                                    <div class="tab-button" data-tab-id="profile">Activity Profile</div>
+                                </section>
+                                <main class="panel-tabs">
+                                    <div class="tab-area panel" data-tab-id="profile" data-panel-id="profile">
+                                        <header><h2>Activity Profile</h2></header>
+                                        <main>
+                                            <table>
+                                                <thead><tr></tr></thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </main>
+                                    </div>
+                                </main>
+                            </aside>
+                            
                         </div>
                     </template>
                 </main>

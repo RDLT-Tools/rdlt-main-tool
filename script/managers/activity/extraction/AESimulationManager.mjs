@@ -1,10 +1,12 @@
-import { AESStep } from "../../entities/activity/AESStep.mjs";
-import VisualRDLTModel from "../../entities/model/visual/VisualRDLTModel.mjs";
-import { backtrack, buildArcMap, buildArcsAdjacencyMatrix, buildVertexMap, checkArc, iterateAtVertex, traverseArc } from "../../services/aes.mjs";
-import { generateUniqueID, pickRandomFromSet } from "../../utils.mjs";
-import ModelContext from "../model/ModelContext.mjs";
+import Activity from "../../../entities/activity/Activity.mjs";
+import { AESStep } from "../../../entities/activity/AESStep.mjs";
+import VisualRDLTModel from "../../../entities/model/visual/VisualRDLTModel.mjs";
+import { backtrack, buildArcMap, buildArcsAdjacencyMatrix, buildVertexMap, checkArc, iterateAtVertex, traverseArc } from "../../../services/aes.mjs";
+import { generateUniqueID, pickRandomFromSet } from "../../../utils.mjs";
+import ModelContext from "../../model/ModelContext.mjs";
 import { AESDrawingManager } from "./AESDrawingManager.mjs";
 import { AESSubworkspaceManager } from "./AESSubworkspaceManager.mjs";
+import { AESConfigsPanelManager } from "./panels/AESConfigsPanelManager.mjs";
 import { AESProfilePanelManager } from "./panels/AESProfilePanelManager.mjs";
 import { AESStatesPanelManager } from "./panels/AESStatesPanelManager.mjs";
 import { AESStepsPanelManager } from "./panels/AESStepsPanelManager.mjs";
@@ -39,6 +41,7 @@ export class AESimulationManager {
 
     /** 
      * @type {{
+     *      configs: AESConfigsPanelManager,
      *      steps: AESStepsPanelManager,
      *      states: AESStatesPanelManager,
      *      profile: AESProfilePanelManager,
@@ -105,10 +108,17 @@ export class AESimulationManager {
         this.#subworkspaceManager = new AESSubworkspaceManager(this, rootElement);
 
         this.#panels = {
+            configs: new AESConfigsPanelManager(this, rootElement.querySelector(".panel[data-panel-id='configs']")),
             steps: new AESStepsPanelManager(this, rootElement.querySelector(".panel[data-panel-id='steps']")),
             states: new AESStatesPanelManager(this, rootElement.querySelector(".panel[data-panel-id='states']")),
             profile: new AESProfilePanelManager(this, rootElement.querySelector(".panel[data-panel-id='profile']")),
         };
+
+        this.#panels.configs.displayConfigs({
+            ...this.configs,
+            source: this.context.managers.visualModel.getComponent(this.configs.source),
+            sink: this.context.managers.visualModel.getComponent(this.configs.sink),
+        });
 
         this.#drawingManager.setupComponents(
             this.#modelSnapshot.getAllComponents(), 
@@ -376,6 +386,32 @@ export class AESimulationManager {
     
     refreshStepsList() {
         this.#panels.steps.refreshStepsList(this.#states.steps)
+    }
+
+    saveActivity(name) {
+        if(![ "end-fail", "end-sink" ].includes(this.#getCurrentStep().action)) return;
+
+        const result = this.#getCurrentStep().action;
+        const pass = result === "end-sink";
+
+        const activity = new Activity({
+            name, source: this.configs.source,
+            sink: this.configs.sink,
+            origin: "aes",
+            conclusion: {
+                pass,
+                title: pass ? 
+                    "Activity completed" : "Activity failed to complete",
+                description: pass ? 
+                    "The activity was able to reach the sink" :
+                    "The activity failed to reach the sink"
+            },
+            profile: this.getStatesAtStepIndex(this.#states.currentStepIndex).activityProfile
+        });
+
+        this.context.managers.activities.addActivity(activity);
+        this.context.managers.workspace.gotoMainModel();
+        this.context.managers.workspace.showPanel("execute");
     }
 
 }

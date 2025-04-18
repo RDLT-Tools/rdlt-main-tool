@@ -1,3 +1,4 @@
+import VisualArc from "./entities/model/visual/VisualArc.mjs";
 
 export class Form {
     /** @type {HTMLDivElement} */
@@ -180,4 +181,17 @@ export function getAbsoluteSVGCoordinates(svgElement, viewX, viewY) {
         x: viewX/zoom + vx, 
         y: viewY/zoom + vy
     };
+}
+
+/**
+ * @param {Arc[]} arcs 
+ * @returns {{ [arcUID: number]: VisualArc }}
+ */
+export function buildArcMap(arcs) {
+    const map = {};
+    for(const arc of arcs) {
+        map[arc.uid] = arc;
+    }
+
+    return map;
 }

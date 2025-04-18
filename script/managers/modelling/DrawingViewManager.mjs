@@ -189,11 +189,11 @@ export default class DrawingViewManager extends BaseModelDrawingManager {
      * @param {ComponentGeometry} vertex1Geometry
      * @param {ComponentGeometry} vertex2Geometry
      */
-    updateArcGeometry(arc, vertex1Geometry, vertex2Geometry) {
+    updateArcGeometry(arc, vertex1Geometry, vertex2Geometry, order) {
         const arcBuilder = this.#getArcBuilder(arc.uid);
         if(!arcBuilder) return;
 
-        this.#setArcGeometry(arcBuilder, arc, vertex1Geometry, vertex2Geometry);
+        this.drawArc(arcBuilder, arc, vertex1Geometry, vertex2Geometry, order);
     }
     
 
@@ -244,55 +244,6 @@ export default class DrawingViewManager extends BaseModelDrawingManager {
      */
     #setArcProps(builder, arc) {
         builder.setLabelText(`${arc.C || "ϵ"}:${arc.L}`);
-    }
-    
-    /**
-     * @param {ArcSVGBuilder} builder 
-     * @param {VisualArc} arc 
-     * @param {ComponentGeometry} vertex1Geometry 
-     * @param {ComponentGeometry} vertex2Geometry 
-     */
-    #setArcGeometry(builder, arc, vertex1Geometry, vertex2Geometry) {
-        const geometry = arc.geometry;
-        const connectorEndThickness = arc.styles.connectorEnd.thickness;
-         
-        const startRadius = vertex1Geometry.size/2;
-        const start = vertex1Geometry.position;
-        
-        const endRadius = vertex2Geometry.size/2;
-        const end = vertex2Geometry.position;
-        
-        let points = [ start ];
-
-        if(arc.form === "self-loop") {
-            const controlPoint = arc.controlPoint;
-            points.push({ 
-                x: vertex1Geometry.position.x + controlPoint.x,
-                y: vertex1Geometry.position.y + controlPoint.y,
-            });
-        } else {
-            points.push(...geometry.waypoints, end);
-        }
-
-        const drawn = builder.drawPath(arc.form, points, startRadius, endRadius);
-
-        if(arc.form !== "self-loop") {
-            // Set connector end invisible if last segment's length is less than connectorEndThickness
-            if(getDistance(points[points.length-2], end) >= connectorEndThickness*2) {
-                builder.setConnectorEndVisible(true);
-                builder.updateConnectorEndPosition(connectorEndThickness, end, endRadius, points[points.length-2]);
-            } else {
-                builder.setConnectorEndVisible(false);
-            }
-        } else {
-            const intersections = drawn.intersections;
-            builder.updateConnectorEndPosition(connectorEndThickness, end, endRadius, intersections[1]);
-        }
-
-        builder.updateLabelPosition(
-            arc.form, points, geometry.arcLabel.baseSegmentIndex,
-            geometry.arcLabel.footFracDistance, geometry.arcLabel.perpDistance, 
-            startRadius, endRadius);
     }
 
     /**
@@ -348,7 +299,7 @@ export default class DrawingViewManager extends BaseModelDrawingManager {
         this.#extraBuilders.arcTracing.element.style.display = "initial";
 
         const arcTracingBuilder = this.#extraBuilders.arcTracing;
-        this.#setArcGeometry(arcTracingBuilder, new VisualArc({ fromVertexUID: -1, toVertexUID: -2 }), 
+        this.drawArc(arcTracingBuilder, new VisualArc({ fromVertexUID: -1, toVertexUID: -2 }), 
             vertex1Geometry, new ComponentGeometry({
                 position: targetPoint, size: 1
             }));
@@ -362,7 +313,7 @@ export default class DrawingViewManager extends BaseModelDrawingManager {
         this.#extraBuilders.arcTracing.element.style.display = "initial";
 
         const arcTracingBuilder = this.#extraBuilders.arcTracing;
-        this.#setArcGeometry(arcTracingBuilder, new VisualArc({
+        this.drawArc(arcTracingBuilder, new VisualArc({
             fromVertexUID: vertex1.uid,
             toVertexUID: vertex2.uid
         }), vertex1.geometry, vertex2.geometry);
@@ -383,7 +334,7 @@ export default class DrawingViewManager extends BaseModelDrawingManager {
         this.#setRBSBounds(rbsBuilder, bounds);
         this.builders.rbs[centerComponent.uid] = rbsBuilder;
 
-        this.drawingSVG.appendChild(rbsBuilder.element);
+        this.groups.rbs.appendChild(rbsBuilder.element);
 
         return rbsBuilder.element;
     }
@@ -419,7 +370,7 @@ export default class DrawingViewManager extends BaseModelDrawingManager {
         const rbsBuilder = this.builders.rbs[centerUID];
         if(!rbsBuilder) return;
 
-        this.drawingSVG.removeChild(rbsBuilder.element);
+        rbsBuilder.element.remove();
         delete this.builders.rbs[centerUID];
     }
 

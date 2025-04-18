@@ -1,0 +1,146 @@
+
+.model-context > main > .subworkspace > aside > .panel-tabs {
+  flex: 1;
+  background-color: #ffffff;
+  border-top: 1.7px solid #838383;
+  min-height: 0;
+}
+
+.panel {
+  padding: 24px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.panel[data-panel-id="properties"] *[data-viewonly] {
+  display: none;
+}
+
+.panel[data-panel-id="properties"][data-view-component]
+  *[data-viewonly="component"],
+.panel[data-panel-id="properties"][data-view-arc] *[data-viewonly="arc"],
+.panel[data-panel-id="properties"][data-view-none] *[data-viewonly="none"] {
+  display: initial;
+}
+
+.panel[data-panel-id="properties"] *[data-viewonly] > header {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel[data-panel-id="properties"] .arcvertices {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.panel[data-panel-id="properties"] .arcvertices-from > div,
+.panel[data-panel-id="properties"] .arcvertices-to > div {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.panel[data-panel-id="properties"] .arcvertices-from > div {
+  justify-content: flex-end;
+  padding-right: 16px;
+}
+
+.panel[data-panel-id="properties"] .arcvertices-from > div > div > div {
+  text-align: right;
+}
+
+.panel[data-panel-id="properties"] .arcvertices-arrow {
+  position: absolute;
+  top: 15px;
+  left: -15px;
+}
+
+.panel[data-panel-id="properties"] .arcvertices-arrow-container {
+  width: 0;
+  height: 0;
+  position: relative;
+}
+
+.panel[data-panel-id="properties"] .arcvertices-to > div {
+  justify-content: flex-start;
+  padding-left: 16px;
+}
+
+.panel[data-panel-id="properties"] .arcvertices .vertex-identifier {
+  font-size: 12px;
+}
+
+.panel[data-panel-id="properties"] .arcvertices .vertex-type {
+  font-size: 11px;
+  opacity: 0.5;
+}
+
+.panel[data-panel-id="execute"] [data-section-id="vs"] table tr > td:last-child,
+.panel[data-panel-id="execute"] [data-section-id="activities"] table tr > td:last-child {
+  text-align: right;
+}
+
+
+.aes-subworkspace .panel[data-tab-id="steps"] table,
+.aes-subworkspace .panel[data-tab-id="states"] table,
+.aes-subworkspace .panel[data-tab-id="profile"] table {
+  margin-top: 12px;
+}
+
+.aes-subworkspace .panel[data-tab-id="steps"] table thead tr > th:last-child,
+.aes-subworkspace .panel[data-tab-id="states"] table thead tr > th:last-child {
+  text-align: right;
+}
+
+.aes-subworkspace .panel[data-tab-id="steps"] table tbody tr > td:last-child {
+  font-size: 12px;
+  opacity: 0.5;
+  text-align: right;
+}
+
+.aes-subworkspace .panel[data-tab-id="steps"] table tr.active {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+
+.aes-subworkspace .panel[data-tab-id="profile"] table tr td:first-child {
+    width: 30px;
+}
+
+
+.as-subworkspace .panel[data-tab-id="profile"] table tr.active {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.panel .action-buttons {
+    text-align: right;
+    margin-top: 12px;
+}
+
+.panel[data-panel-id="execute"] [data-section-id="activities"] table td {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.panel[data-panel-id="execute"] [data-section-id="activities"] table tr td:last-child {
+    padding-right: 0;
+}
+
+.panel[data-panel-id="execute"] [data-section-id="activities"] .activity-origin {
+    font-size: 0.9em;
+    opacity: 0.6;
+    margin-top: 2px;
+}
+
+.panel[data-panel-id="execute"] [data-section-id="activities"] table tr .data-passed-message {
+  color: green;
+  font-weight: bold;
+}
+
+.panel[data-panel-id="execute"] [data-section-id="activities"] table tr:not([data-passed="true"]) .data-passed-message {
+  color: red;
+}

@@ -90,6 +90,7 @@ export class DrawingViewportManager {
     }
 
     setStates(states) {
+        if(!states) return;
         requestAnimationFrame(() => {
             this.#view.states = states;
             this.#updateViewport();

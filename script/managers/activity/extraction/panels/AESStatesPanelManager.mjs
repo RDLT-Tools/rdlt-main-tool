@@ -1,5 +1,5 @@
-import { AESStep } from "../../../entities/activity/AESStep.mjs";
-import { buildElement } from "../../../utils.mjs";
+import { AESStep } from "../../../../entities/activity/AESStep.mjs";
+import { buildElement } from "../../../../utils.mjs";
 import { AESimulationManager } from "../AESimulationManager.mjs";
 
 export class AESStatesPanelManager {

@@ -1,4 +1,8 @@
+import Activity from "../../../entities/activity/Activity.mjs";
+import { buildArcMap } from "../../../utils.mjs";
 import ModelContext from "../../model/ModelContext.mjs";
+import { sanitizeForFilename } from "../utils.mjs";
+import ActivityFileExportManager from "./ActivityFileExportManager.mjs";
 import ImageExportManager from "./ImageExportManager.mjs";
 import RDLTFileExportManager from "./RDLTFileExportManager.mjs";
 
@@ -15,7 +19,8 @@ export default class ExportManager {
 
     exportToRDLTFile() {
         const visualModelManager = this.context.managers.visualModel;
-        return RDLTFileExportManager.exportToRDLTFile(visualModelManager);
+        const filename = sanitizeForFilename(visualModelManager.getModelName()) + ".txt";
+        return RDLTFileExportManager.exportToRDLTFile(filename, visualModelManager);
     }
     
     exportToPNGImage() {
@@ -60,6 +65,14 @@ export default class ExportManager {
         return ImageExportManager.exportSVGToImage(filename, svgElement, { minX, minY, maxX, maxY });
     }
 
-    
+    /**
+     * @param {Activity} activity 
+     */
+    exportActivityToTextFile(activity) {
+        const modelName = this.context.getModelName();
+        const filename = `${sanitizeForFilename(modelName)}_activity-${sanitizeForFilename(activity.name)}.txt`;
+        const arcMap = buildArcMap(this.context.managers.visualModel.getAllArcs());
+        return ActivityFileExportManager.exportToTextFile(filename, activity, arcMap);
+    }
 
 }

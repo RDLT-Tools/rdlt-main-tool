@@ -6,14 +6,15 @@ import OutlineStyle from "../../../entities/styling/OutlineStyle.mjs";
 import TextStyle from "../../../entities/styling/TextStyle.mjs";
 import ModelContext from "../../model/ModelContext.mjs";
 import VisualModelManager from "../../model/VisualModelManager.mjs";
-import { startBlobDownload } from "../utils.mjs";
+import { serializeString, startBlobDownload } from "../utils.mjs";
 
 export default class RDLTFileExportManager {
 
     /**
+     * @param {string} filename
      * @param {VisualModelManager} visualModelManager
      */
-    static exportToRDLTFile(visualModelManager) {
+    static exportToRDLTFile(filename, visualModelManager) {
         const components = visualModelManager.getAllComponents();
         const arcs = visualModelManager.getAllArcs();
 
@@ -155,8 +156,6 @@ export default class RDLTFileExportManager {
             "STYLES: ARCS", ...serialized.styles.arcs,
         ].join("\n");
 
-
-        const filename = `${visualModelManager.getModelName()}.txt`;
         startBlobDownload(filename, raw);
     }
 
@@ -185,7 +184,7 @@ export default class RDLTFileExportManager {
      */
     static serializeComponent(component) {
         const { uid, identifier, type, isRBSCenter, label } = component;
-        return `${uid} ${RDLTFileExportManager.serializeString(identifier)} ${type[0]} ${isRBSCenter ? 1 : 0} ${RDLTFileExportManager.serializeString(label)}`;
+        return `${uid} ${serializeString(identifier)} ${type[0]} ${isRBSCenter ? 1 : 0} ${serializeString(label)}`;
     }
 
     /**
@@ -194,7 +193,7 @@ export default class RDLTFileExportManager {
      */
     static serializeArc(arc) {
         const { uid, fromVertexUID, toVertexUID, C, L } = arc;
-        return `${uid} ${fromVertexUID}-${toVertexUID} ${RDLTFileExportManager.serializeString(C)} ${L}`;
+        return `${uid} ${fromVertexUID}-${toVertexUID} ${serializeString(C)} ${L}`;
     }
 
     /**
@@ -236,19 +235,5 @@ export default class RDLTFileExportManager {
         return `L=f${labelFontID} O=o${outlineID}`;
     }
 
-    /**
-     * @param {string} str 
-     * @returns {string}
-     */
-    static serializeString(str) {
-        str = str.trim();
-        if(str === "") return `""`;
-
-        // If string contains special characters, enclose in quotation marks
-        if(/[^a-zA-Z0-9_]/.test(str)) {
-            return `"${str.replace(/"/g, '\\"')}"`;
-        }
-
-        return str;
-    }
+    
 }

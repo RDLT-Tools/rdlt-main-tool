@@ -11,13 +11,7 @@ export default class ModellingManager {
     /** @type { ModelContext } */
     context;
 
-    /**
-     * @param {ModelContext} context 
-     */
-    constructor(context) {
-        this.context = context;
-    }
-
+    
     /**
      * @type {{
      *  mode: "view" | "select",
@@ -53,10 +47,20 @@ export default class ModellingManager {
         highlightStart: null,
     };
 
+
+    /**
+     * @param {ModelContext} context 
+     */
+    constructor(context) {
+        this.context = context;
+    }
+
     loadModel() {
         const visualModelManager = this.context.managers.visualModel;
 
-        visualModelManager.getAllArcs().map(arc => this.#displayNewArc(arc));
+        const arcs = visualModelManager.getAllArcs();
+
+        arcs.map(arc => this.#displayNewArc(arc));
         visualModelManager.getAllComponents().map(vertex => this.#displayNewComponent(vertex));
 
         this.#notifyModelStructureChangesListeners();
@@ -152,10 +156,10 @@ export default class ModellingManager {
     }
 
     /**
-     * @param {"mouse-move" | "mouse-down" | "mouse-up" } event 
+     * @param {"mouse-move" | "mouse-down" | "mouse-up" | "key-delete" | "key-selectall"} event 
      * @param {{ x?: number, y?: number }} props 
      */
-    onDrawingViewUserEvent(event, props) {
+    onDrawingViewUserEvent(event, props = {}) {
         const { x, y } = props;
 
         const mode = this.modellingStates.mode;
@@ -204,6 +208,14 @@ export default class ModellingManager {
                         if(modellingEvents.isArcTracing) {
                             this.#endArcTracing();
                         }
+                        break;
+                    case "key-delete":
+                        this.removedSelectedArcs(false);
+                        this.removeSelectedComponents(true);
+                        break;
+                    case "key-selectall":
+                        this.selectAll();
+                        break;
                 }
             break;
         }
@@ -436,6 +448,7 @@ export default class ModellingManager {
             const { x, y } = newPositions[componentUID];
             this.#updateComponentPosition(Number(componentUID), x, y);
         }
+        
 
         const movedComponentsUIDs = Object.keys(newPositions).map(n => Number(n));
         const rbsBounds = this.context.managers.rbsBounds.onComponentsTransformed(movedComponentsUIDs);
@@ -451,15 +464,19 @@ export default class ModellingManager {
         this.context.managers.drawing.updateComponentGeometry(id, geometry);
 
         // Update geometry of incident arcs
-        const incidentArcs = this.context.managers.visualModel.getArcsIncidentToComponent(id);
+        this.#updateIncidentArcGeometries(id);
+
+        // Update properties panel values, if selected
+        this.context.managers.panels.properties.refreshOneComponentValues(this.getComponentById(id));
+    }
+
+    #updateIncidentArcGeometries(vertexUID) {
+        const incidentArcs = this.context.managers.visualModel.getArcsIncidentToComponent(vertexUID);
         for(const arc of incidentArcs) {
             const vertex1Geometry = this.getComponentById(arc.fromVertexUID).geometry;
             const vertex2Geometry = this.getComponentById(arc.toVertexUID).geometry;
             this.context.managers.drawing.updateArcGeometry(arc, vertex1Geometry, vertex2Geometry);
         }
-
-        // Update properties panel values, if selected
-        this.context.managers.panels.properties.refreshOneComponentValues(this.getComponentById(id));
     }
 
     /**
@@ -472,6 +489,9 @@ export default class ModellingManager {
     addArc(fromVertexUID, toVertexUID, props, geometry, styles, thenSelect = false) {
         const visualArc = this.context.managers.visualModel.addArc(fromVertexUID, toVertexUID, props, geometry, styles);
         this.#displayNewArc(visualArc);
+
+        // Update arc geometries of all coinciding arcs
+        this.#updateIncidentArcGeometries(fromVertexUID);
 
         if(thenSelect) {
             this.#clearSelection();
@@ -597,11 +617,23 @@ export default class ModellingManager {
         this.#refreshSelected();
     }
 
+    selectAll() {
+        this.#clearSelection();
+
+        const allVertices = this.context.managers.visualModel.getAllComponents();
+        const allArcs = this.context.managers.visualModel.getAllArcs();
+        
+        allVertices.forEach(v => this.#addComponentToSelection(v.uid));
+        allArcs.forEach(a => this.#addArcToSelection(a.uid));
+
+        this.#refreshSelected();
+    }
+
     getRBSComponents(centerUID) {
         return this.context.managers.visualModel.getRBSComponents(centerUID);
     }
 
-    removeSelectedComponents() {
+    removeSelectedComponents(thenUpdate = true) {
         const removedComponents = [];
         for(const componentUID of this.modellingStates.selected.components) {
             const { removedComponent, removedArcs } = this.context.managers.visualModel.removeComponent(componentUID);
@@ -618,30 +650,42 @@ export default class ModellingManager {
         removedRBS.forEach(centerUID => this.context.managers.drawing.removeRBS(centerUID));
         this.context.managers.drawing.updateMultipleRBSBounds(affectedRBS);
 
-        this.#clearSelection();
-        this.#refreshSelected();
-        this.#notifyModelStructureChangesListeners();
-        this.#saveModel();
+        if(thenUpdate) {
+            this.#clearSelection();
+            this.#refreshSelected();
+            this.#notifyModelStructureChangesListeners();
+            this.#saveModel();
+        }
     }
 
-    removedSelectedArcs() {
+    removedSelectedArcs(thenUpdate = true) {
         const removedArcs = [];
+
+        const affectedVertices = new Set();
         for(const arcUID of this.modellingStates.selected.arcs) {
             const removedArc = this.context.managers.visualModel.removeArc(arcUID);
             if(!removedArc) continue;
 
             this.context.managers.drawing.removeArc(removedArc.uid);
+            affectedVertices.add(removedArc.fromVertexUID);
 
             removedArcs.push(removedArc);
+        }
+
+        // Update geometries of coinciding arcs by each removed arc
+        for(const vertexUID of affectedVertices) {
+            this.#updateIncidentArcGeometries(vertexUID);
         }
 
         const rbsBounds = this.context.managers.rbsBounds.onArcsDeleted(removedArcs);
         this.context.managers.drawing.updateMultipleRBSBounds(rbsBounds);
         
-        this.#clearSelection();
-        this.#refreshSelected();
-        this.#notifyModelStructureChangesListeners();
-        this.#saveModel();
+        if(thenUpdate) {
+            this.#clearSelection();
+            this.#refreshSelected();
+            this.#notifyModelStructureChangesListeners();
+            this.#saveModel();
+        }
     }
 
     #notifyModelStructureChangesListeners() {

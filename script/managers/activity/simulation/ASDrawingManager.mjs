@@ -1,11 +1,12 @@
-import VisualArc from "../../entities/model/visual/VisualArc.mjs";
-import VisualComponent from "../../entities/model/visual/VisualComponent.mjs";
-import { BaseModelDrawingManager } from "../drawing/BaseModelDrawingManager.mjs";
-import { AESimulationManager } from "./AESimulationManager.mjs";
+import VisualArc from "../../../entities/model/visual/VisualArc.mjs";
+import VisualComponent from "../../../entities/model/visual/VisualComponent.mjs";
+import { BaseModelDrawingManager } from "../../drawing/BaseModelDrawingManager.mjs";
+import { ActivitySimulationManager } from "./ActivitySimulationManager.mjs";
 
-export class AESDrawingManager extends BaseModelDrawingManager {
-    /** @type {AESimulationManager} */
+export class ASDrawingManager extends BaseModelDrawingManager {
+    /** @type {ActivitySimulationManager} */
     #simulationManager;
+
     #highlights = {
         vertices: new Set(),
         arcs: new Set()
@@ -23,11 +24,6 @@ export class AESDrawingManager extends BaseModelDrawingManager {
      */
     setupComponents(vertices, arcs) {
         super.setupComponents(vertices, arcs);
-
-        for(const arcUID in this.builders.arcs) {
-            const arcBuilder = this.builders.arcs[arcUID];
-            arcBuilder.aesClickableElement.addEventListener("click", () => this.#simulationManager.chooseArc(Number(arcUID)));
-        }
     }
 
     highlightVertex(vertexUID) {
