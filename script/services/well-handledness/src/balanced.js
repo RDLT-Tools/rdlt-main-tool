@@ -102,7 +102,7 @@ export function checkIfClosedStructure(
   for (const join of joinPoints) {
     if (join.join_type === "AND") {
       const processesAtYCount = join.incoming.length;
-      const relevantSplits = [];
+      let relevantSplits = [];
 
       // Find splits paired with this join in siblingPaths
       for (const [keyStr] of siblingPaths) {
@@ -112,6 +112,12 @@ export function checkIfClosedStructure(
           const split = splitPoints.find((sp) => sp.name === splitName);
           if (split) relevantSplits.push(split);
         }
+      }
+
+      if (relevantSplits.length === 0) {
+        relevantSplits = disjointPaths
+          .filter((path) => path[path.length - 1] === join)
+          .map((path) => path[0]);
       }
 
       for (const split of relevantSplits) {
@@ -188,8 +194,16 @@ export function checkComplementarity(graph, splitPoints, joinPoints) {
   );
   const splitJoinStrucList = new Map();
 
+  const closedStructure = checkIfClosedStructure(
+    graph,
+    allDisjointPaths,
+    siblingPaths,
+    splitPoints,
+    joinPoints
+  );
+
   // Build split-join structure list
-  for (const [keyStr] of siblingPaths) {
+  for (const [keyStr] of closedStructure) {
     const [splitName, joinName] = keyStr.split("-");
     const start = splitPoints.find((sp) => sp.name === splitName);
     const end = joinPoints.find((jp) => jp.name === joinName);
@@ -208,14 +222,6 @@ export function checkComplementarity(graph, splitPoints, joinPoints) {
   console.log(
     "Split-Join Struc List:",
     Array.from(splitJoinStrucList.entries()).map(([k, v]) => ({ [k]: v }))
-  );
-
-  const closedStructure = checkIfClosedStructure(
-    graph,
-    allDisjointPaths,
-    siblingPaths,
-    splitPoints,
-    joinPoints
   );
 
   console.log(
