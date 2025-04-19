@@ -388,3 +388,41 @@ export function findAllRBSPaths(startVertexUID, endVertexUID, visitedArcs, cache
 
     return arcPaths;
 }
+
+export function isInbridge(arcUID, arcMap, rbsMatrix) {
+    const arc = arcMap[arcUID];
+
+    return rbsMatrix[arc.toVertexUID] && 
+        (rbsMatrix[arc.fromVertexUID] !== rbsMatrix[arc.toVertexUID]);
+}
+
+export function isOutbridge(arcUID, arcMap, rbsMatrix) {
+    const arc = arcMap[arcUID];
+
+    return rbsMatrix[arc.fromVertexUID] && 
+        (rbsMatrix[arc.fromVertexUID] !== rbsMatrix[arc.toVertexUID]);
+}
+
+export function areTypeAlikeIncoming(arcUID1, arcUID2, arcMap, rbsMatrix) {
+    // Two incoming arcs to the same vertex are type-alike if any is true:
+    //    1. Neither are inbridge/outbridge
+    //    2. Both are inbridges
+    //    3. Both are outbridges and come from the same vertex
+
+    const isArc1Inbridge = isInbridge(arcUID1, arcMap, rbsMatrix);
+    const isArc1Outbridge = isOutbridge(arcUID1, arcMap, rbsMatrix);
+    const isArc2Inbridge = isInbridge(arcUID2, arcMap, rbsMatrix);
+    const isArc2Outbridge = isOutbridge(arcUID2, arcMap, rbsMatrix);
+
+    // 1. Neither are inbridge/outbridge
+    if(!isArc1Inbridge && !isArc1Outbridge && !isArc2Inbridge && !isArc2Outbridge) return true;
+
+    // 2. Both are inbridges
+    if(isArc1Inbridge && isArc2Inbridge) return true;
+
+    // 3. Both are outbridges and come from the same vertex
+    if(isArc1Outbridge && isArc2Outbridge &&
+        arcMap[arcUID1].fromVertexUID === arcMap[arcUID2].fromVertexUID) return true; 
+
+    return false;
+}

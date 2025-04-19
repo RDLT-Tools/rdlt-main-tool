@@ -1,6 +1,6 @@
 import Activity from "../../entities/activity/Activity.mjs";
 import { backtrack, checkArc, iterateAtVertex, traverseArc } from "../../services/aes.mjs";
-import { buildArcMap, buildArcsAdjacencyMatrix, buildVertexMap, pickRandomFromSet } from "../../utils.mjs";
+import { buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, pickRandomFromSet } from "../../utils.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 
 export class ActivitiesManager {
@@ -32,19 +32,16 @@ export class ActivitiesManager {
     */
     generateActivity(configs) {
         const modelSnapshot = this.context.managers.visualModel.makeCopy();
-        const vertices = modelSnapshot.getAllComponents().map(v => ({
-            uid: v.uid, type: v.type
-        }));
+        const vertices = modelSnapshot.getAllComponents().map(v => v.simplify());
+        const arcs = modelSnapshot.getAllArcs().map(a => a.simplify());
 
-        const arcs = modelSnapshot.getAllArcs().map(a => ({
-            uid: a.uid, fromVertexUID: a.fromVertexUID, 
-            toVertexUID: a.toVertexUID, L: a.L, C: a.C
-        }));
-
+        const vertexMap = buildVertexMap(vertices);
         const aeCache = {
-            vertexMap: buildVertexMap(vertices),
+            vertexMap,
+            arcs,
             arcMap: buildArcMap(arcs),
-            arcsMatrix: buildArcsAdjacencyMatrix(arcs)
+            arcsMatrix: buildArcsAdjacencyMatrix(arcs),
+            rbsMatrix: buildRBSMatrix(vertexMap, arcs)
         };
         
         const aeStates = {

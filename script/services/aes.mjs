@@ -7,7 +7,7 @@ which supports iterative execution of AE, where various steps such as
 exploration, checking, and traversal may be performed over separate iterations.
 */
 
-import { getIncomingArcs, getOutgoingArcs } from "../utils.mjs";
+import { areTypeAlikeIncoming, getIncomingArcs, getOutgoingArcs, isEpsilon, isOutbridge } from "../utils.mjs";
 
 /**
  * @typedef {number} ArcUID
@@ -25,6 +25,7 @@ import { getIncomingArcs, getOutgoingArcs } from "../utils.mjs";
  * @typedef {{ [vertexUID: number]: number }} VertexTimesteps
  * @typedef {VertexUID[]} TraversedPath
  * @typedef {{ [timeStep: number]: Set<ArcUID> }} ActivityProfile
+ * @typedef {{ [vertexUID: number]: VertexUID }} RBSMatrix
  * 
  * @typedef {{ 
  *  vertexUID: number, 
@@ -32,9 +33,11 @@ import { getIncomingArcs, getOutgoingArcs } from "../utils.mjs";
  * }} RoutineArgs
  * 
  * @typedef {{ 
+ *  arcs: Arc[],
  *  arcMap?: ArcMap,  
  *  vertexMap?: VertexMap,
  *  arcsMatrix: ArcsAdjacencyMatrix,
+ *  rbsMatrix: RBSMatrix
  * }} Cache
  * 
  * @typedef {{ 
@@ -213,7 +216,7 @@ export function backtrack(args, states, cache) {
 export function traverseArc(args, states, cache) {
     const { arcUID } = args;
     const { T, CTIndicator, path } = states;
-    const { arcMap, vertexMap, arcsMatrix } = cache;
+    const { arcs, arcMap, vertexMap, arcsMatrix, rbsMatrix } = cache;
 
     const arc = arcMap[arcUID];
 
@@ -224,8 +227,15 @@ export function traverseArc(args, states, cache) {
 
     // 2. Update T of every recently checked incoming arc whose C != epsilon
     for(const incomingArcUID of incomingArcs) {
+        // Skip if incoming arc is not type alike with traversed arc
+        if(incomingArcUID !== arcUID && !areTypeAlikeIncoming(arcUID, incomingArcUID, arcMap, rbsMatrix)) continue;
+        
+        // Skip if incoming arc has never been checked previously
         if(!isArcPreviouslyChecked(incomingArcUID, CTIndicator)) continue;
+
         const incomingArc = arcMap[incomingArcUID];
+        
+        // Skip if epsilon
         if(isEpsilon(incomingArc.C) && arcUID !== incomingArcUID) continue;
 
         const t = T[incomingArcUID];
@@ -238,10 +248,13 @@ export function traverseArc(args, states, cache) {
     }
 
     // 3. Update first T of every unchecked arc that is (object -> controller)
-    
     for(const incomingArcUID of incomingArcs) {
+        // Skip if already traversed
         if(getArcTraversals(incomingArcUID, CTIndicator) > 0) continue;
 
+        // Skip if incoming arc is not type alike with traversed arc
+        if(incomingArcUID !== arcUID && !areTypeAlikeIncoming(arcUID, incomingArcUID, arcMap, rbsMatrix)) continue;
+        
         const incomingArc = arcMap[incomingArcUID];
         if(!isEpsilon(incomingArc)) continue;
 
@@ -262,6 +275,19 @@ export function traverseArc(args, states, cache) {
     if(!(maxT in states.activityProfile)) states.activityProfile[maxT] = new Set();
     for(const reachableArcUID of reachableArcs) {
         states.activityProfile[maxT].add(reachableArcUID);
+    }
+
+    // 6. If arc is outbridge, reset states for the RBS exited
+    if(isOutbridge(arcUID, arcMap, rbsMatrix)) {
+        const centerUID = rbsMatrix[arc.fromVertexUID];
+
+        for(const arc of arcs) {
+            if(rbsMatrix[arc.fromVertexUID] === centerUID
+                && rbsMatrix[arc.toVertexUID] === centerUID) {
+                T[arc.uid] = [];
+                CTIndicator[arc.uid] = [];
+            }
+        }
     }
 
     return arc.toVertexUID;
@@ -325,19 +351,10 @@ export function getMaxT(arcs, T) {
 }
 
 /**
- * @param {Arc | string} arc
- * @returns {boolean} 
- */
-export function isEpsilon(arc) {
-    if(typeof(arc) === "string") return arc === "";
-    return arc.C === "";
-}
-
-/**
  * 
  * @param {Vertex} vertex 
  * @returns {boolean}
  */
 export function isVertexAnObject(vertex) {
-    return [ "boundary" | "entity" ].includes(vertex.type);
+    return [ "boundary", "entity" ].includes(vertex.type);
 }

@@ -2,7 +2,7 @@
 /**
  * 
  * @param {{ 
- *      vertices: { uid, identifier }[],
+ *      vertices: { uid, identifier, type }[],
  *      arcs: { uid, fromVertexUID, toVertexUID, C, L }[] 
  * }} model 
  * 

@@ -65,7 +65,8 @@ export default class VisualComponent {
         return {
             uid: this.uid,
             identifier: this.identifier,
-            isRBSCenter: this.isRBSCenter
+            isRBSCenter: this.isRBSCenter,
+            type: this.type
         };
     }
 
