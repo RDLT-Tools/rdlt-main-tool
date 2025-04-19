@@ -447,6 +447,15 @@ svg .arc-waypoint:not([data-nomove]) {
 }
 
 
+.as-subworkspace .arc-highlight,
+.vs-subworkspace .arc-highlight {
+  transition: all 200ms ease;
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke: transparent;
+  opacity: 0.5;
+}
+
 .as-subworkspace .arc-highlight {
   transition: all 200ms ease;
   stroke-width: 12;
@@ -493,4 +502,8 @@ svg .arc-waypoint:not([data-nomove]) {
 
 .ver-subworkspace .component.active .component-circle {
   stroke: #ff5050;
+}
+
+.vs-subworkspace .arc.abstract .arc-bare {
+  opacity: 0.2;
 }

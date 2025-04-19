@@ -29,21 +29,25 @@ export default class VisualArc {
     /** @type {ArcStyles} */
     styles;
 
+    /** @type {boolean} */
+    isAbstractArc;
+
     /** @type {{ index: number, count: number }} */
     order = { index: 0, count: 1 };
 
 
     /**
-     * @param {{ uid: number, C: string, L: number, fromVertexUID: number, toVertexUID: number, geometry, styles }} options 
+     * @param {{ uid: number, C: string, L: number, fromVertexUID: number, toVertexUID: number, geometry, styles, isAbstractArc }} options 
      */
     constructor(options = {}) {
-        const { uid, C, L, fromVertexUID, toVertexUID, geometry, styles } = options || {};
+        const { uid, C, L, fromVertexUID, toVertexUID, geometry, styles, isAbstractArc } = options || {};
     
         this.uid = uid || ModelArc.ID_COUNTER++;
         this.C = C || "";
         this.L = L || 1;
         this.fromVertexUID = fromVertexUID;
         this.toVertexUID = toVertexUID;
+        this.isAbstractArc = isAbstractArc || false;
 
         this.geometry = geometry || new ArcGeometry();
         this.styles = styles || new ArcStyles();
@@ -59,6 +63,15 @@ export default class VisualArc {
             geometry: this.geometry.copy(),
             styles: this.styles.copy(),
         });
+    }
+
+    simplify() {
+        return {
+            uid: this.uid,
+            fromVertexUID: this.fromVertexUID,
+            toVertexUID: this.toVertexUID,
+            C: this.C, L: this.L
+        };
     }
 
     toJSON() {

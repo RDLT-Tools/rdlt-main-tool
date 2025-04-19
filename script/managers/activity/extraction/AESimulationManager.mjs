@@ -1,8 +1,8 @@
 import Activity from "../../../entities/activity/Activity.mjs";
 import { AESStep } from "../../../entities/activity/AESStep.mjs";
 import VisualRDLTModel from "../../../entities/model/visual/VisualRDLTModel.mjs";
-import { backtrack, buildArcMap, buildArcsAdjacencyMatrix, buildVertexMap, checkArc, iterateAtVertex, traverseArc } from "../../../services/aes.mjs";
-import { generateUniqueID, pickRandomFromSet } from "../../../utils.mjs";
+import { backtrack, checkArc, iterateAtVertex, traverseArc } from "../../../services/aes.mjs";
+import { buildArcMap, buildArcsAdjacencyMatrix, buildVertexMap, generateUniqueID, pickRandomFromSet } from "../../../utils.mjs";
 import ModelContext from "../../model/ModelContext.mjs";
 import { AESDrawingManager } from "./AESDrawingManager.mjs";
 import { AESSubworkspaceManager } from "./AESSubworkspaceManager.mjs";

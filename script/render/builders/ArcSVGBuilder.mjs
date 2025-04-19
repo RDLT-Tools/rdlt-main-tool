@@ -57,23 +57,22 @@ export default class ArcSVGBuilder {
             stroke: arcColor,
             fill: "none",
             "marker-end": "url(#arrow)",
-            "marker-start": "url(#arrow)"
+            "marker-start": "url(#arrow)",
+            classname: "arc-path"
         });
-
-        this.#pathElement.classList.add("arc-path");
-
 
         this.#connectorEndElement = makeSVGElement("polygon", {
             points: "",
             fill: arcColor,
-            stroke: "none"
+            stroke: "none",
+            classname: "conn-end"
         });
 
         const arcElement = makeGroupSVG([
             // connectorEndDefs,
             this.#pathElement,
-            this.#connectorEndElement
-        ], { className: "diagram" });
+            this.#connectorEndElement,
+        ], { className: "arc-bare diagram" });
 
 
         if(["model", "aes", "vs"].includes(origin)) {
@@ -130,7 +129,7 @@ export default class ArcSVGBuilder {
                 this.#waypointsElement = makeGroupSVG([], { className: "arc-waypoints" });
     
                 this.#element = makeGroupSVG([
-                    labelMaskBoundsElement,
+                    // labelMaskBoundsElement,
                     this.#highlightPathElement,
                     arcElement,
                     this.#triggerPathElement,
@@ -151,13 +150,13 @@ export default class ArcSVGBuilder {
                 this.#element = makeGroupSVG([
                     this.#highlightPathElement,
                     this.#aesClickableElement,
-                    labelMaskBoundsElement,
+                    // labelMaskBoundsElement,
                     arcElement,
                     this.#labelElement.element,
                 ], { className: "arc" });
             } else if(origin === "vs") {
                 this.#element = makeGroupSVG([
-                    labelMaskBoundsElement,
+                    // labelMaskBoundsElement,
                     this.#highlightPathElement,
                     arcElement,
                     this.#labelElement.element,
@@ -452,6 +451,14 @@ export default class ArcSVGBuilder {
     setIsSelected(isSelected) {
         if(isSelected) this.#element.setAttribute("data-selected", "");
         else this.#element.removeAttribute("data-selected");
+    }
+
+    setIsAbstract(isAbstract) {
+        if(isAbstract) {
+            this.#element.classList.add("abstract");
+        } else {
+            this.#element.classList.remove("abstract");
+        }
     }
 
 }

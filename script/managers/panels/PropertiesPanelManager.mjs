@@ -91,7 +91,7 @@ export default class PropertiesPanelManager {
         const arcUID = selectedArcs[0];
 
         if([ 'C', 'L' ].includes(fieldName)) {
-            modellingManager.updateArcProps(arcUID, { [fieldName]: value });
+            modellingManager.updateArcProps(arcUID, { [fieldName]: fieldName === 'L' ? Number(value) || 1 : value });
         }
     }
 

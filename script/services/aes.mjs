@@ -7,6 +7,8 @@ which supports iterative execution of AE, where various steps such as
 exploration, checking, and traversal may be performed over separate iterations.
 */
 
+import { getIncomingArcs, getOutgoingArcs } from "../utils.mjs";
+
 /**
  * @typedef {number} ArcUID
  * @typedef {number} VertexUID
@@ -266,92 +268,6 @@ export function traverseArc(args, states, cache) {
 }
 
 
-/**
- * @param {Arc[]} arcs 
- * @returns {ArcsAdjacencyMatrix}
- */
-export function buildArcsAdjacencyMatrix(arcs) {
-    /** @type {ArcsAdjacencyMatrix} */
-    const matrix = {};
-
-    for(const arc of arcs) {
-        const { uid, fromVertexUID, toVertexUID } = arc;
-        if(!(fromVertexUID in matrix)) matrix[fromVertexUID] = {};
-        
-        const outgoingArcs = matrix[fromVertexUID];
-        if(!(toVertexUID in outgoingArcs)) outgoingArcs[toVertexUID] = new Set();
-
-        outgoingArcs[toVertexUID].add(uid);
-    }
-
-    return matrix;
-}
-
-/**
- * @param {Arc[]} arcs 
- * @returns {ArcMap}
- */
-export function buildArcMap(arcs) {
-    const map = {};
-    for(const arc of arcs) {
-        map[arc.uid] = arc;
-    }
-
-    return map;
-}
-
-
-/**
- * 
- * @param {Vertex[]} vertices 
- * @returns {VertexMap}
- */
-export function buildVertexMap(vertices) {
-    const map = {};
-    for(const vertex of vertices) {
-        map[vertex.uid] = vertex;
-    }
-
-    return map;
-}
-
-/**
- * @param {number} vertexUID 
- * @param {ArcsAdjacencyMatrix} arcsMatrix 
- * @returns {Set<ArcUID>}
- */
-export function getIncomingArcs(vertexUID, arcsMatrix) {
-    const allIncomingArcs = new Set(); 
-    for(const fromVertexUID in arcsMatrix) {
-        const incomingArcs = arcsMatrix[fromVertexUID][vertexUID];
-        if(incomingArcs) {
-            for(const arcUID of incomingArcs) {
-                allIncomingArcs.add(arcUID);
-            }
-        }
-    }
-
-    return allIncomingArcs;
-}
-
-/**
- * @param {number} vertexUID 
- * @param {ArcsAdjacencyMatrix} arcsMatrix 
- * @returns {Set<ArcUID>}
- */
-export function getOutgoingArcs(vertexUID, arcsMatrix) {
-    const allOutgoingArcs = new Set();
-    const outgoingMap = arcsMatrix[vertexUID];
-
-    for(const toVertexUID in outgoingMap) {
-        const arcs = outgoingMap[toVertexUID];
-        for(const arcUID of arcs) {
-            allOutgoingArcs.add(arcUID);
-        }
-    }
-
-    return allOutgoingArcs;
-}
 
 /**
  * 
