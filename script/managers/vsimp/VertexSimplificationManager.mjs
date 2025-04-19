@@ -71,7 +71,7 @@ export class VertexSimplificationManager {
         const modelManager = this.context.managers.visualModel;
         
         if(this.#level === 1) {
-            vertices = modelManager.getAllComponents().map(c => c.simplify());
+            vertices = modelManager.getAllComponents().map(v => v.simplify());
             arcs = modelManager.getAllArcs().map(a => a.simplify());
         } else {
             vertices = modelManager.getRBSComponents(this.#rbsCenterUID).map(v => ({ ...v.simplify(), isRBSCenter: false }));

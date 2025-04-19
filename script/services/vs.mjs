@@ -49,6 +49,10 @@ export function performVertexSimplificationLevel1(vertices, arcs) {
     }
 
     for(const arc of arcs) {
+        // Ignore arcs that are inside an RBS
+        if(rbsMatrix[arc.fromVertexUID] && rbsMatrix[arc.fromVertexUID] === rbsMatrix[arc.toVertexUID]) continue;
+        
+        // Add arc if its vertices are within simplified version and is not within an RBS
         if(chosenVertices.has(arc.fromVertexUID) && chosenVertices.has(arc.toVertexUID)) {
             chosenArcs.add(arc.uid);
         }
@@ -70,9 +74,6 @@ export function performVertexSimplificationLevel1(vertices, arcs) {
                 const arcPaths = findAllRBSPaths(startVertexUID, endVertexUID, null, cache);
 
                 for(const arcPath of arcPaths) {
-                    // Only consider path whose length is at least 2
-                    if(arcPath.length < 2) continue;
-                    
                     const minL = Math.min(...arcPath.map(arcUID => arcMap[arcUID].L));
                     abstractArcs.push({
                         fromVertexUID: startVertexUID,
