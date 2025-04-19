@@ -25,6 +25,10 @@ export default class VisualModelManager {
     getModelName() {
         return this.#visualModel.getName();
     }
+    
+    setModelName(name) {
+        return this.#visualModel.setName(name);
+    }
 
     /**
      * 

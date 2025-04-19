@@ -1,8 +1,11 @@
-import { buildElement } from "../../utils.mjs";
+import { buildElement, ellipsize } from "../../utils.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import { TabGroupManager } from "./TabGroupManager.mjs";
 
 export class TabManager {
+    
+    static maxTitleLength = 30;
+    
     /** @type {string} */
     id;
 
@@ -17,6 +20,9 @@ export class TabManager {
 
     /** @type {HTMLDivElement} */
     tabButtonElement;
+
+    /** @type {HTMLSpanElement} */
+    tabTitleElement;
 
     /** @type {HTMLDivElement} */
     tabAreaElement;
@@ -46,9 +52,12 @@ export class TabManager {
 
         this.tabButtonCloseElement.addEventListener("click", () => this.close());
 
+        this.tabTitleElement = buildElement("span", { classname: "tab-title" }, [ 
+            ellipsize(this.title, TabManager.maxTitleLength) ]);
+
         this.tabButtonElement = buildElement("div", {
             classname: "tab-button"
-        }, this.dismissable ? [ this.title, this.tabButtonCloseElement ] : [ this.title ]);
+        }, this.dismissable ? [ this.tabTitleElement, this.tabButtonCloseElement ] : [ this.tabTitleElement ]);
 
         return this.tabButtonElement;
     }
@@ -81,6 +90,10 @@ export class TabManager {
             this.tabAreaElement?.classList.add("hidden");
             this.tabButtonElement?.classList.add("hidden");
         }
+    }
+
+    setTitle(title) {
+        this.tabTitleElement.innerText = ellipsize(title, TabManager.maxTitleLength);
     }
 
     close() {

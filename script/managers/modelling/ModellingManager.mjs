@@ -104,6 +104,11 @@ export default class ModellingManager {
         return `${lastIdentifier.prefix}${lastIdentifier.num+1}`;
     }
 
+    renameModel(newName) {
+        this.context.managers.visualModel.setModelName(newName);
+        this.#saveModel();
+    }
+
     /**
      * @param {"click" | "mouse-down" | "mouse-up" | "mouse-enter" | "mouse-leave"} event 
      * @param {number} id

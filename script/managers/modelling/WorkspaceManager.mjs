@@ -42,7 +42,8 @@ export default class WorkspaceManager {
      *      main: HTMLDivElement, 
      *      buttons: ViewButtons,
      *      panels: PanelsView, 
-     *      drawing: ViewDrawing 
+     *      drawing: ViewDrawing,
+     *      header: { modelNameInput: HTMLInputElement }
      * }}
      */
     #view = {
@@ -53,7 +54,8 @@ export default class WorkspaceManager {
             actions: {}
         },
         panels: {},
-        drawing: {}
+        drawing: {},
+        header: { modelNameInput: null }
     };
 
     
@@ -108,6 +110,14 @@ export default class WorkspaceManager {
                 this.#view.panels[panelID] = panel;
         });
 
+        // Initialize model name input
+        this.#view.header.modelNameInput = rootElement.querySelector("input.model-name-input");
+        this.#view.header.modelNameInput.addEventListener("input", (event) => {
+            const newName = event.target.value?.trim() || "Untitled Model";
+            this.context.managers.modelling.renameModel(newName);
+            App.setContextTabTitle(this.context, newName);
+        });
+        this.#view.header.modelNameInput.value = this.context.getModelName();
     }
 
     getRootElement() {

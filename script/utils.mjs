@@ -426,3 +426,14 @@ export function areTypeAlikeIncoming(arcUID1, arcUID2, arcMap, rbsMatrix) {
 
     return false;
 }
+
+/**
+ * 
+ * @param {string} str 
+ * @param {number} maxLength 
+ */
+export function ellipsize(str, maxLength) {
+    if(str.length <= maxLength) return str;
+
+    return str.substring(0, maxLength - 3) + "...";
+}

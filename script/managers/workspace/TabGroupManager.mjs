@@ -60,16 +60,16 @@ export class TabGroupManager {
     }
 
 
-    #getTabManager(id) {
+    getTabManager(id) {
         return this.#tabs.find(tab => tab.id === id) || null;
     }
 
     selectTab(id) {
-        const tabManager = this.#getTabManager(id);
+        const tabManager = this.getTabManager(id);
         if(!tabManager) return;
 
         if(this.#activeTab) {
-            const activeTabManager = this.#getTabManager(this.#activeTab);
+            const activeTabManager = this.getTabManager(this.#activeTab);
             if(activeTabManager) activeTabManager.setActive(false);
         }
 
