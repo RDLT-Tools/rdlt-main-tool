@@ -1,4 +1,5 @@
 import { verifyFreeChoiceness } from "../../services/free-choiceness.mjs";
+import { verifySoundness } from "../../services/soundness/soundness-service.mjs";
 import { Form } from "../../utils.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 
@@ -33,7 +34,8 @@ export default class VerificationsPanelManager {
         },
         sections: {
             poi: {},
-            freeChoiceness: {}
+            freeChoiceness: {},
+            soundness: {}
         }
     };
 
@@ -45,7 +47,8 @@ export default class VerificationsPanelManager {
      */
     #forms = {
         poi: null,
-        freeChoiceness: null
+        freeChoiceness: null,
+        soundness: null
     };
 
     /**
@@ -62,6 +65,7 @@ export default class VerificationsPanelManager {
     #initializeView() {
         this.#initializePOISection();
         this.#initializeFreeChoicenessSection();
+        this.#initializeSoundnessSection();
     }
 
     
@@ -75,6 +79,12 @@ export default class VerificationsPanelManager {
             .setFieldNames([ 'source', 'sink', 'type' ]);
         this.#views.selectors.sources.push(this.#forms.freeChoiceness.getFieldElement("source"));
         this.#views.selectors.sinks.push(this.#forms.freeChoiceness.getFieldElement("sink"));
+
+        // Soundness form elements
+        this.#forms.soundness = new Form(this.#views.sections.soundness.root)
+            .setFieldNames([ 'source', 'sink', 'notion' ]);
+        this.#views.selectors.sources.push(this.#forms.soundness.getFieldElement("source"));
+        this.#views.selectors.sinks.push(this.#forms.soundness.getFieldElement("sink"));
     }
 
     #initializePOISection() {
@@ -108,6 +118,25 @@ export default class VerificationsPanelManager {
             const simpleModel = modelSnapshot.toSimpleModel();
 
             const result = verifyFreeChoiceness(simpleModel, source, sink, type);
+
+            this.context.managers.workspace.showVerificationResults(result, modelSnapshot);
+        });
+    }
+
+    #initializeSoundnessSection() {
+        const sectionRoot = this.#rootElement.querySelector("[data-section-id='soundness']");
+        const sectionViews = this.#views.sections.soundness;
+
+        sectionViews.root = sectionRoot;
+        sectionViews.startButton = sectionRoot.querySelector("button[data-subaction='start']");
+        sectionViews.startButton.addEventListener("click", () => {
+            const { source, sink, notion } = this.#forms.soundness.getValues();
+            if(!source || !sink) return;
+            
+            const modelSnapshot = this.context.managers.visualModel.makeCopy();
+            const simpleModel = modelSnapshot.toSimpleModel();
+
+            const result = verifySoundness(simpleModel, source, sink, notion);
 
             this.context.managers.workspace.showVerificationResults(result, modelSnapshot);
         });
