@@ -112,7 +112,7 @@ export default class ComponentSVGBuilder {
                 groupBounds,
                 this.#componentElement,
             ], { className: "component dragging" });
-        } else if([ "aes", "vs" ].includes(origin)) {
+        } else if([ "aes", "vs", "poi" ].includes(origin)) {
             this.#centerLabel = new TextSVGBuilder("", {
                 align: "middle", vAlign: "central", 
                 x: this.boundWidth/2,

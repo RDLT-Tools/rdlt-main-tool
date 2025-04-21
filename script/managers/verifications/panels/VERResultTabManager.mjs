@@ -1,4 +1,4 @@
-import { buildElement } from "../../../utils.mjs";
+import { buildArcTagElement, buildElement, buildVertexTagElement } from "../../../utils.mjs";
 import { VerificationsResultManager } from "../VerificationsResultManager.mjs";
 
 export default class VERResultTabManager {
@@ -123,10 +123,7 @@ export default class VERResultTabManager {
                 const identifierPair = this.#parentManager.getArcIdentifierPair(arcUID);
                 const row = buildElement("tr", {}, [
                     buildElement("td", {}, [
-                        buildElement("div", { classname: "arc-tag" }, [
-                            buildElement("div", {}, [ identifierPair[0] ]),
-                            buildElement("div", {}, [ identifierPair[1] ]),
-                        ])
+                        buildArcTagElement(...identifierPair)
                     ])
                 ]);
 
@@ -148,7 +145,7 @@ export default class VERResultTabManager {
                 const identifier = this.#parentManager.getVertexIdentifier(vertexUID);
                 const row = buildElement("tr", {}, [
                     buildElement("td", {}, [
-                        buildElement("div", { classname: "vertex-tag" }, [ identifier ])
+                        buildVertexTagElement(identifier)
                     ])
                 ]);
     

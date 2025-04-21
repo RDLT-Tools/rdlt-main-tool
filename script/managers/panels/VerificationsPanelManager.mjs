@@ -54,6 +54,7 @@ export default class VerificationsPanelManager {
     }
 
     #initializeView() {
+        this.#initializePOISection();
         this.#initializeFreeChoicenessSection();
     }
 
@@ -63,6 +64,17 @@ export default class VerificationsPanelManager {
             .setFieldNames([ 'source', 'sink', 'type' ]);
         this.#views.selectors.sources.push(this.#forms.freeChoiceness.getFieldElement("source"));
         this.#views.selectors.sinks.push(this.#forms.freeChoiceness.getFieldElement("sink"));
+    }
+
+    #initializePOISection() {
+        const sectionRoot = this.#rootElement.querySelector("[data-section-id='poi']");
+        const sectionViews = this.#views.sections.freeChoiceness;
+
+        sectionViews.root = sectionRoot;
+        sectionViews.startButton = sectionRoot.querySelector("button[data-subaction='start']");
+        sectionViews.startButton.addEventListener("click", () => {
+            this.context.managers.workspace.showPOIs();
+        });
     }
 
     #initializeFreeChoicenessSection() {

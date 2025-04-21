@@ -1,5 +1,5 @@
 import { AESStep } from "../../../../entities/activity/AESStep.mjs";
-import { buildElement } from "../../../../utils.mjs";
+import { buildArcTagElement, buildElement } from "../../../../utils.mjs";
 import { AESimulationManager } from "../AESimulationManager.mjs";
 
 export class AESStatesPanelManager {
@@ -70,10 +70,7 @@ export class AESStatesPanelManager {
                 // Arc tag column
                 const [ fromVertexIdentifier, toVertexIdentifier ] = this.#simulationManager.getArcIdentifierPair(arc.uid);
                 stateRowCells.push(buildElement("td", {}, [
-                    buildElement("div", { classname: "arc-tag" }, [
-                        buildElement("div", {}, [ fromVertexIdentifier ]),
-                        buildElement("div", {}, [ toVertexIdentifier ]),
-                    ])
+                    buildArcTagElement(fromVertexIdentifier, toVertexIdentifier)
                 ]));
 
                 // Attributes column

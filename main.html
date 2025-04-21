@@ -44,14 +44,14 @@
                     </section>
                 </header>
                 <section class="tab-buttons">
-                    <div class="tab-button" data-tab-id="main-model">Main Model</div>
+                    <div class="tab-button" data-tab-id="main-model"><i class="fas fa-hexagon-nodes"></i> Main Model</div>
                 </section>
                 <main class="main-view">
                     <div class="subworkspace tab-area" data-tab-id="main-model">
                         <aside class="left-panels">
                             <section class="tab-buttons">
-                                <div class="tab-button" data-tab-id="palette">Palette</div>
-                                <div class="tab-button" data-tab-id="components">Components</div>
+                                <div class="tab-button" data-tab-id="palette"><i class="fas fa-palette"></i> Palette</div>
+                                <div class="tab-button" data-tab-id="components"><i class="fas fa-shapes"></i> Components</div>
                             </section>
                             <main class="panel-tabs">
                                 <div class="tab-area panel" data-tab-id="palette" data-panel-id="palette">
@@ -87,9 +87,9 @@
                         </main>
                         <aside class="right-panels">
                             <section class="tab-buttons">
-                                <div class="tab-button" data-tab-id="properties">Properties</div>
-                                <div class="tab-button" data-tab-id="execute">Execute</div>
-                                <div class="tab-button" data-tab-id="verifications">Verifications</div>
+                                <div class="tab-button" data-tab-id="properties"><i class="fas fa-list-ul"></i> Properties</div>
+                                <div class="tab-button" data-tab-id="execute"><i class="fas fa-play"></i> Execute</div>
+                                <div class="tab-button" data-tab-id="verifications"><i class="fas fa-circle-check"></i> Verifications</div>
                             </section>
                             <main class="panel-tabs">
                                 <div class="tab-area panel" data-tab-id="properties" data-panel-id="properties" data-view-none>
@@ -225,7 +225,7 @@
                                     <div class="collapsible" data-section-id="activities">
                                         <header>Activities</header>
                                         <main>
-                                            <table>
+                                            <table class="anchor-right">
                                                 <tbody></tbody>
                                             </table>
                                             <div class="action-buttons">
@@ -297,6 +297,17 @@
                                         <h2>Verifications</h2>
                                     </header>
                                     <br/>
+                                    <div class="collapsible" data-section-id="poi">
+                                        <header>Points of Interest</header>
+                                        <main>
+                                            <div class="section-description">
+                                                Analyze this model for presence of points of delay, synchronicity, deadlocks, reoptimization, and its timeliness of response.
+                                            </div>
+                                            <div class="section-action-buttons">
+                                                <button data-subaction="start"><i class="fas fa-magnifying-glass"></i>&nbsp; Start Analysis</button>
+                                            </div>
+                                        </main>
+                                    </div>
                                     <div class="collapsible" data-section-id="fc">
                                         <header>Free Choiceness</header>
                                         <main>
@@ -350,19 +361,15 @@
                                                 <div class="input-group columns full-width">
                                                     <div style="flex: 1">
                                                         <label>Source</label>
-                                                        <div data-aes-detail="source" class="vertex-display" style="display: flex; gap: 6px; align-items: center;">
-                                                            <img data-vertex-type="boundary" height="20" src="./assets/templates/components/boundary.svg">
-                                                            <img data-vertex-type="entity" height="20" src="./assets/templates/components/entity.svg">
-                                                            <img data-vertex-type="controller" height="20" src="./assets/templates/components/controller.svg">
+                                                        <div data-aes-detail="source">
+                                                            <div class="vertex-display"></div>
                                                             <span></span>
                                                         </div>
                                                     </div>
                                                     <div style="flex: 1">
                                                         <label>Sink</label>
-                                                        <div data-aes-detail="sink" class="vertex-display" style="display: flex; gap: 6px; align-items: center;">
-                                                            <img data-vertex-type="boundary" height="20" src="./assets/templates/components/boundary.svg">
-                                                            <img data-vertex-type="entity" height="20" src="./assets/templates/components/entity.svg">
-                                                            <img data-vertex-type="controller" height="20" src="./assets/templates/components/controller.svg">
+                                                        <div data-aes-detail="sink">
+                                                            <div class="vertex-display"></div>
                                                             <span></span>
                                                         </div>
                                                     </div>
@@ -435,7 +442,7 @@
                                         <header>
                                             <h2>Current Arc States</h2>
                                         </header> 
-                                        <table>
+                                        <table class="anchor-right">
                                             <thead><tr>
                                                 <th>Arc</th>
                                                 <th>Attributes</th>
@@ -568,20 +575,16 @@
                                                     <div class="input-group columns full-width">
                                                         <div>
                                                             <label>Source</label>
-                                                            <div data-as-detail="source" class="vertex-display" style="display: flex; gap: 6px; align-items: center;">
-                                                                <img data-vertex-type="boundary" height="20" src="./assets/templates/components/boundary.svg">
-                                                                <img data-vertex-type="entity" height="20" src="./assets/templates/components/entity.svg">
-                                                                <img data-vertex-type="controller" height="20" src="./assets/templates/components/controller.svg">
-                                                                <span>x1</span>
+                                                            <div data-as-detail="source">
+                                                                <div class="vertex-display"></div>
+                                                                <span></span>
                                                             </div>
                                                         </div>
                                                         <div>
                                                             <label>Sink</label>
-                                                            <div data-as-detail="sink" class="vertex-display" style="display: flex; gap: 6px; align-items: center;">
-                                                                <img data-vertex-type="boundary" height="20" src="./assets/templates/components/boundary.svg">
-                                                                <img data-vertex-type="entity" height="20" src="./assets/templates/components/entity.svg">
-                                                                <img data-vertex-type="controller" height="20" src="./assets/templates/components/controller.svg">
-                                                                <span>x2</span>
+                                                            <div data-as-detail="sink">
+                                                                <div class="vertex-display"></div>
+                                                                <span></span>
                                                             </div>
                                                         </div>
                                                         <div>
@@ -629,6 +632,98 @@
                                 </main>
                             </aside>
                             
+                        </div>
+                    </template>
+                    <template data-tab-template-id="poi">
+                        <div class="subworkspace tab-area poi-subworkspace" data-active-poi="tor">
+                            <main class="poi-main">
+                                <header>
+                                    <div>
+                                        <h1>Points of Interest</h1>
+                                    </div>
+                                    <div></div>
+                                    <div class="poi-controls">
+                                        <select>
+                                            <option value="pod">Points of Delay (PODs)</option>
+                                            <option value="pos">Points of Synchronocity (POSs)</option>
+                                            <option value="pore">Points of Reoptimization</option>
+                                            <option value="deadlocks">Deadlock Points</option>
+                                            <option value="shared">Shared Resources</option>
+                                            <option value="tor">Timeliness of Response</option>
+                                        </select>
+                                    </div>
+                                </header>
+                                <main>
+                                    <section class="drawing"><svg></svg></section>
+                                </main>
+                            </main>
+                            <aside class="right-panels">
+                                <section class="tab-buttons">
+                                    <div class="tab-button" data-tab-id="poi">POIs</div>
+                                </section>
+                                <main class="panel-tabs">
+                                    <div class="tab-area panel" data-tab-id="poi" data-panel-id="poi">
+                                        <header>
+                                            <h2>Points of Interest</h2>
+                                        </header>
+                                        <br>
+                                        <div class="collapsible" data-poi-section="pod">
+                                            <header>Points of Delay (PODs)</header>
+                                            <main>
+                                                <table>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </main>
+                                        </div>
+                                        <div class="collapsible" data-poi-section="pos">
+                                            <header>Points of Synchronicity (POSs)</header>
+                                            <main>
+                                                <table>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </main>
+                                        </div>
+                                        <div class="collapsible" data-poi-section="shared">
+                                            <header>Shared Resources</header>
+                                            <main>
+                                                <table>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </main>
+                                        </div>
+                                        <div class="collapsible" data-poi-section="deadlocks">
+                                            <header>Deadlock Points</header>
+                                            <main>
+                                                <table>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </main>
+                                        </div>
+                                        <div class="collapsible" data-poi-section="tor">
+                                            <header>Timeliness of Response</header>
+                                            <main>
+                                                <table class="anchor-right">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Vertex</th>
+                                                            <th>Time Reached</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </main>
+                                        </div> 
+                                        <div class="collapsible" data-poi-section="pore">
+                                            <header>Points of Reoptimization</header>
+                                            <main>
+                                                <table>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </main>
+                                        </div> 
+                                    </div>
+                                </main>
+                            </aside>
                         </div>
                     </template>
                 </main>

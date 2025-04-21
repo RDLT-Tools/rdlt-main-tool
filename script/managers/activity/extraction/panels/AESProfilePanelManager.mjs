@@ -1,5 +1,5 @@
 import { AESStep } from "../../../../entities/activity/AESStep.mjs";
-import { buildElement } from "../../../../utils.mjs";
+import { buildArcTagElement, buildElement } from "../../../../utils.mjs";
 import { AESimulationManager } from "../AESimulationManager.mjs";
 
 export class AESProfilePanelManager {
@@ -72,10 +72,7 @@ export class AESProfilePanelManager {
             reachableArcsCell.innerHTML = "";
             for(const arcUID of reachabilityConfig) {
                 const [ fromVertexIdentifier, toVertexIdentifier ] = this.#simulationManager.getArcIdentifierPair(arcUID);
-                reachableArcsCell.appendChild(buildElement("div", { classname: "arc-tag" }, [
-                    buildElement("div", {}, [ fromVertexIdentifier ]),
-                    buildElement("div", {}, [ toVertexIdentifier ]),
-                ]));
+                reachableArcsCell.appendChild(buildArcTagElement(fromVertexIdentifier, toVertexIdentifier));
             }
 
             tableBody.appendChild(profileRow);

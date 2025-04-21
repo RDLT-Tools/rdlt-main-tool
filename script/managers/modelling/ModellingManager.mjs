@@ -161,7 +161,7 @@ export default class ModellingManager {
     }
 
     /**
-     * @param {"mouse-move" | "mouse-down" | "mouse-up" | "key-delete" | "key-selectall"} event 
+     * @param {"mouse-move" | "mouse-down" | "mouse-up" | "key-delete" | "key-selectall" | "key-arrowdown" | "key-arrowup" | "key-arrowleft" | "key-arrowright"} event 
      * @param {{ x?: number, y?: number }} props 
      */
     onDrawingViewUserEvent(event, props = {}) {
@@ -169,6 +169,8 @@ export default class ModellingManager {
 
         const mode = this.modellingStates.mode;
         const modellingEvents = this.modellingStates.events;
+
+        const relativeMoveOffset = { x: 10, y: 10 };
 
         switch(mode) {
             case "select":
@@ -220,6 +222,18 @@ export default class ModellingManager {
                         break;
                     case "key-selectall":
                         this.selectAll();
+                        break;
+                    case "key-arrowup":
+                        this.#moveSelectedRelative(0, -relativeMoveOffset.y);
+                        break;
+                    case "key-arrowdown":
+                        this.#moveSelectedRelative(0, relativeMoveOffset.y);
+                        break;
+                    case "key-arrowleft":
+                        this.#moveSelectedRelative(-relativeMoveOffset.x, 0);
+                        break;
+                    case "key-arrowright":
+                        this.#moveSelectedRelative(relativeMoveOffset.x, 0);
                         break;
                 }
             break;
@@ -290,6 +304,27 @@ export default class ModellingManager {
         this.context.managers.workspace.setModellingEvent("ismoving", false);
         this.context.managers.transform.endMovement();
         this.#saveModel();
+    }
+
+    /**
+     * 
+     * @param {number} offsetX 
+     * @param {number} offsetY 
+     */
+    #moveSelectedRelative(offsetX, offsetY) {
+        const newPositions = {};
+
+        for(const vertexUID of this.modellingStates.selected.components) {
+            const vertex = this.getComponentById(vertexUID);
+            if(!vertex) continue;
+
+            newPositions[vertexUID] = {
+                x: vertex.geometry.position.x + offsetX,
+                y: vertex.geometry.position.y + offsetY
+            }
+        }
+
+        this.updateComponentsPositions(newPositions);
     }
 
     #startHighlighting(x, y) {

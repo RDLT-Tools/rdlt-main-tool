@@ -1,4 +1,4 @@
-import { buildElement } from "../../../../utils.mjs";
+import { buildArcTagElement, buildElement } from "../../../../utils.mjs";
 import { ActivitySimulationManager } from "../ActivitySimulationManager.mjs";
 
 export class ASProfilePanelManager {
@@ -67,10 +67,7 @@ export class ASProfilePanelManager {
             reachableArcsCell.innerHTML = "";
             for(const arcUID of reachabilityConfig) {
                 const [ fromVertexIdentifier, toVertexIdentifier ] = this.#simulationManager.getArcIdentifierPair(arcUID);
-                reachableArcsCell.appendChild(buildElement("div", { classname: "arc-tag" }, [
-                    buildElement("div", {}, [ fromVertexIdentifier ]),
-                    buildElement("div", {}, [ toVertexIdentifier ]),
-                ]));
+                reachableArcsCell.appendChild(buildArcTagElement(fromVertexIdentifier, toVertexIdentifier));
             }
 
             tableBody.appendChild(profileRow);

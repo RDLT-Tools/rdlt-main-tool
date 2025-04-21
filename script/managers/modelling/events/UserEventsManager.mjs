@@ -29,12 +29,24 @@ export default class UserEventsManager {
         this.#keyEventsManager = new KeyEventsManager(this);
 
         this.#mouseEventsManager.registerDrawingSVG(this.#drawingSVG);
+        const modellingManager = this.context.managers.modelling;
 
         GlobalKeyEventsManager.listen(this.#drawingSVG, (keys) => {
-            if(setHasExact(keys, "Backspace") || setHasExact(keys, "Delete")) {
-                this.context.managers.modelling.onDrawingViewUserEvent("key-delete");
-            } else if(setHasExact(keys, "Control", "a")) {
-                this.context.managers.modelling.onDrawingViewUserEvent("key-selectall");
+            // Single-key events
+            if(keys.size === 1) {
+                const key = [...keys][0];
+
+                const keyUserEvent = {
+                    Backspace: "key-delete",
+                    Delete: "key-delete",
+                    ArrowUp: "key-arrowup",
+                    ArrowDown: "key-arrowdown",
+                    ArrowUp: "key-arrowup",
+                    ArrowLeft: "key-arrowleft",
+                    ArrowRight: "key-arrowright",
+                }[key];
+
+                modellingManager.onDrawingViewUserEvent(keyUserEvent);
             }
         });
     }

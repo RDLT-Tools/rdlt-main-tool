@@ -75,7 +75,7 @@ export default class ArcSVGBuilder {
         ], { className: "arc-bare diagram" });
 
 
-        if(["model", "aes", "vs"].includes(origin)) {
+        if(["model", "aes", "vs", "poi"].includes(origin)) {
             this.#labelElement = new TextSVGBuilder("", {
                 align: "middle", vAlign: "central", 
                 x: 0,
@@ -154,9 +154,8 @@ export default class ArcSVGBuilder {
                     arcElement,
                     this.#labelElement.element,
                 ], { className: "arc" });
-            } else if(origin === "vs") {
+            } else if([ "vs", "poi" ].includes(origin)) {
                 this.#element = makeGroupSVG([
-                    // labelMaskBoundsElement,
                     this.#highlightPathElement,
                     arcElement,
                     this.#labelElement.element,

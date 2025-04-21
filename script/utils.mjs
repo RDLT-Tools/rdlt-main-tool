@@ -133,6 +133,28 @@ export function buildElement(tagName = "div", attributes = {}, children = []) {
     return element;
 }
 
+export function buildVertexDisplayElement(type) {
+    return buildElement("div", { 
+        classname: "vertex-display", 
+        "data-vertex-type": type
+    });
+}
+
+export function buildArcDisplayElement() {
+    return buildElement("div", { classname: "arc-display" });
+}
+
+export function buildVertexTagElement(vertexIdentifier) {
+    return buildElement("div", { classname: "vertex-tag" }, [ vertexIdentifier ]);
+}
+
+export function buildArcTagElement(fromIdentifier, toIdentifier) {
+    return buildElement("div", { classname: "arc-tag" }, [
+        buildElement("div", {}, [ fromIdentifier ]),
+        buildElement("div", {}, [ toIdentifier ]),
+    ]);
+}
+
 export function pickRandomFromSet(set) {
     const arr = Array.from(set);
     const randomIndex = Math.floor(Math.random() * arr.length);
