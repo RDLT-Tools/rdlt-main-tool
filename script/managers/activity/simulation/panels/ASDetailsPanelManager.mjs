@@ -39,8 +39,10 @@ export class ASDetailsPanelManager {
         const nameView = this.#rootElement.querySelector(`[data-as-detail="name"]`);
         const sourceRootView = this.#rootElement.querySelector(`[data-as-detail="source"]`);
         const sourceTextView = sourceRootView.querySelector("span");
+        const sourceVertexDisplay = sourceRootView.querySelector(".vertex-display");
         const sinkRootView = this.#rootElement.querySelector(`[data-as-detail="sink"]`);
         const sinkTextView = sinkRootView.querySelector("span");
+        const sinkVertexDisplay = sinkRootView.querySelector(".vertex-display");
         const originView = this.#rootElement.querySelector(`[data-as-detail="origin"]`);
 
         const source = this.#simulationManager.getComponent(activity.source);
@@ -53,7 +55,7 @@ export class ASDetailsPanelManager {
             ae: "Generated", aes: "Simulated", direct: "Direct Input", import: "From File"
         }[activity.origin] || "-";
 
-        sourceRootView.setAttribute("data-vertex-type", source.type);
-        sinkRootView.setAttribute("data-vertex-type", sink.type);     
+        sourceVertexDisplay.setAttribute("data-vertex-type", source.type);
+        sinkVertexDisplay.setAttribute("data-vertex-type", sink.type);     
     }
 }

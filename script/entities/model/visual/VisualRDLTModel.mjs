@@ -1,3 +1,8 @@
+import { isEpsilon } from "../../../utils.mjs";
+import ArcGeometry from "../../geometry/ArcGeometry.mjs";
+import ComponentGeometry from "../../geometry/ComponentGeometry.mjs";
+import ArcStyles from "../../styling/ArcStyles.mjs";
+import ComponentStyles from "../../styling/ComponentStyles.mjs";
 import RDLTModel from "../RDLTModel.mjs";
 import ModelAnnotation from "./ModelAnnotation.mjs";
 import VisualArc from "./VisualArc.mjs";
@@ -97,7 +102,7 @@ export default class VisualRDLTModel {
 
     /**
      * 
-     * @param {{ components?: VisualComponent[], arcs?: VisualArc[] }} options 
+     * @param {{ name: string, components?: VisualComponent[], arcs?: VisualArc[] }} options 
      */
     constructor(options = {}) {
         const { name, components, arcs } = options || {};
@@ -105,12 +110,12 @@ export default class VisualRDLTModel {
         this.#name = name || "Untitled Model";
 
         if(components) {
-            for(const component of components) this.addComponent(component);
+            for(const component of components) this.#addVisualComponent(component);
             this.VERTEX_ID_COUNTER = Math.max(...components.map(c => c.uid), 0) + 1;
         }
         
         if(arcs) {
-            for(const arc of arcs) this.addArc(arc);
+            for(const arc of arcs) this.#addVisualArc(arc);
             this.ARC_ID_COUNTER = Math.max(...arcs.map(c => c.uid), 0) + 1;
         }
     }
@@ -224,7 +229,7 @@ export default class VisualRDLTModel {
         for(const arc of outgoingArcs) {
             if(addedComponents.has(arc.toVertexUID)) continue;
 
-            if(arc.C === "") { // only add if C-attribute is epsilon
+            if(isEpsilon(arc)) { // only add if C-attribute is epsilon
                 addedComponents.add(arc.toVertexUID);
                 rbsComponents.push(this.getComponent(arc.toVertexUID));
             }
@@ -252,11 +257,33 @@ export default class VisualRDLTModel {
     getAllArcs() {
         return [...this.#arcs];
     }
+    
+    /**
+     * 
+     * @param {{ identifier: string, label: string, isRBSCenter: boolean }} props 
+     * @param {ComponentGeometry} geometry 
+     * @param {ComponentStyles} styles 
+     * @returns {VisualComponent}
+     */
+    addComponent(type, props, geometry, styles) {
+        const visualComponent = new VisualComponent({
+            uid: this.VERTEX_ID_COUNTER++,
+            type,
+            identifier: props.identifier,
+            label: props.label,
+            isRBSCenter: props.isRBSCenter || false,
+            geometry: geometry || new ComponentGeometry(),
+            styles: styles || new ComponentStyles()
+        });
+
+        this.#addVisualComponent(visualComponent);
+        return visualComponent;
+    }
 
     /**
      * @param {VisualComponent} component 
      */
-    addComponent(component) {
+    #addVisualComponent(component) {
         this.#components[component.uid] = component;
         this.#arcConnections[component.uid] = {};
 
@@ -264,9 +291,30 @@ export default class VisualRDLTModel {
     }
 
     /**
+     * @param {{ C, L }} props 
+     * @param {ArcGeometry} geometry 
+     * @param {ArcStyles} styles 
+     * @returns {VisualArc}
+     */
+    addArc(fromVertexUID, toVertexUID, props, geometry, styles, isAbstractArc = false) {
+        const { C, L } = props || {};
+        const visualArc = new VisualArc({
+            uid: this.ARC_ID_COUNTER++,
+            fromVertexUID,
+            toVertexUID,
+            C, L,
+            geometry, styles,
+            isAbstractArc
+        });
+
+        this.#addVisualArc(visualArc);
+        return visualArc;
+    }
+
+    /**
      * @param {VisualArc} arc 
      */
-    addArc(arc) {
+    #addVisualArc(arc) {
         this.#arcs.push(arc);
 
         if(!this.#arcConnections[arc.fromVertexUID]) 
@@ -394,11 +442,16 @@ export default class VisualRDLTModel {
 
         const copiedArcs = this.#arcs.map(arc => arc.copy());
 
-        return new VisualRDLTModel({
+        const copiedModel = new VisualRDLTModel({
             name: this.#name,
             components: copiedVertices,
             arcs: copiedArcs
         });
+
+        copiedModel.VERTEX_ID_COUNTER = this.VERTEX_ID_COUNTER;
+        copiedModel.ARC_ID_COUNTER = this.ARC_ID_COUNTER;
+
+        return copiedModel;
     }
     
     toJSON() {
@@ -413,17 +466,8 @@ export default class VisualRDLTModel {
 
     toSimpleModel() {
         return {
-            components: Object.values(this.#components).map(c => ({
-                uid: c.uid,
-                identifier: c.identifier,
-                isRBSCenter: c.isRBSCenter
-            })),
-            arcs: this.#arcs.map(a => ({
-                uid: a.uid,
-                fromVertexUID: a.fromVertexUID,
-                toVertexUID: a.toVertexUID,
-                C: a.C, L: a.L
-            }))
+            components: Object.values(this.#components).map(c => c.simplify()),
+            arcs: this.#arcs.map(a => a.simplify())
         };
     }
 

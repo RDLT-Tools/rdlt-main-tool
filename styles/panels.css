@@ -1,4 +1,9 @@
 
+.tab-button > i {
+  opacity: 0.8;
+  margin-right: 4px;
+}
+
 .model-context > main > .subworkspace > aside > .panel-tabs {
   flex: 1;
   background-color: #ffffff;
@@ -79,11 +84,6 @@
   opacity: 0.5;
 }
 
-.panel[data-panel-id="execute"] [data-section-id="vs"] table tr > td:last-child,
-.panel[data-panel-id="execute"] [data-section-id="activities"] table tr > td:last-child {
-  text-align: right;
-}
-
 
 .aes-subworkspace .panel[data-tab-id="steps"] table,
 .aes-subworkspace .panel[data-tab-id="states"] table,
@@ -91,15 +91,9 @@
   margin-top: 12px;
 }
 
-.aes-subworkspace .panel[data-tab-id="steps"] table thead tr > th:last-child,
-.aes-subworkspace .panel[data-tab-id="states"] table thead tr > th:last-child {
-  text-align: right;
-}
-
 .aes-subworkspace .panel[data-tab-id="steps"] table tbody tr > td:last-child {
   font-size: 12px;
   opacity: 0.5;
-  text-align: right;
 }
 
 .aes-subworkspace .panel[data-tab-id="steps"] table tr.active {
@@ -143,4 +137,17 @@
 
 .panel[data-panel-id="execute"] [data-section-id="activities"] table tr:not([data-passed="true"]) .data-passed-message {
   color: red;
+}
+
+.poi-subworkspace > aside {
+  width: 360px !important;
+}
+
+.poi-subworkspace[data-active-poi="pod"] [data-poi-section]:not([data-poi-section="pod"]), 
+.poi-subworkspace[data-active-poi="pos"] [data-poi-section]:not([data-poi-section="pos"]), 
+.poi-subworkspace[data-active-poi="deadlocks"] [data-poi-section]:not([data-poi-section="deadlocks"]), 
+.poi-subworkspace[data-active-poi="shared"] [data-poi-section]:not([data-poi-section="shared"]), 
+.poi-subworkspace[data-active-poi="tor"] [data-poi-section]:not([data-poi-section="tor"]), 
+.poi-subworkspace[data-active-poi="pore"] [data-poi-section]:not([data-poi-section="pore"]) {
+  display: none;
 }

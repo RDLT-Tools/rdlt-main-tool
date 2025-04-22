@@ -1,5 +1,5 @@
 import { AESStep } from "../../../../entities/activity/AESStep.mjs";
-import { buildElement } from "../../../../utils.mjs";
+import { buildArcTagElement, buildElement, buildVertexTagElement } from "../../../../utils.mjs";
 import { AESimulationManager } from "../AESimulationManager.mjs";
 
 export class AESStepsPanelManager {
@@ -69,15 +69,12 @@ export class AESStepsPanelManager {
                 if([ "start", "backtrack", "end-sink" ].includes(step.action)) {
                     const currentVertexIdentifier = this.#simulationManager.getVertexIdentifier(step.currentVertex);
                     stepRowCells.push(buildElement("td", {}, [
-                        buildElement("div", { classname: "vertex-tag" }, [ currentVertexIdentifier ])
+                        buildVertexTagElement(currentVertexIdentifier)
                     ]));
                 } else if([ "try-explore", "explore", "check", "traverse" ].includes(step.action)) {
                     const [ fromVertexIdentifier, toVertexIdentifier ] = this.#simulationManager.getArcIdentifierPair(step.currentArc);
                     stepRowCells.push(buildElement("td", {}, [
-                        buildElement("div", { classname: "arc-tag" }, [
-                            buildElement("div", {}, [ fromVertexIdentifier ]),
-                            buildElement("div", {}, [ toVertexIdentifier ]),
-                        ])
+                        buildArcTagElement(fromVertexIdentifier, toVertexIdentifier)
                     ]))
                 } else {
                     stepRowCells.push(buildElement("td"));

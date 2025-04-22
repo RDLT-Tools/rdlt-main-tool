@@ -1,4 +1,4 @@
-import { setHasExact } from "../../utils.mjs";
+import { getAbsoluteSVGCoordinates, setHasExact } from "../../utils.mjs";
 import { GlobalKeyEventsManager } from "../modelling/events/GlobalKeyEventsManager.mjs";
 
 export class DrawingViewportManager {
@@ -31,15 +31,17 @@ export class DrawingViewportManager {
     }
 
     #initialize() {
-        GlobalKeyEventsManager.listen(this.#svgElement, (keys, scrollDirection, cursorPosition) => {
+        GlobalKeyEventsManager.listen(this.#svgElement, (keys, scrollDirection, relativeCursorPosition) => {
             if(keys.size === 0) {
                 this.move(0, scrollDirection);
             } else if(setHasExact(keys, "Control")) {
                 // const { x: cx, y: cy } = cursorPosition;
                 // const { x: ox, y: oy } = this.#svgElement.getBoundingClientRect();
+                
+                relativeCursorPosition = relativeCursorPosition || { x: 0, y: 0 };
 
-                if(scrollDirection < 0) this.zoomIn();
-                else if(scrollDirection > 0) this.zoomOut();
+                if(scrollDirection < 0) this.zoomIn(relativeCursorPosition);
+                else if(scrollDirection > 0) this.zoomOut(relativeCursorPosition);
 
             } else if(setHasExact(keys, "Shift")) {
                 this.move(scrollDirection, 0);
@@ -59,16 +61,30 @@ export class DrawingViewportManager {
         this.#updateViewport();
     }
 
-    zoomIn() {
-        this.#view.states.zoom *= this.#view.motion.zoomFactor;
+    /**
+     * 
+     * @param {number} zoomFactor 
+     * @param {{ x: number, y: number }} relativeCursorPosition 
+     */
+    #zoom(zoomFactor, relativeCursorPosition) {
+        this.#view.states.zoom *= zoomFactor;
+
+        // const relativeReoffsetX = (zoomFactor-1)*relativeCursorPosition.x;
+        // const relativeReoffsetY = (zoomFactor-1)*relativeCursorPosition.y;
+        // const drawingCursorPosition = this.getAbsolutePosition(relativeCursorPosition.x, relativeCursorPosition.y);
+
+        // this.#view.states.offset.x += (zoomFactor-1)*drawingCursorPosition.x;
+        // this.#view.states.offset.y += (zoomFactor-1)*drawingCursorPosition.y;
         
         this.#updateViewport();
     }
 
-    zoomOut() {
-        this.#view.states.zoom /= this.#view.motion.zoomFactor;
+    zoomIn(relativeCursorPosition) {
+        this.#zoom(this.#view.motion.zoomFactor, relativeCursorPosition);
+    }
 
-        this.#updateViewport();
+    zoomOut(relativeCursorPosition) {
+        this.#zoom(1/this.#view.motion.zoomFactor, relativeCursorPosition);
     }
 
     #updateViewport() {

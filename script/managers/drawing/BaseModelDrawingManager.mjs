@@ -148,6 +148,8 @@ export class BaseModelDrawingManager {
         const arcBuilder = new ArcSVGBuilder(this.origin);
 
         arcBuilder.setLabelText(`${arc.C || "ϵ"}:${arc.L}`);
+        if(arc.isAbstractArc) arcBuilder.setIsAbstract(true);
+        
         this.drawArc(arcBuilder, arc, vertex1Geometry, vertex2Geometry);
 
         this.builders.arcs[id] = arcBuilder;

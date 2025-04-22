@@ -25,6 +25,10 @@ export default class VisualModelManager {
     getModelName() {
         return this.#visualModel.getName();
     }
+    
+    setModelName(name) {
+        return this.#visualModel.setName(name);
+    }
 
     /**
      * 
@@ -34,19 +38,7 @@ export default class VisualModelManager {
      * @returns {VisualComponent}
      */
     addComponent(type, props, geometry, styles) {
-        const visualComponent = new VisualComponent({
-            uid: this.#visualModel.VERTEX_ID_COUNTER++,
-            type,
-            identifier: props.identifier,
-            label: props.label,
-            isRBSCenter: props.isRBSCenter || false,
-            geometry: geometry || new ComponentGeometry(),
-            styles: styles || new ComponentStyles()
-        });
-
-        this.#visualModel.addComponent(visualComponent);
-
-        return visualComponent;
+        return this.#visualModel.addComponent(type, props, geometry, styles);
     }
 
     /**
@@ -120,17 +112,7 @@ export default class VisualModelManager {
      * @returns {VisualArc}
      */
     addArc(fromVertexUID, toVertexUID, props, geometry, styles) {
-        const { C, L } = props || {};
-        const visualArc = new VisualArc({
-            uid: this.#visualModel.ARC_ID_COUNTER++,
-            fromVertexUID,
-            toVertexUID,
-            C, L,
-            geometry, styles
-        });
-
-        this.#visualModel.addArc(visualArc);
-        return visualArc;
+        return this.#visualModel.addArc(fromVertexUID, toVertexUID, props, geometry, styles);
     }
 
     /**

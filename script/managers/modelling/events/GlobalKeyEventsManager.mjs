@@ -4,7 +4,7 @@ export class GlobalKeyEventsManager {
 
     /** @typedef {"Shift" | "Control" | "+" | "-"} Keys */
     /** @typedef {-1 | 0 | 1} ScrollDirection */
-    /** @typedef {(keys: Set<Keys>, scrollDirection: ScrollDirection, cursorPosition: { x: number, y: number }) => void} KeyEventsHandler */
+    /** @typedef {(keys: Set<Keys>, scrollDirection: ScrollDirection, relativeCursorPosition: { x: number, y: number }) => void} KeyEventsHandler */
     
     /** @type {{ element: HTMLElement, handler: KeyEventsHandler }[]} */
     static #listeners = [];
@@ -48,10 +48,15 @@ export class GlobalKeyEventsManager {
     static #notifyListeners(scrollDirection = 0, cursorPosition = null) {
         for(const { element, handler } of GlobalKeyEventsManager.#listeners) {
             requestAnimationFrame(() => {
-                const { width, height } = element.getBoundingClientRect();
+                const { width, height, x, y } = element.getBoundingClientRect();
                 if(width === 0 || height === 0) return;
+
+                const relativeCursorPosition = cursorPosition !== null ? {
+                    x: cursorPosition.x - x,
+                    y: cursorPosition.y - y 
+                } : null;
     
-                handler(GlobalKeyEventsManager.#heldKeys, scrollDirection, cursorPosition);
+                handler(GlobalKeyEventsManager.#heldKeys, scrollDirection, relativeCursorPosition);
             });
         }
     }
@@ -64,10 +69,10 @@ export class GlobalKeyEventsManager {
     static listen(element, handler) {
         this.#listeners.push({ element, handler });
         element.addEventListener("wheel", (event) => {
+            event.preventDefault();
             this.#notifyListeners(Math.sign(event.deltaY || 0), {
                 x: event.clientX, y: event.clientY
             });
-            event.preventDefault();
-        });
+        }, { passive: false }); 
     }
 }

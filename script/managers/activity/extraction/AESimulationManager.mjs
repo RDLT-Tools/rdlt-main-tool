@@ -1,8 +1,8 @@
 import Activity from "../../../entities/activity/Activity.mjs";
 import { AESStep } from "../../../entities/activity/AESStep.mjs";
 import VisualRDLTModel from "../../../entities/model/visual/VisualRDLTModel.mjs";
-import { backtrack, buildArcMap, buildArcsAdjacencyMatrix, buildVertexMap, checkArc, iterateAtVertex, traverseArc } from "../../../services/aes.mjs";
-import { generateUniqueID, pickRandomFromSet } from "../../../utils.mjs";
+import { backtrack, checkArc, iterateAtVertex, traverseArc } from "../../../services/aes.mjs";
+import { buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, generateUniqueID, pickRandomFromSet } from "../../../utils.mjs";
 import ModelContext from "../../model/ModelContext.mjs";
 import { AESDrawingManager } from "./AESDrawingManager.mjs";
 import { AESSubworkspaceManager } from "./AESSubworkspaceManager.mjs";
@@ -142,22 +142,20 @@ export class AESimulationManager {
         this.#states.aeStates.checkpoints[0] = structuredClone(initialAEStates);
         this.#states.aeStates.current = initialAEStates;
 
-        const vertices = this.#modelSnapshot.getAllComponents().map(v => ({
-            uid: v.uid, type: v.type
-        }));
-
-        const arcs = this.#modelSnapshot.getAllArcs().map(a => ({
-            uid: a.uid, fromVertexUID: a.fromVertexUID, 
-            toVertexUID: a.toVertexUID, L: a.L, C: a.C
-        }));
+        const vertices = this.#modelSnapshot.getAllComponents().map(v => v.simplify());
+        const arcs = this.#modelSnapshot.getAllArcs().map(a => a.simplify());
 
         this.#cache.vertices = vertices;
         this.#cache.arcs = arcs;
 
+        const vertexMap = buildVertexMap(vertices);
+
         this.#cache.aeCache = {
-            vertexMap: buildVertexMap(vertices),
+            arcs,
+            vertexMap,
             arcMap: buildArcMap(arcs),
-            arcsMatrix: buildArcsAdjacencyMatrix(arcs)
+            arcsMatrix: buildArcsAdjacencyMatrix(arcs),
+            rbsMatrix: buildRBSMatrix(vertexMap, arcs)
         };
 
         this.refreshStepsList();

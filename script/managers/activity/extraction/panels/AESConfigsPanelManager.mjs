@@ -20,8 +20,10 @@ export class AESConfigsPanelManager {
         const nameView = this.#rootElement.querySelector(`input[name="name"]`);
         const sourceRootView = this.#rootElement.querySelector(`[data-aes-detail="source"]`);
         const sourceTextView = sourceRootView.querySelector("span");
+        const sourceVertexDisplay = sourceRootView.querySelector(".vertex-display");
         const sinkRootView = this.#rootElement.querySelector(`[data-aes-detail="sink"]`);
         const sinkTextView = sinkRootView.querySelector("span");
+        const sinkVertexDisplay = sinkRootView.querySelector(".vertex-display");
         const modeView = this.#rootElement.querySelector(`[data-aes-detail="mode"]`);
 
         nameView.value = configs.name || "";
@@ -32,7 +34,7 @@ export class AESConfigsPanelManager {
             user: "User-based selection"
         }[configs.mode] || "-";
 
-        sourceRootView.setAttribute("data-vertex-type", configs.source.type);
-        sinkRootView.setAttribute("data-vertex-type", configs.sink.type);        
+        sourceVertexDisplay.setAttribute("data-vertex-type", configs.source.type);
+        sinkVertexDisplay.setAttribute("data-vertex-type", configs.sink.type);        
     }
 }

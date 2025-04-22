@@ -42,9 +42,6 @@ export default class VerificationsPanelManager {
   /**
    * @type {{
    *      freeChoiceness: Form,
-   * }}
-   *
-   * @type {{
    *      wellHandledness: Form,
    * }}
    */
@@ -65,6 +62,7 @@ export default class VerificationsPanelManager {
   }
 
   #initializeView() {
+    this.#initializePOISection();
     this.#initializeFreeChoicenessSection();
     this.#initializeWellHandlednessSection();
   }
@@ -88,6 +86,21 @@ export default class VerificationsPanelManager {
     );
   }
 
+  #initializePOISection() {
+    const sectionRoot = this.#rootElement.querySelector(
+      "[data-section-id='poi']"
+    );
+    const sectionViews = this.#views.sections.freeChoiceness;
+
+    sectionViews.root = sectionRoot;
+    sectionViews.startButton = sectionRoot.querySelector(
+      "button[data-subaction='start']"
+    );
+    sectionViews.startButton.addEventListener("click", () => {
+      this.context.managers.workspace.showPOIs();
+    });
+  }
+
   #initializeFreeChoicenessSection() {
     const sectionRoot = this.#rootElement.querySelector(
       "[data-section-id='fc']"
@@ -99,7 +112,6 @@ export default class VerificationsPanelManager {
       "button[data-subaction='start']"
     );
     sectionViews.startButton.addEventListener("click", () => {
-      console.log("Clicked verification button for free-choiceness");
       const { source, sink, type } = this.#forms.freeChoiceness.getValues();
       if (!source || !sink) return;
 
@@ -126,7 +138,6 @@ export default class VerificationsPanelManager {
       "button[data-subaction='start']"
     );
     sectionViews.startButton.addEventListener("click", () => {
-      console.log("Clicked verification button for well-handledness");
       const { source, sink, type } = this.#forms.wellHandledness.getValues();
       if (!source || !sink) return;
 

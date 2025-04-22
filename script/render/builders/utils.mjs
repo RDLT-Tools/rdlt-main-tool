@@ -17,7 +17,7 @@ export function makeSVGElement(tag, attributes = {}, children = []) {
   const element = document.createElementNS(ns, tag);
   if (tag === "svg") element.setAttribute("xmlns", ns);
   for (const key in attributes) {
-    if (key === "className") {
+    if (key === "className" || key === "classname") {
       element.classList.add(...attributes[key].split(" "));
     } else {
       element.setAttribute(key, attributes[key]);

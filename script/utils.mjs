@@ -133,6 +133,28 @@ export function buildElement(tagName = "div", attributes = {}, children = []) {
     return element;
 }
 
+export function buildVertexDisplayElement(type) {
+    return buildElement("div", { 
+        classname: "vertex-display", 
+        "data-vertex-type": type
+    });
+}
+
+export function buildArcDisplayElement() {
+    return buildElement("div", { classname: "arc-display" });
+}
+
+export function buildVertexTagElement(vertexIdentifier) {
+    return buildElement("div", { classname: "vertex-tag" }, [ vertexIdentifier ]);
+}
+
+export function buildArcTagElement(fromIdentifier, toIdentifier) {
+    return buildElement("div", { classname: "arc-tag" }, [
+        buildElement("div", {}, [ fromIdentifier ]),
+        buildElement("div", {}, [ toIdentifier ]),
+    ]);
+}
+
 export function pickRandomFromSet(set) {
     const arr = Array.from(set);
     const randomIndex = Math.floor(Math.random() * arr.length);
@@ -183,6 +205,20 @@ export function getAbsoluteSVGCoordinates(svgElement, viewX, viewY) {
     };
 }
 
+
+/**
+ * @typedef {number} ArcUID
+ * @typedef {number} VertexUID
+ * @typedef {number} RBSCenterVertexUID
+ * @typedef {{ uid: ArcUID, fromVertexUID: number, toVertexUID: number, C: string, L: number }} Arc
+ * @typedef {{ uid: ArcUID, type: "boundary" | "entity" | "controller", isRBSCenter: boolean }} Vertex
+ * 
+ * @typedef {{ [vertexUID: number]: Vertex }} VertexMap 
+ * @typedef {{ [arcUID: number]: Arc }} ArcMap 
+ * @typedef {{ [fromVertexUID: number]: { [toVertexUID: number]: Set<ArcUID> } }} ArcsAdjacencyMatrix
+ * @typedef {{ [vertexUID: number]: RBSCenterVertexUID }} RBSMatrix
+ */
+
 /**
  * @param {Arc[]} arcs 
  * @returns {{ [arcUID: number]: VisualArc }}
@@ -194,4 +230,232 @@ export function buildArcMap(arcs) {
     }
 
     return map;
+}
+
+
+/**
+ * @param {Arc[]} arcs 
+ * @returns {ArcsAdjacencyMatrix}
+ */
+export function buildArcsAdjacencyMatrix(arcs) {
+    /** @type {ArcsAdjacencyMatrix} */
+    const matrix = {};
+
+    for(const arc of arcs) {
+        const { uid, fromVertexUID, toVertexUID } = arc;
+        if(!(fromVertexUID in matrix)) matrix[fromVertexUID] = {};
+        
+        const outgoingArcs = matrix[fromVertexUID];
+        if(!(toVertexUID in outgoingArcs)) outgoingArcs[toVertexUID] = new Set();
+
+        outgoingArcs[toVertexUID].add(uid);
+    }
+
+    return matrix;
+}
+
+
+/**
+ * 
+ * @param {Vertex[]} vertices 
+ * @returns {VertexMap}
+ */
+export function buildVertexMap(vertices) {
+    const map = {};
+    for(const vertex of vertices) {
+        map[vertex.uid] = vertex;
+    }
+
+    return map;
+}
+
+
+/**
+ * 
+ * @param {VertexMap} vertexMap
+ * @param {Arc[]} arcs
+ * @param {ArcsAdjacencyMatrix} arcsMatrix 
+ * @returns {RBSMatrix}
+ */
+export function buildRBSMatrix(vertexMap, arcs) {
+    const rbsMatrix = {};
+
+    for(const arc of arcs) {
+        const from = vertexMap[arc.fromVertexUID];
+        if(from.isRBSCenter && isEpsilon(arc)) {
+            rbsMatrix[arc.fromVertexUID] = arc.fromVertexUID;
+            rbsMatrix[arc.toVertexUID] = arc.fromVertexUID;
+        }
+    }
+
+    return rbsMatrix;
+}
+
+/**
+ * @param {number} vertexUID 
+ * @param {ArcsAdjacencyMatrix} arcsMatrix 
+ * @returns {Set<ArcUID>}
+ */
+export function getIncomingArcs(vertexUID, arcsMatrix) {
+    const allIncomingArcs = new Set(); 
+    for(const fromVertexUID in arcsMatrix) {
+        const incomingArcs = arcsMatrix[fromVertexUID][vertexUID];
+        if(incomingArcs) {
+            for(const arcUID of incomingArcs) {
+                allIncomingArcs.add(arcUID);
+            }
+        }
+    }
+
+    return allIncomingArcs;
+}
+
+/**
+ * @param {number} vertexUID 
+ * @param {ArcsAdjacencyMatrix} arcsMatrix 
+ * @returns {Set<ArcUID>}
+ */
+export function getOutgoingArcs(vertexUID, arcsMatrix) {
+    const allOutgoingArcs = new Set();
+    const outgoingMap = arcsMatrix[vertexUID];
+
+    for(const toVertexUID in outgoingMap) {
+        const arcs = outgoingMap[toVertexUID];
+        for(const arcUID of arcs) {
+            allOutgoingArcs.add(arcUID);
+        }
+    }
+
+    return allOutgoingArcs;
+}
+
+/**
+ * @param {number} vertexUID 
+ * @param {ArcsAdjacencyMatrix} arcsMatrix 
+ * @returns {Set<ArcUID>}
+ */
+export function getIncidentArcs(vertexUID, arcsMatrix) {
+    const incidentArcs = new Set();
+
+    // Get incoming arcs
+    for(const fromVertexUID in arcsMatrix) {
+        const incomingArcs = arcsMatrix[fromVertexUID][vertexUID];
+        if(incomingArcs) {
+            for(const arcUID of incomingArcs) {
+                incidentArcs.add(arcUID);
+            }
+        }
+    }
+
+    // Get outgoing arcs
+    const outgoingMap = arcsMatrix[vertexUID];
+    for(const toVertexUID in outgoingMap) {
+        const arcs = outgoingMap[toVertexUID];
+        for(const arcUID of arcs) {
+            incidentArcs.add(arcUID);
+        }
+    }
+
+    return incidentArcs;
+}
+
+
+/**
+ * @param {Arc | string} arc
+ * @returns {boolean} 
+ */
+export function isEpsilon(arc) {
+    if(typeof(arc) === "string") return arc.trim() === "";
+    return arc.C.trim() === "";
+}
+
+/**
+ * 
+ * @param {VertexUID} startVertexUID 
+ * @param {VertexUID} endVertexUID 
+ * @param {Set<ArcUID>} visitedArcs 
+ * @param {{ vertexMap: VertexMap, arcMap: ArcMap, arcsMatrix: ArcsAdjacencyMatrix, rbsMatrix: RBSMatrix }} cache 
+ * 
+ * @returns {VertexUID[][]}
+ */
+export function findAllRBSPaths(startVertexUID, endVertexUID, visitedArcs, cache) {
+    if(!visitedArcs) visitedArcs = new Set();
+    const { vertexMap, arcMap, arcsMatrix, rbsMatrix } = cache;
+    
+    const arcPaths = [];
+    
+    const rbsCenterUID = rbsMatrix[startVertexUID];
+
+    const outgoingArcs = getOutgoingArcs(startVertexUID, arcsMatrix);
+    for(const arcUID of outgoingArcs) {
+        if(visitedArcs.has(arcUID)) continue;
+        const arc = arcMap[arcUID];
+
+        if(arc.toVertexUID === endVertexUID) {
+            arcPaths.push([ arcUID ]);
+            continue;
+        }
+
+        if(rbsMatrix[arc.toVertexUID] !== rbsCenterUID) continue;
+
+        const _visitedArcs = new Set(visitedArcs);
+        _visitedArcs.add(arcUID);
+
+        const nextArcPaths = findAllRBSPaths(arc.toVertexUID, endVertexUID, _visitedArcs, cache);
+        for(const arcPath of nextArcPaths) {
+            arcPaths.push([ arcUID, ...arcPath ]);
+        }
+
+    }
+
+    return arcPaths;
+}
+
+export function isInbridge(arcUID, arcMap, rbsMatrix) {
+    const arc = arcMap[arcUID];
+
+    return rbsMatrix[arc.toVertexUID] && 
+        (rbsMatrix[arc.fromVertexUID] !== rbsMatrix[arc.toVertexUID]);
+}
+
+export function isOutbridge(arcUID, arcMap, rbsMatrix) {
+    const arc = arcMap[arcUID];
+
+    return rbsMatrix[arc.fromVertexUID] && 
+        (rbsMatrix[arc.fromVertexUID] !== rbsMatrix[arc.toVertexUID]);
+}
+
+export function areTypeAlikeIncoming(arcUID1, arcUID2, arcMap, rbsMatrix) {
+    // Two incoming arcs to the same vertex are type-alike if any is true:
+    //    1. Neither are inbridge/outbridge
+    //    2. Both are inbridges
+    //    3. Both are outbridges and come from the same vertex
+
+    const isArc1Inbridge = isInbridge(arcUID1, arcMap, rbsMatrix);
+    const isArc1Outbridge = isOutbridge(arcUID1, arcMap, rbsMatrix);
+    const isArc2Inbridge = isInbridge(arcUID2, arcMap, rbsMatrix);
+    const isArc2Outbridge = isOutbridge(arcUID2, arcMap, rbsMatrix);
+
+    // 1. Neither are inbridge/outbridge
+    if(!isArc1Inbridge && !isArc1Outbridge && !isArc2Inbridge && !isArc2Outbridge) return true;
+
+    // 2. Both are inbridges
+    if(isArc1Inbridge && isArc2Inbridge) return true;
+
+    // 3. Both are outbridges and come from the same vertex
+    if(isArc1Outbridge && isArc2Outbridge &&
+        arcMap[arcUID1].fromVertexUID === arcMap[arcUID2].fromVertexUID) return true; 
+
+    return false;
+}
+
+/**
+ * 
+ * @param {string} str 
+ * @param {number} maxLength 
+ */
+export function ellipsize(str, maxLength) {
+    if(str.length <= maxLength) return str;
+
+    return str.substring(0, maxLength - 3) + "...";
 }

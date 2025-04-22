@@ -81,11 +81,6 @@ h2 {
     width: 100%;
 }
 
-.anchor-right {
-    display: flex;
-    justify-content: right;
-}
-
 .columns {
     display: flex;
     flex-direction: row;
@@ -145,6 +140,18 @@ input {
     outline: none;
     border-radius: 5px;
     padding: 6px 8px 6px 8px;
+}
+
+input.model-name-input {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    width: 100%;
+    font-size: 18px;
+    padding: 0;
+    margin: 0;
+    margin-top: 4px;
+    outline: none;
 }
 
 input[type="checkbox"] {
@@ -276,6 +283,33 @@ table.row-clickable tr:active {
     transform: scale(0.99);
 }
 
+table.anchor-right > tbody > tr > td:last-child:not(:first-child),
+table.anchor-right > thead > tr > th:last-child:not(:first-child) {
+    text-align: right;
+}
+
+table tr[data-has-subtable] {
+    border-bottom: none !important;
+}
+
+table.subtable {
+    box-sizing: border-box;
+}
+
+table.subtable th {
+    font-size: 0.95em;
+}
+
+table tr.subtable-parent > td {
+    padding-left: 30px;
+    padding-bottom: 0;
+}
+
+table.subtable tr {
+    border-top: 1px dashed #C0C0C0;    
+    border-bottom: none;
+}
+
 .vertex-tag, .arc-tag {
     background-color: rgba(0, 0, 0, 0.08);
     display: inline-block;
@@ -332,9 +366,32 @@ table.row-clickable tr:active {
     color: #B21313;
 }
 
-.vertex-display:not([data-vertex-type]) img,
-.vertex-display[data-vertex-type="boundary"] img:not([data-vertex-type="boundary"]),
-.vertex-display[data-vertex-type="entity"] img:not([data-vertex-type="entity"]),
-.vertex-display[data-vertex-type="controller"] img:not([data-vertex-type="controller"]) {
-    display: none;
+
+
+.vertex-display, .arc-display {
+    height: 24px;
+    width: 24px;
+    display: inline-block;
+    vertical-align: middle;
+
+    background-position: center;
+    background-size: 22px auto;
+    background-repeat: no-repeat;
+}
+
+.vertex-display[data-vertex-type="boundary"] {
+    background-image: url(../assets/templates/components/boundary.svg);
+}
+
+.vertex-display[data-vertex-type="entity"] {
+    background-image: url(../assets/templates/components/entity.svg);
+}
+
+.vertex-display[data-vertex-type="controller"] {
+    background-image: url(../assets/templates/components/controller.svg);
+}
+
+.arc-display {
+    background-image: url(../assets/icons/arc.svg);
+    background-size: 18px auto;
 }

@@ -103,6 +103,15 @@ export default class App {
 
         return context;
     }
+    
+    /**
+     * 
+     * @param {ModelContext} context 
+     * @param {string} title 
+     */
+    static setContextTabTitle(context, title) {
+        this.#contextsTabGroupManager.getTabManager(context.id)?.setTitle(title);
+    }
 
     static saveStates() {
         LocalSessionManager.saveAppStates(App.#states);

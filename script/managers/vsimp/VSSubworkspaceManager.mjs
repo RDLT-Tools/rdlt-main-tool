@@ -11,12 +11,13 @@ export class VSSubworkspaceManager {
     /**
      * @type {{
      *      main: HTMLDivElement,
+     *      header: { levelLabel: HTMLDivElement },
      *      buttons: { actions: { [action: string]: HTMLButtonElement } },
      *      panels: { [panelID: string]: HTMLDivElement }
      * }}
      */
     #view = {
-        header: {},
+        header: { levelLabel: null },
         buttons: { actions: {} },
         panels: {}
     };
@@ -53,10 +54,16 @@ export class VSSubworkspaceManager {
                 this.#view.buttons.actions[action] = button;
                 button.addEventListener("click", () => this.#onActionClicked(action));
         });
+
+        // Initialize header
+        this.#view.header.levelLabel = this.#rootAreaElement.querySelector(".vs-level-label");
     }
 
     #onActionClicked(action) {
         switch(action) {
+            case "open":
+                this.#vsManager.openAsModel();
+            break;
         }
     }
 
@@ -74,5 +81,13 @@ export class VSSubworkspaceManager {
         // ));
         
         // this.#tabs.right.selectTab("result");
+    }
+
+    setup(level, rbsCenterIdentifier) {
+        if(level === 1) {
+            this.#view.header.levelLabel.innerHTML = `Level 1`;
+        } else {
+            this.#view.header.levelLabel.innerHTML = `Level 2 (Level 1 on RBS centered at <div class="vertex-tag">${rbsCenterIdentifier}</div>)`;
+        }
     }
 }

@@ -4,6 +4,7 @@ import { AESimulationManager } from "../activity/extraction/AESimulationManager.
 import { ActivitySimulationManager } from "../activity/simulation/ActivitySimulationManager.mjs";
 import ImportManager from "../file/import/ImportManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
+import { POIManager } from "../poi/POIManager.mjs";
 import { VerificationsResultManager } from "../verifications/VerificationsResultManager.mjs";
 import { VertexSimplificationManager } from "../vsimp/VertexSimplificationManager.mjs";
 import { TabGroupManager } from "../workspace/TabGroupManager.mjs";
@@ -42,7 +43,8 @@ export default class WorkspaceManager {
      *      main: HTMLDivElement, 
      *      buttons: ViewButtons,
      *      panels: PanelsView, 
-     *      drawing: ViewDrawing 
+     *      drawing: ViewDrawing,
+     *      header: { modelNameInput: HTMLInputElement }
      * }}
      */
     #view = {
@@ -53,7 +55,8 @@ export default class WorkspaceManager {
             actions: {}
         },
         panels: {},
-        drawing: {}
+        drawing: {},
+        header: { modelNameInput: null }
     };
 
     
@@ -108,6 +111,14 @@ export default class WorkspaceManager {
                 this.#view.panels[panelID] = panel;
         });
 
+        // Initialize model name input
+        this.#view.header.modelNameInput = rootElement.querySelector("input.model-name-input");
+        this.#view.header.modelNameInput.addEventListener("input", (event) => {
+            const newName = event.target.value?.trim() || "Untitled Model";
+            this.context.managers.modelling.renameModel(newName);
+            App.setContextTabTitle(this.context, newName);
+        });
+        this.#view.header.modelNameInput.value = this.context.getModelName();
     }
 
     getRootElement() {
@@ -273,6 +284,10 @@ export default class WorkspaceManager {
         return this.#addTemplatedSubworkspace(`as-${asID}`, "Activity Simulation", "as");
     }
 
+    addPOISubworkspace(poiID) {
+        return this.#addTemplatedSubworkspace(`poi-${poiID}`, "Points of Interest", "poi");
+    }
+
     /** @param {{ name, source, sink, mode }} configs */
     startAESimulation(configs) {
         return new AESimulationManager(this.context, configs, 
@@ -299,5 +314,9 @@ export default class WorkspaceManager {
      */
     startVertexSimplification(level, rbsCenterUID = null) {
         return new VertexSimplificationManager(this.context, level, rbsCenterUID);
+    }
+
+    showPOIs() {
+        return new POIManager(this.context, this.context.managers.visualModel.makeCopy());
     }
 }

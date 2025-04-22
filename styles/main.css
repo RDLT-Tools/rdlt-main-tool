@@ -425,6 +425,10 @@ svg .arc-waypoint:not([data-nomove]) {
   float: right;
 }
 
+.aes-subworkspace .aes-states-T [data-aes-state-T-ct] {
+  padding-left: 6px; 
+}
+
 .aes-subworkspace .aes-states-T [data-aes-state-T-ct="checked"] { color: #e153e6; }
 .aes-subworkspace .aes-states-T [data-aes-state-T-ct="traversed"] { color: #3a81de; }
 
@@ -441,11 +445,21 @@ svg .arc-waypoint:not([data-nomove]) {
 
 .vs-subworkspace .drawing,
 .as-subworkspace .drawing,
-.ver-subworkspace .drawing {
+.ver-subworkspace .drawing,
+.poi-subworkspace .drawing {
   height: 100%;
   width: 100%;
 }
 
+
+.as-subworkspace .arc-highlight,
+.vs-subworkspace .arc-highlight {
+  transition: all 200ms ease;
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke: transparent;
+  opacity: 0.5;
+}
 
 .as-subworkspace .arc-highlight {
   transition: all 200ms ease;
@@ -493,4 +507,49 @@ svg .arc-waypoint:not([data-nomove]) {
 
 .ver-subworkspace .component.active .component-circle {
   stroke: #ff5050;
+}
+
+.vs-subworkspace .arc.abstract .arc-bare {
+  opacity: 0.2;
+}
+
+
+.poi-subworkspace .component-circle {
+  transition: all 300ms ease;
+  fill-opacity: 1;
+  stroke-width: 15;
+  stroke: transparent;
+  opacity: 0.6;
+}
+
+
+.poi-subworkspace .arc-highlight {
+  transition: all 200ms ease;
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke: transparent;
+  opacity: 0.6;
+}
+
+.poi-subworkspace[data-active-poi="pod"] .component.active .component-circle {
+  stroke: #F58C46;
+}
+
+.poi-subworkspace[data-active-poi="pos"] .component.active .component-circle {
+  stroke: #3a81de;
+}
+
+.poi-subworkspace[data-active-poi="shared"] .arc.active .arc-highlight {
+  stroke: #909090;
+}
+
+
+.poi-subworkspace[data-active-poi="deadlocks"] .component.active .component-circle {
+  stroke: #ff5050;
+}
+
+
+.poi-subworkspace[data-active-poi="pore"] .component.active .component-circle,
+.poi-subworkspace[data-active-poi="pore"] .arc.active .arc-highlight {
+  stroke: #836FF3;
 }

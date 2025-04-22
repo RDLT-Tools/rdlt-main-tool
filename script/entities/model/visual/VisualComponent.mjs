@@ -61,6 +61,15 @@ export default class VisualComponent {
         return copied;
     }
 
+    simplify() {
+        return {
+            uid: this.uid,
+            identifier: this.identifier,
+            isRBSCenter: this.isRBSCenter,
+            type: this.type
+        };
+    }
+
     toJSON() {
         return {
             uid: this.uid,
