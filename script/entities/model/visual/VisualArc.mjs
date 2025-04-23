@@ -53,9 +53,9 @@ export default class VisualArc {
         this.styles = styles || new ArcStyles();
     }
 
-    copy() {
+    copy(newInstance = false) {
         return new VisualArc({
-            uid: this.uid,
+            uid: newInstance ? null : this.uid,
             C: this.C,
             L: this.L,
             fromVertexUID: this.fromVertexUID,

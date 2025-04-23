@@ -183,6 +183,10 @@ svg .component .component-circle {
   pointer-events: all !important;
 }
 
+svg .arc text {
+  pointer-events: none;
+}
+
 svg .arctracing-hover {
   pointer-events: stroke !important;
   transition: opacity 100ms ease;
@@ -552,4 +556,24 @@ svg .arc-waypoint:not([data-nomove]) {
 .poi-subworkspace[data-active-poi="pore"] .component.active .component-circle,
 .poi-subworkspace[data-active-poi="pore"] .arc.active .arc-highlight {
   stroke: #836FF3;
+}
+
+
+[data-tab-id="main-model"] .arc-highlight {
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke: transparent;
+  opacity: 0.3;
+}
+
+[data-tab-id="main-model"] .component-circle {
+  fill-opacity: 1;
+  stroke-width: 15;
+  stroke: transparent;
+  opacity: 0.3;
+}
+
+[data-tab-id="main-model"] .arc.active .arc-highlight,
+[data-tab-id="main-model"] .component.active .component-circle {
+  stroke: #ff5050;
 }

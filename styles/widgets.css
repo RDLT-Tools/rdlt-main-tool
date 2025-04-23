@@ -340,7 +340,7 @@ table.subtable tr {
     margin-right: 20px;
 }
 
-.conclusion-chip {
+.status-chip {
     padding: 12px 16px;
     background-color: #E6FFDB;
     border-radius: 5px;
@@ -348,21 +348,21 @@ table.subtable tr {
     margin-bottom: 12px;
 }
 
-.conclusion-chip .conclusion-title {
+.status-chip .status-title {
     font-weight: bold;
     color: #1F981C;
 }
 
-.conclusion-chip .conclusion-description {
+.status-chip .status-description {
     margin-top: 4px;
     font-size: 0.95em;
 }
 
-.conclusion-chip:not(.passed) {
+.status-chip:not(.passed) {
     background-color: #FFE7E2;
 }
 
-.conclusion-chip:not(.passed) .conclusion-title {
+.status-chip:not(.passed) .status-title {
     color: #B21313;
 }
 

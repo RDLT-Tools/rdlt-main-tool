@@ -4,6 +4,7 @@ import VisualArc from "../../entities/model/visual/VisualArc.mjs";
 import VisualComponent from "../../entities/model/visual/VisualComponent.mjs";
 import ArcStyles from "../../entities/styling/ArcStyles.mjs";
 import ComponentStyles from "../../entities/styling/ComponentStyles.mjs";
+import { isVertexAnObject } from "../../utils.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import { LocalSessionManager } from "../session/LocalSessionManager.mjs";
 
@@ -457,8 +458,12 @@ export default class ModellingManager {
         const component = this.context.managers.visualModel.updateComponentProps(id, props);
         drawingManager.updateComponentProps(component);
 
-        if('type' in props) drawingManager.updateComponentType(id, component);
-        
+        if('type' in props) {
+            drawingManager.updateComponentType(id, component);
+            this.#notifyModelStructureChangesListeners();
+            this.#refreshSelected();
+        }
+
         if('isRBSCenter' in props) {
             if(component.isRBSCenter) {
                 const rbsBounds = this.context.managers.rbsBounds.onComponentSetAsRBSCenter(id);
@@ -732,6 +737,63 @@ export default class ModellingManager {
         // Update dependent listeners
         this.context.managers.panels.execute.refreshModelValues();
         this.context.managers.panels.verifications.refreshModelValues();
+
+        this.#validateModelStructure();
+    }
+
+    #validateModelStructure() {
+        const drawingManager = this.context.managers.drawing;
+        drawingManager.clearHighlights();
+
+        const arcs = this.context.managers.visualModel.getAllArcs();
+        const vertices = this.context.managers.visualModel.getAllComponents();
+
+        for(const arc of arcs) {
+            const { valid, error } = this.validateArc(arc);
+            if(!valid) drawingManager.highlightArc(arc.uid);
+        }
+
+        for(const vertex of vertices) {
+            const { valid, error } = this.validateVertex(vertex);
+            if(!valid) drawingManager.highlightVertex(vertex.uid);
+        }
+    }
+
+    /**
+     * @param {VisualArc} arcUID 
+     * @returns {{ valid: boolean, error: { title: string, description: string } }}
+     */
+    validateArc(arc) {
+        if(!arc) return { valid: false, error: { title: "Arc not found" } };
+
+        const from = this.getComponentById(arc.fromVertexUID);
+        const to = this.getComponentById(arc.toVertexUID);
+
+        // Check if arc connects two objects
+        if(isVertexAnObject(from) && isVertexAnObject(to)) {
+            return { valid: false, error: { 
+                title: "Invalid arc", 
+                description: "An arc between objects (i.e. boundary/entity) is not allowed."
+            } };
+        }
+
+        return { valid: true };
+    }
+
+    /**
+     * @param {VisualComponent} vertex 
+     * @returns {{ valid: boolean, error: { title: string, description: string } }}
+     */
+    validateVertex(vertex) {
+        // Check if vertex is RBS center but not an object
+        if(vertex.isRBSCenter && !isVertexAnObject(vertex)) {
+            return { valid: false, error: { 
+                title: "Invalid RBS Center",
+                description: "A controller cannot be the center of an RBS"
+            } };
+        }
+
+        return { valid: true };
     }
 
     #saveModel() {

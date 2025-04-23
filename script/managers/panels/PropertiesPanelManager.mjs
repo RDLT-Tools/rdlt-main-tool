@@ -16,10 +16,14 @@ export default class PropertiesPanelManager {
     };
 
     #views = {
+        statusChips: {
+            arc: null,
+            component: null
+        },
         arcVertices: {
             to: { identifier: null, type: null, image: null, button: null },
             from: { identifier: null, type: null, image: null, button: null },
-        }
+        },
     };
 
     /**
@@ -50,6 +54,9 @@ export default class PropertiesPanelManager {
                 button: arcVerticesTo.querySelector("button")
             },
         };
+        
+        this.#views.statusChips.arc = this.#rootElement.querySelector(`[data-viewonly="arc"] .status-chip`);
+        this.#views.statusChips.component = this.#rootElement.querySelector(`[data-viewonly="component"] .status-chip`);
     }
 
     #initializeForms() {
@@ -131,6 +138,10 @@ export default class PropertiesPanelManager {
             x: component.geometry.position.x,
             y: component.geometry.position.y,
         });
+
+        const { valid, error } = modellingManager.validateVertex(component);
+        if(valid) this.#hideStatusChip("component");
+        else this.#displayStatusChip("component", error.title, error.description);
     }
 
     /**
@@ -147,12 +158,17 @@ export default class PropertiesPanelManager {
             pathType: arc.geometry.pathType,
             isAutoDraw: arc.geometry.isAutoDraw
         });
+        
+        const { valid, error } = modellingManager.validateArc(arc);
+        if(valid) this.#hideStatusChip("arc");
+        else this.#displayStatusChip("arc", error.title, error.description);
 
         // Update vertices view
         const typeLabel = { entity: "Entity", boundary: "Boundary", controller: "Controller" };
         const componentFrom = modellingManager.getComponentById(arc.fromVertexUID);
         const componentTo = modellingManager.getComponentById(arc.toVertexUID);
-        
+
+
         const { arcVertices } = this.#views;
         arcVertices.from.identifier.innerHTML = componentFrom.identifier;
         arcVertices.from.type.innerHTML = typeLabel[componentFrom.type];
@@ -160,6 +176,20 @@ export default class PropertiesPanelManager {
         arcVertices.to.identifier.innerHTML = componentTo.identifier;
         arcVertices.to.type.innerHTML = typeLabel[componentTo.type];
         arcVertices.to.image.src = `./assets/templates/components/${componentTo.type}.svg`;
+    }
+
+    #hideStatusChip(variant) {
+        this.#views.statusChips[variant].classList.add("hidden");
+    }
+    
+    #displayStatusChip(variant, title, description) {
+        const statusChipElement = this.#views.statusChips[variant];
+        if(!title) return this.#hideStatusChip(variant);
+        
+        statusChipElement.querySelector(".status-title").innerText = title;
+        statusChipElement.querySelector(".status-description").innerText = description;
+
+        statusChipElement.classList.remove("hidden");
     }
 
     /**

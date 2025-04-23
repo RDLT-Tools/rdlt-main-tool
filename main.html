@@ -101,6 +101,10 @@
                                             <div><h2>Component</h2></div>
                                             <div><button data-action="remove-component"><i class="fas fa-minus"></i> &nbsp;Remove</button></div>
                                         </header>
+                                        <div class="status-chip hidden">
+                                            <div class="status-title"></div>
+                                            <div class="status-description"></div>
+                                        </div>
                                         <div class="collapsible">
                                             <header>Attributes</header>
                                             <main>
@@ -150,6 +154,10 @@
                                             <div><h2>Arc</h2></div>
                                             <div><button data-action="remove-arc"><i class="fas fa-minus"></i> &nbsp;Remove</button></div>
                                         </header>
+                                        <div class="status-chip hidden">
+                                            <div class="status-title"></div>
+                                            <div class="status-description"></div>
+                                        </div>
                                         <div class="collapsible">
                                             <header>Vertices</header>
                                             <main class="arcvertices">
@@ -272,7 +280,7 @@
                                     <div class="collapsible" data-section-id="vs">
                                         <header>Expanded Vertex Simplification</header>
                                         <main>
-                                            <table>
+                                            <table class="anchor-right">
                                                 <tbody>
                                                     <tr>
                                                         <td>Level 1</td>
@@ -301,10 +309,24 @@
                                         <header>Points of Interest</header>
                                         <main>
                                             <div class="section-description">
-                                                Analyze this model for presence of points of delay, synchronicity, deadlocks, reoptimization, and its timeliness of response.
+                                                Analyze this model for presence of points of delays, synchronicity, deadlocks, reoptimization, and its timeliness of response.
                                             </div>
-                                            <div class="section-action-buttons">
-                                                <button data-subaction="start"><i class="fas fa-magnifying-glass"></i>&nbsp; Start Analysis</button>
+                                            <div class="input-group columns full-width" style="display: flex; align-items: end;">
+                                                <div>
+                                                    <label>Source</label>
+                                                    <div style="display: flex; gap: 6px;">
+                                                        <select name="source" style="flex: 1"></select>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label>Sink</label>
+                                                    <div style="display: flex; gap: 6px;">
+                                                        <select name="sink" style="flex: 1"></select>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <button data-subaction="start"><i class="fas fa-magnifying-glass"></i>&nbsp; Start</button>
+                                                </div>
                                             </div>
                                         </main>
                                     </div>
@@ -490,9 +512,9 @@
                                         <header>
                                             <h2>Result</h2>
                                         </header>
-                                        <div class="conclusion-chip">
-                                            <div class="conclusion-title">Some title</div>
-                                            <div class="conclusion-description">Some description</div>
+                                        <div class="status-chip">
+                                            <div class="status-title">Some title</div>
+                                            <div class="status-description">Some description</div>
                                         </div>
                                         <div class="collapsible" data-ver-section="criteria">
                                             <header>Criteria</header>
@@ -561,9 +583,9 @@
                                     <div class="tab-area panel" data-tab-id="details" data-panel-id="details">
                                         <header><h2>Activity Details</h2></header>
                                         <main>
-                                            <div class="conclusion-chip">
-                                                <div class="conclusion-title">Some title</div>
-                                                <div class="conclusion-description">Some description</div>
+                                            <div class="status-chip">
+                                                <div class="status-title">Some title</div>
+                                                <div class="status-description">Some description</div>
                                             </div>
                                             <div class="collapsible">
                                                 <header>Properties</header>
@@ -644,8 +666,8 @@
                                     <div></div>
                                     <div class="poi-controls">
                                         <select>
-                                            <option value="pod">Points of Delay (PODs)</option>
-                                            <option value="pos">Points of Synchronocity (POSs)</option>
+                                            <option value="pod">Points of Delays (PODs)</option>
+                                            <option value="pos">Points of Synching (POSs)</option>
                                             <option value="pore">Points of Reoptimization</option>
                                             <option value="deadlocks">Deadlock Points</option>
                                             <option value="shared">Shared Resources</option>
@@ -668,7 +690,7 @@
                                         </header>
                                         <br>
                                         <div class="collapsible" data-poi-section="pod">
-                                            <header>Points of Delay (PODs)</header>
+                                            <header>Points of Delays (PODs)</header>
                                             <main>
                                                 <table>
                                                     <tbody></tbody>
@@ -676,7 +698,7 @@
                                             </main>
                                         </div>
                                         <div class="collapsible" data-poi-section="pos">
-                                            <header>Points of Synchronicity (POSs)</header>
+                                            <header>Points of Synching (POSs)</header>
                                             <main>
                                                 <table>
                                                     <tbody></tbody>

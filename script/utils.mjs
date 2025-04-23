@@ -449,6 +449,103 @@ export function areTypeAlikeIncoming(arcUID1, arcUID2, arcMap, rbsMatrix) {
     return false;
 }
 
+
+/**
+ * 
+ * @param {VertexUID} startVertexUID 
+ * @param {VertexUID} endVertexUID 
+ * @param {boolean} elementaryPathsOnly 
+ * @param {Set<number>} visitedVertices 
+ * @param {ArcMap} arcMap 
+ * @param {ArcsAdjacencyMatrix} arcsMatrix 
+ * 
+ * @returns {VertexUID[][]}
+ */
+export function findAllElementaryPaths(startVertexUID, endVertexUID, visitedVertices, arcMap, arcsMatrix) {
+    if(startVertexUID === endVertexUID) return [ [startVertexUID] ];
+
+    const vertexPaths = [];
+    const nextVertices = getNextVertices(startVertexUID, arcsMatrix);
+    visitedVertices.add(startVertexUID);
+
+
+    for(const vertexUID of nextVertices) {
+        if(visitedVertices.has(vertexUID)) continue;
+
+        const nextVertexPaths = findAllElementaryPaths(
+            vertexUID, endVertexUID,
+            new Set(visitedVertices), arcMap, arcsMatrix);
+
+        for(const nextVertexPath of nextVertexPaths) {
+            nextVertexPath.unshift(startVertexUID);
+            vertexPaths.push(nextVertexPath);
+        }
+    }
+
+    return vertexPaths;
+}
+
+/**
+ * 
+ * @param {VertexUID} vertexUID 
+ * @param {ArcsAdjacencyMatrix} arcsMatrix 
+ * @returns {Set<VertexUID>}
+ */
+export function getNextVertices(vertexUID, arcsMatrix) {
+    const nextVertices = new Set();
+    for(const toVertexUID in arcsMatrix[vertexUID]) {
+        if(arcsMatrix[vertexUID][toVertexUID].size > 0) {
+            nextVertices.add(Number(toVertexUID));
+        }
+    }
+
+    return nextVertices;
+}
+
+/**
+ * 
+ * @param {VertexUID} fromVertexUID 
+ * @param {VertexUID} toVertexUID 
+ * @param {ArcsAdjacencyMatrix} arcsMatrix 
+ * @returns {Set<number>}
+ */
+export function getArcsBetween(fromVertexUID, toVertexUID, arcsMatrix) {
+    return arcsMatrix[fromVertexUID]?.[toVertexUID] || new Set();
+}
+
+
+/**
+ * 
+ * @param {VertexUID} currentVertexUID 
+ * @param {Set<VertexUID>} visitedVertices 
+ * @param {ArcMap} arcMap 
+ * @param {ArcsAdjacencyMatrix} arcsMatrix 
+ */
+export function findAllLoopingArcs(currentVertexUID, visitedVertices, arcsMatrix) {
+    const loopingArcs = new Set();
+
+    const nextVertices = getNextVertices(currentVertexUID, arcsMatrix);
+    visitedVertices.add(currentVertexUID);
+
+    for(const vertexUID of nextVertices) {
+        if(vertexUID === currentVertexUID) continue; // ignore self-loops
+
+        if(visitedVertices.has(vertexUID)) {
+            const arcs = getArcsBetween(currentVertexUID, vertexUID, arcsMatrix);
+            for(const arcUID of arcs) loopingArcs.add(arcUID);
+            continue;
+        }
+
+        const nextLoopingArcs = findAllLoopingArcs(vertexUID, new Set(visitedVertices), arcsMatrix);
+        for(const loopingArc of nextLoopingArcs) {
+            loopingArcs.add(loopingArc);
+        }
+    }
+
+    return loopingArcs;
+}
+
+
 /**
  * 
  * @param {string} str 
@@ -458,4 +555,14 @@ export function ellipsize(str, maxLength) {
     if(str.length <= maxLength) return str;
 
     return str.substring(0, maxLength - 3) + "...";
+}
+
+
+/**
+ * 
+ * @param {Vertex} vertex 
+ * @returns {boolean}
+ */
+export function isVertexAnObject(vertex) {
+    return [ "boundary", "entity" ].includes(vertex.type);
 }

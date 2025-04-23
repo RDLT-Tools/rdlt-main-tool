@@ -16,6 +16,9 @@ export default class VerificationsPanelManager {
      *      sinks: HTMLSelectElement[]
      *  },
      *  sections: {
+     *      poi: {
+     *          root: HTMLDivElement
+     *      },
      *      freeChoiceness: {
      *          root: HTMLDivElement,
      *          startButton: HTMLButtonElement,
@@ -29,16 +32,19 @@ export default class VerificationsPanelManager {
             sinks: []
         },
         sections: {
+            poi: {},
             freeChoiceness: {}
         }
     };
 
     /**
      * @type {{
+     *      poi: Form,
      *      freeChoiceness: Form
      * }}
      */
     #forms = {
+        poi: null,
         freeChoiceness: null
     };
 
@@ -60,6 +66,11 @@ export default class VerificationsPanelManager {
 
     
     #initializeForms() {
+        this.#forms.poi = new Form(this.#views.sections.poi.root)
+            .setFieldNames([ 'source', 'sink' ]);
+        this.#views.selectors.sources.push(this.#forms.poi.getFieldElement("source"));
+        this.#views.selectors.sinks.push(this.#forms.poi.getFieldElement("sink"));
+
         this.#forms.freeChoiceness = new Form(this.#views.sections.freeChoiceness.root)
             .setFieldNames([ 'source', 'sink', 'type' ]);
         this.#views.selectors.sources.push(this.#forms.freeChoiceness.getFieldElement("source"));
@@ -68,12 +79,18 @@ export default class VerificationsPanelManager {
 
     #initializePOISection() {
         const sectionRoot = this.#rootElement.querySelector("[data-section-id='poi']");
-        const sectionViews = this.#views.sections.freeChoiceness;
+        const sectionViews = this.#views.sections.poi;
 
         sectionViews.root = sectionRoot;
         sectionViews.startButton = sectionRoot.querySelector("button[data-subaction='start']");
         sectionViews.startButton.addEventListener("click", () => {
-            this.context.managers.workspace.showPOIs();
+            const { source, sink } = this.#forms.poi.getValues();
+            if(!source || !sink) return;
+
+            this.context.managers.workspace.showPOIs({ 
+                source: Number(source), 
+                sink: Number(sink) 
+            });
         });
     }
 

@@ -228,7 +228,7 @@ export default class WorkspaceManager {
         ));
         
         this.tabs.left.selectTab("palette");
-        this.tabs.right.selectTab("execute");
+        this.tabs.right.selectTab("verifications");
 
     }
 
@@ -316,7 +316,7 @@ export default class WorkspaceManager {
         return new VertexSimplificationManager(this.context, level, rbsCenterUID);
     }
 
-    showPOIs() {
-        return new POIManager(this.context, this.context.managers.visualModel.makeCopy());
+    showPOIs(configs) {
+        return new POIManager(this.context, configs, this.context.managers.visualModel.makeCopy());
     }
 }

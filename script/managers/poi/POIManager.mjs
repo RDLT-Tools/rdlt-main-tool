@@ -1,5 +1,6 @@
 import VisualRDLTModel from "../../entities/model/visual/VisualRDLTModel.mjs";
-import { generateUniqueID, pickRandomFromSet } from "../../utils.mjs";
+import { getPODs, getPOSs } from "../../services/poi.mjs";
+import { buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, generateUniqueID, pickRandomFromSet } from "../../utils.mjs";
 import { BaseModelDrawingManager } from "../drawing/BaseModelDrawingManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import POIPanelManager from "./panels/POIPanelManager.mjs";
@@ -13,6 +14,9 @@ export class POIManager {
 
     /** @type {string} */
     id;
+
+    /** @type {{ source: number, sink: number }} */
+    configs;
 
     /** @type {VisualRDLTModel} */
     #modelSnapshot;
@@ -37,10 +41,13 @@ export class POIManager {
     /**
      * @param {ModelContext} context
      */
-    constructor(context, visualModelSnapshot) {
+    constructor(context, configs, visualModelSnapshot) {
         this.context = context;
         this.id = generateUniqueID();
+        this.configs = configs;
         this.#modelSnapshot = visualModelSnapshot;
+
+        console.log(this.configs);
 
         this.#initialize();
         this.#start();
@@ -67,9 +74,20 @@ export class POIManager {
         );
 
 
+        const vertices = this.#modelSnapshot.getAllComponents();
+        const arcs = this.#modelSnapshot.getAllArcs();
+        const vertexMap = buildVertexMap(vertices);
+        const cache = {
+            vertexMap,
+            arcMap: buildArcMap(arcs),
+            arcsMatrix: buildArcsAdjacencyMatrix(arcs),
+            rbsMatrix: buildRBSMatrix(vertexMap, arcs)
+        };
+
+
         // POD
         const podResult = {
-            vertices: new Set([ 1, 3 ])
+            vertices: getPODs(cache)
         };
 
         this.#panels.poi.setupPODDisplay(podResult);
@@ -81,7 +99,7 @@ export class POIManager {
 
         // POS
         const posResult = {
-            vertices: new Set([ 4 ])
+            vertices: getPOSs(this.configs.source, cache)
         };
         
         this.#panels.poi.setupPOSDisplay(posResult);
