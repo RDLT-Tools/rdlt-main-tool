@@ -7,7 +7,7 @@ which supports iterative execution of AE, where various steps such as
 exploration, checking, and traversal may be performed over separate iterations.
 */
 
-import { areTypeAlikeIncoming, getIncomingArcs, getOutgoingArcs, isEpsilon, isOutbridge } from "../utils.mjs";
+import { areTypeAlikeIncoming, getIncomingArcs, getOutgoingArcs, isEpsilon, isOutbridge, isVertexAnObject } from "../utils.mjs";
 
 /**
  * @typedef {number} ArcUID
@@ -348,13 +348,4 @@ export function getMaxT(arcs, T) {
     }
 
     return maxT;
-}
-
-/**
- * 
- * @param {Vertex} vertex 
- * @returns {boolean}
- */
-export function isVertexAnObject(vertex) {
-    return [ "boundary", "entity" ].includes(vertex.type);
 }

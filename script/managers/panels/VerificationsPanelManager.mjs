@@ -17,11 +17,14 @@ export default class VerificationsPanelManager {
    *      sinks: HTMLSelectElement[]
    *  },
    *  sections: {
+   *      poi: {
+   *          root: HTMLDivElement
+   *      },
    *      freeChoiceness: {
    *          root: HTMLDivElement,
    *          startButton: HTMLButtonElement,
    *      },
-   *      wellHandledness: {
+   * wellHandledness: {
    *          root: HTMLDivElement,
    *          startButton: HTMLButtonElement,
    *      }
@@ -34,6 +37,7 @@ export default class VerificationsPanelManager {
       sinks: [],
     },
     sections: {
+      poi: {},
       freeChoiceness: {},
       wellHandledness: {},
     },
@@ -41,11 +45,13 @@ export default class VerificationsPanelManager {
 
   /**
    * @type {{
+   *      poi: Form,
    *      freeChoiceness: Form,
-   *      wellHandledness: Form,
+   *     wellHandledness: Form
    * }}
    */
   #forms = {
+    poi: null,
     freeChoiceness: null,
     wellHandledness: null,
   };
@@ -68,21 +74,23 @@ export default class VerificationsPanelManager {
   }
 
   #initializeForms() {
+    this.#forms.poi = new Form(this.#views.sections.poi.root).setFieldNames([
+      "source",
+      "sink",
+    ]);
+    this.#views.selectors.sources.push(
+      this.#forms.poi.getFieldElement("source")
+    );
+    this.#views.selectors.sinks.push(this.#forms.poi.getFieldElement("sink"));
+
     this.#forms.freeChoiceness = new Form(
       this.#views.sections.freeChoiceness.root
     ).setFieldNames(["source", "sink", "type"]);
-
-    this.#forms.wellHandledness = new Form(
-      this.#views.sections.wellHandledness.root
-    ).setFieldNames(["source", "sink", "type"]);
-
     this.#views.selectors.sources.push(
-      this.#forms.freeChoiceness.getFieldElement("source"),
-      this.#forms.wellHandledness.getFieldElement("source")
+      this.#forms.freeChoiceness.getFieldElement("source")
     );
     this.#views.selectors.sinks.push(
-      this.#forms.freeChoiceness.getFieldElement("sink"),
-      this.#forms.wellHandledness.getFieldElement("sink")
+      this.#forms.freeChoiceness.getFieldElement("sink")
     );
   }
 
@@ -90,14 +98,20 @@ export default class VerificationsPanelManager {
     const sectionRoot = this.#rootElement.querySelector(
       "[data-section-id='poi']"
     );
-    const sectionViews = this.#views.sections.freeChoiceness;
+    const sectionViews = this.#views.sections.poi;
 
     sectionViews.root = sectionRoot;
     sectionViews.startButton = sectionRoot.querySelector(
       "button[data-subaction='start']"
     );
     sectionViews.startButton.addEventListener("click", () => {
-      this.context.managers.workspace.showPOIs();
+      const { source, sink } = this.#forms.poi.getValues();
+      if (!source || !sink) return;
+
+      this.context.managers.workspace.showPOIs({
+        source: Number(source),
+        sink: Number(sink),
+      });
     });
   }
 

@@ -12,8 +12,8 @@ export class DrawingViewportManager {
             zoom: 1,
         }, 
         motion: {
-            zoomFactor: 1.1,
-            moveFactor: { x: 24, y: 24 }
+            zoomFactor: 1.05,
+            moveFactor: { x: 16, y: 16 }
         }
     };
 

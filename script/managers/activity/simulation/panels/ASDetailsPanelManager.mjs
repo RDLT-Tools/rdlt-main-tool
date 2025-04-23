@@ -18,14 +18,14 @@ export class ASDetailsPanelManager {
     /** @param {Activity} activity */
     displayActivityDetails(activity) {
         // Setup conclusion chip
-        const conclusionChip = this.#rootElement.querySelector(".conclusion-chip");
+        const conclusionChip = this.#rootElement.querySelector(".status-chip");
         const conclusion = activity.conclusion;
         if(conclusion && conclusion.title) {
             const { pass, title, description } = conclusion;
             if(pass) conclusionChip.classList.add("passed");
 
-            const conclusionTitleView = conclusionChip.querySelector(".conclusion-title");
-            const conclusionDescView = conclusionChip.querySelector(".conclusion-description");
+            const conclusionTitleView = conclusionChip.querySelector(".status-title");
+            const conclusionDescView = conclusionChip.querySelector(".status-description");
 
             conclusionTitleView.innerHTML = title;
 

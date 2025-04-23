@@ -45,9 +45,9 @@ export default class VERResultTabManager {
     }
 
     #initializeView() {
-        this.#view.conclusion.root = this.#rootElement.querySelector(".conclusion-chip");
-        this.#view.conclusion.title = this.#rootElement.querySelector(".conclusion-title");
-        this.#view.conclusion.description = this.#rootElement.querySelector(".conclusion-description");
+        this.#view.conclusion.root = this.#rootElement.querySelector(".status-chip");
+        this.#view.conclusion.title = this.#rootElement.querySelector(".status-title");
+        this.#view.conclusion.description = this.#rootElement.querySelector(".status-description");
 
         this.#view.criteria.section = this.#rootElement.querySelector(`[data-ver-section="criteria"]`);
         this.#view.criteria.table = this.#rootElement.querySelector(`[data-ver-section="criteria"] table`);

@@ -47,6 +47,10 @@ export default class UserEventsManager {
                 }[key];
 
                 modellingManager.onDrawingViewUserEvent(keyUserEvent);
+            } else {
+                if(setHasExact(keys, "Control", "a")) {
+                    modellingManager.onDrawingViewUserEvent("key-selectall");
+                }
             }
         });
     }
