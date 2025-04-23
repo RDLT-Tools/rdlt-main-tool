@@ -86,11 +86,18 @@ export default class VerificationsPanelManager {
     this.#forms.freeChoiceness = new Form(
       this.#views.sections.freeChoiceness.root
     ).setFieldNames(["source", "sink", "type"]);
+
+    this.#forms.wellHandledness = new Form(
+      this.#views.sections.wellHandledness.root
+    ).setFieldNames(["source", "sink", "type"]);
+
     this.#views.selectors.sources.push(
-      this.#forms.freeChoiceness.getFieldElement("source")
+      this.#forms.freeChoiceness.getFieldElement("source"),
+      this.#forms.wellHandledness.getFieldElement("source")
     );
     this.#views.selectors.sinks.push(
-      this.#forms.freeChoiceness.getFieldElement("sink")
+      this.#forms.freeChoiceness.getFieldElement("sink"),
+      this.#forms.wellHandledness.getFieldElement("sink")
     );
   }
 
