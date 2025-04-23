@@ -1,10 +1,10 @@
 import { TabGroupManager } from "../../workspace/TabGroupManager.mjs";
 import { TabManager } from "../../workspace/TabManager.mjs";
-import { ActivitySimulationManager } from "./ActivitySimulationManager.mjs";
+import { ActivityInputManager } from "./ActivityInputManager.mjs";
 
-export class ASSubworkspaceManager {
+export class AISubworkspaceManager {
     
-    /** @type {ActivitySimulationManager} */
+    /** @type {ActivityInputManager} */
     #simulationManager;
     
     /** @type {HTMLDivElement} */
@@ -41,11 +41,11 @@ export class ASSubworkspaceManager {
     }
 
     #initializeView() {
-        this.#view.main = this.#rootAreaElement.querySelector(".as-main");
+        this.#view.main = this.#rootAreaElement.querySelector(".ai-main");
 
-        const headerElement = this.#rootAreaElement.querySelector(".as-main > header");
+        const headerElement = this.#rootAreaElement.querySelector(".ai-main > header");
         this.#view.header = {
-            main: headerElement.querySelector(".as-status-view"),
+            main: headerElement.querySelector(".ai-status-view"),
         };
 
         // Initialize panels
@@ -56,9 +56,9 @@ export class ASSubworkspaceManager {
         });
 
         // Initialize action buttons
-        [...this.#rootAreaElement.querySelectorAll('button[data-as-action]')].forEach(
+        [...this.#rootAreaElement.querySelectorAll('button[data-ai-action]')].forEach(
             button => {
-                const action = button.getAttribute("data-as-action");
+                const action = button.getAttribute("data-ai-action");
                 this.#view.buttons.actions[action] = button;
                 button.addEventListener("click", () => this.#onActionClicked(action));
         });
@@ -71,6 +71,12 @@ export class ASSubworkspaceManager {
             break;
             case "next": 
                 this.#simulationManager.next();
+            break;
+            case "add-timestep":
+                this.#simulationManager.addTimestep();
+            break;
+            case "save":
+                this.#simulationManager.saveActivity();
             break;
         }
     }

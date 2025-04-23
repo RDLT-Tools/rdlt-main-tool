@@ -393,7 +393,8 @@ export class AESimulationManager {
         const pass = result === "end-sink";
 
         const activity = new Activity({
-            name, source: this.configs.source,
+            name: name.trim() || "<Untitled Activity>", 
+            source: this.configs.source,
             sink: this.configs.sink,
             origin: "aes",
             conclusion: {

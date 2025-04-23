@@ -1,8 +1,8 @@
 import { buildArcTagElement, buildElement } from "../../../../utils.mjs";
-import { ActivitySimulationManager } from "../ActivitySimulationManager.mjs";
+import { ActivityInputManager } from "../ActivityInputManager.mjs";
 
-export class ASProfilePanelManager {
-    /** @type {ActivitySimulationManager} */
+export class AIProfilePanelManager {
+    /** @type {ActivityInputManager} */
     #simulationManager;
 
     /** @type {HTMLDivElement} */
@@ -41,39 +41,44 @@ export class ASProfilePanelManager {
     }
 
     /**
-     * @param {{ [timestep: number]: Set<number> }} activityProfile 
+     * @param {Set<number>[]} activityProfile 
      */
-    displayProfileList(activityProfile) {
+    refreshProfileList(activityProfile) {
+        for(let i = 0; i < activityProfile.length; i++) {
+            const timestep = i + 1;
+            const reachabilityConfig = [...activityProfile[i]];
+
+            this.refreshTimestepProfile(timestep, reachabilityConfig);
+        }
+    }
+
+    refreshTimestepProfile(timestep, reachabilityConfig) {
         const tableBody = this.#views.profileTable.querySelector("tbody");
-        tableBody.innerHTML = "";
+        
+        let profileRow = this.#cache.profileRows[timestep];
 
-        const timesteps = Object.keys(activityProfile).map(t => Number(t)).sort((a,b) => a-b);
-        for(const timeStep of timesteps) {
-            const reachabilityConfig = [...activityProfile[timeStep]];
-
+        if(!profileRow) {
             const profileRowCells = [];
 
-            // Timestep column
-            profileRowCells.push(buildElement("td", {}, [ timeStep ]));
+            // timestep column
+            profileRowCells.push(buildElement("td", {}, [ timestep ]));
 
             // Reachable arcs column
             profileRowCells.push(buildElement("td", { classname: "as-profile-reachables"}, [])); 
 
-            const profileRow = buildElement("tr", {}, profileRowCells);
-
-
-            // Set reachable arcs
-            const reachableArcsCell = profileRow.querySelector(".as-profile-reachables");
-            reachableArcsCell.innerHTML = "";
-            for(const arcUID of reachabilityConfig) {
-                const [ fromVertexIdentifier, toVertexIdentifier ] = this.#simulationManager.getArcIdentifierPair(arcUID);
-                reachableArcsCell.appendChild(buildArcTagElement(fromVertexIdentifier, toVertexIdentifier));
-            }
-
-            profileRow.addEventListener("click", () => this.#simulationManager.setCurrentTimestep(timeStep));
-
+            profileRow = buildElement("tr", {}, profileRowCells);
+            profileRow.addEventListener("click", () => this.#simulationManager.setCurrentTimestep(timestep));
+            this.#cache.profileRows[timestep] = profileRow;
             tableBody.appendChild(profileRow);
-            this.#cache.profileRows[timeStep] = profileRow;
+
+        }
+
+        // Set reachable arcs
+        const reachableArcsCell = profileRow.querySelector(".as-profile-reachables");
+        reachableArcsCell.innerHTML = "";
+        for(const arcUID of reachabilityConfig) {
+            const [ fromVertexIdentifier, toVertexIdentifier ] = this.#simulationManager.getArcIdentifierPair(arcUID);
+            reachableArcsCell.appendChild(buildArcTagElement(fromVertexIdentifier, toVertexIdentifier));
         }
     }
 

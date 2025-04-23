@@ -1,6 +1,7 @@
 import App from "../../App.mjs";
 import Activity from "../../entities/activity/Activity.mjs";
 import { AESimulationManager } from "../activity/extraction/AESimulationManager.mjs";
+import { ActivityInputManager } from "../activity/input/ActivityInputManager.mjs";
 import { ActivitySimulationManager } from "../activity/simulation/ActivitySimulationManager.mjs";
 import ImportManager from "../file/import/ImportManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
@@ -228,7 +229,7 @@ export default class WorkspaceManager {
         ));
         
         this.tabs.left.selectTab("palette");
-        this.tabs.right.selectTab("verifications");
+        this.tabs.right.selectTab("execute");
 
     }
 
@@ -284,6 +285,10 @@ export default class WorkspaceManager {
         return this.#addTemplatedSubworkspace(`as-${asID}`, "Activity Simulation", "as");
     }
 
+    addAISubworkspace(aiID) {
+        return this.#addTemplatedSubworkspace(`ai-${aiID}`, "Create Activity", "ai");
+    }
+
     addPOISubworkspace(poiID) {
         return this.#addTemplatedSubworkspace(`poi-${poiID}`, "Points of Interest", "poi");
     }
@@ -318,5 +323,9 @@ export default class WorkspaceManager {
 
     showPOIs(configs) {
         return new POIManager(this.context, configs, this.context.managers.visualModel.makeCopy());
+    }
+
+    createdInputtedActivity() {
+        return new ActivityInputManager(this.context, this.context.managers.visualModel.makeCopy());
     }
 }

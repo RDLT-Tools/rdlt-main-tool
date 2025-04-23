@@ -21,7 +21,7 @@ export default class ArcSVGBuilder {
     #selectedPathElement;
     #waypointsElement;
     #highlightPathElement;
-    #aesClickableElement;
+    #clickableElement;
 
     #bounds = {
         start: { x: 0, y: 0 },
@@ -140,16 +140,16 @@ export default class ArcSVGBuilder {
                 ], { className: "arc" });
             } else if(origin === "aes") {
                 
-                this.#aesClickableElement = makeSVGElement("path", {
+                this.#clickableElement = makeSVGElement("path", {
                     d: "",
                     fill: "none",
                     stroke: "black",
-                    className: "arc-aes-clickable"
-                })
+                    className: "arc-clickable"
+                });
 
                 this.#element = makeGroupSVG([
                     this.#highlightPathElement,
-                    this.#aesClickableElement,
+                    this.#clickableElement,
                     // labelMaskBoundsElement,
                     arcElement,
                     this.#labelElement.element,
@@ -169,7 +169,7 @@ export default class ArcSVGBuilder {
     }
 
     get element() { return this.#element; }
-    get aesClickableElement() { return this.#aesClickableElement; }
+    get clickableElement() { return this.#clickableElement; }
 
 
     /**
@@ -313,7 +313,7 @@ export default class ArcSVGBuilder {
             }
             
         } else if(this.#origin === "aes") {
-            this.#aesClickableElement.setAttribute("d", d);
+            this.#clickableElement.setAttribute("d", d);
         }
 
         return response;

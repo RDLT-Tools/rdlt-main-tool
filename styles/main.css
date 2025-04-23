@@ -183,7 +183,7 @@ svg .component .component-circle {
   pointer-events: all !important;
 }
 
-svg .arc text {
+svg .arc .arc-bare, svg .arc text {
   pointer-events: none;
 }
 
@@ -350,7 +350,7 @@ svg .arc-waypoint:not([data-nomove]) {
   pointer-events: none;
 }
 
-.aes-subworkspace .arc-aes-clickable {
+.arc-clickable {
   transition: all 200ms ease;
   stroke-width: 24;
   stroke-linecap: round;
@@ -359,12 +359,18 @@ svg .arc-waypoint:not([data-nomove]) {
   pointer-events: none;
 }
 
-.aes-subworkspace .arc-aes-clickable:hover {
+.arc-clickable:hover {
   opacity: 1;
 }
 
-.aes-subworkspace .arc-aes-clickable:active {
+.arc-clickable:active {
   opacity: 0.8;
+}
+
+.drawing.arcs-clickable .arc .arc-clickable {
+  stroke: transparent;
+  pointer-events: stroke;
+  cursor: pointer;
 }
 
 [data-aes-current-action="start"] .component.active .component-circle {
@@ -408,7 +414,7 @@ svg .arc-waypoint:not([data-nomove]) {
   stroke: #74d8e0;
 }
 
-[data-aes-current-action="choosing"] .arc.active .arc-aes-clickable {
+[data-aes-current-action="choosing"] .arc.active .arc-clickable {
   stroke: #e2d971;
   pointer-events: stroke;
   cursor: pointer;
@@ -450,7 +456,8 @@ svg .arc-waypoint:not([data-nomove]) {
 .vs-subworkspace .drawing,
 .as-subworkspace .drawing,
 .ver-subworkspace .drawing,
-.poi-subworkspace .drawing {
+.poi-subworkspace .drawing,
+.ai-subworkspace .drawing {
   height: 100%;
   width: 100%;
 }
@@ -576,4 +583,22 @@ svg .arc-waypoint:not([data-nomove]) {
 [data-tab-id="main-model"] .arc.active .arc-highlight,
 [data-tab-id="main-model"] .component.active .component-circle {
   stroke: #ff5050;
+}
+
+
+.ai-subworkspace .arc:not(.active) .arc-clickable {
+  stroke: #CCCCCC;
+}
+
+
+.ai-subworkspace .arc-highlight {
+  transition: all 200ms ease;
+  stroke-width: 12;
+  stroke-linecap: round;
+  stroke: transparent;
+  opacity: 0.6;
+}
+
+.ai-subworkspace .arc.active .arc-highlight {
+  stroke: #3a81de !important;
 }

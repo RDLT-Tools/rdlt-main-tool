@@ -16,6 +16,7 @@ export default class ExecutePanelManager {
      *      root: HTMLDivElement,
      *      table: HTMLTableElement,
      *      importButton: HTMLButtonElement
+     *      addActivityButton: HTMLButtonElement
      *  },
      *  activityExtraction: {
      *      root: HTMLDivElement,
@@ -69,8 +70,10 @@ export default class ExecutePanelManager {
 
         activitiesSectionViews.root = activitiesSectionRoot;
         activitiesSectionViews.table = activitiesSectionRoot.querySelector("table");
+        activitiesSectionViews.addActivityButton = activitiesSectionRoot.querySelector("button[data-subaction='add-activity']");
         activitiesSectionViews.importButton = activitiesSectionRoot.querySelector("button[data-subaction='import']");
 
+        activitiesSectionViews.addActivityButton.addEventListener("click", () => this.context.managers.workspace.createdInputtedActivity());
         activitiesSectionViews.importButton.addEventListener("click", () => this.context.managers.activities.importActivity());
     }
 
@@ -84,10 +87,10 @@ export default class ExecutePanelManager {
 
         aeSectionViews.generateButton.addEventListener("click", () => {
             const { name, source, sink } = this.#forms.activityExtraction.getValues();
-            if(!name.trim() || !source || !sink) return;
+            if(!source || !sink) return;
 
             this.context.managers.activities.generateActivity({ 
-                name, 
+                name: name?.trim() || "<Untitled Activity>", 
                 source: Number(source), 
                 sink: Number(sink) 
             });

@@ -1,8 +1,8 @@
 import Activity from "../../../entities/activity/Activity.mjs";
 import VisualRDLTModel from "../../../entities/model/visual/VisualRDLTModel.mjs";
 import { generateUniqueID } from "../../../utils.mjs";
+import { BaseModelDrawingManager } from "../../drawing/BaseModelDrawingManager.mjs";
 import ModelContext from "../../model/ModelContext.mjs";
-import { ASDrawingManager } from "./ASDrawingManager.mjs";
 import { ASSubworkspaceManager } from "./ASSubworkspaceManager.mjs";
 import { ASDetailsPanelManager } from "./panels/ASDetailsPanelManager.mjs";
 import { ASProfilePanelManager } from "./panels/ASProfilePanelManager.mjs";
@@ -22,7 +22,7 @@ export class ActivitySimulationManager {
     /** @type {VisualRDLTModel} */
     #modelSnapshot;
 
-    /** @type {ASDrawingManager} */
+    /** @type {BaseModelDrawingManager} */
     #drawingManager;
 
     /** @type {ASSubworkspaceManager} */
@@ -69,7 +69,7 @@ export class ActivitySimulationManager {
     #initialize() {
         const subworkspaceTabManager = this.context.managers.workspace.addASSubworkspace(this.id);
         const rootElement = subworkspaceTabManager.tabAreaElement;
-        this.#drawingManager = new ASDrawingManager(this, rootElement.querySelector(".drawing > svg"));
+        this.#drawingManager = new BaseModelDrawingManager(rootElement.querySelector(".drawing > svg"), "aes");
         this.#subworkspaceManager = new ASSubworkspaceManager(this, rootElement);
 
         this.#panels = {
@@ -81,8 +81,6 @@ export class ActivitySimulationManager {
             this.#modelSnapshot.getAllComponents(), 
             this.#modelSnapshot.getAllArcs());
 
-        
-        this.#subworkspaceManager.setup(this.configs);
         this.#panels.details.displayActivityDetails(this.#activity);
 
         this.#panels.profile.displayProfileList(this.#activity.profile);

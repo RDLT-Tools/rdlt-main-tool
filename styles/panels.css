@@ -106,7 +106,8 @@
 }
 
 
-.as-subworkspace .panel[data-tab-id="profile"] table tr.active {
+.as-subworkspace .panel[data-tab-id="profile"] table tr.active, 
+.ai-subworkspace .panel[data-tab-id="profile"] table tr.active {
   background-color: rgba(0, 0, 0, 0.05) !important;
 }
 
