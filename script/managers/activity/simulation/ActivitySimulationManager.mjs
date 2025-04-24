@@ -66,8 +66,8 @@ export class ActivitySimulationManager {
         this.#initialize();
     }
 
-    #initialize() {
-        const subworkspaceTabManager = this.context.managers.workspace.addASSubworkspace(this.id);
+    async #initialize() {
+        const subworkspaceTabManager = await this.context.managers.workspace.addASSubworkspace(this.id);
         const rootElement = subworkspaceTabManager.tabAreaElement;
         this.#drawingManager = new BaseModelDrawingManager(rootElement.querySelector(".drawing > svg"), "aes");
         this.#subworkspaceManager = new ASSubworkspaceManager(this, rootElement);

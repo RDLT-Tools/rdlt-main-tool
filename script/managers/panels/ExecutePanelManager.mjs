@@ -97,14 +97,14 @@ export default class ExecutePanelManager {
         });
 
         aeSectionViews.simulateButton.addEventListener("click", () => {
-            const { name, source, sink, mode } = this.#forms.activityExtraction.getValues();
+            const { name, source, sink, mode, isTargeted } = this.#forms.activityExtraction.getValues();
             if(!source || !sink || !mode) return;
+
+            console.log({ isTargeted });
             
             const aesManager = this.context.managers.workspace.startAESimulation({
                 name, source: Number(source), sink: Number(sink), mode
             });
-
-            aesManager.start();
         });
     }
 
@@ -130,7 +130,7 @@ export default class ExecutePanelManager {
 
     #initializeForms() {
         this.#forms.activityExtraction = new Form(this.#views.activityExtraction.root)
-            .setFieldNames([ 'name', 'source', 'sink', 'mode' ]);
+            .setFieldNames([ 'name', 'source', 'sink', 'mode', 'isTargeted' ]);
 
         this.#forms.vertexSimplification = new Form(this.#views.vertexSimplification.root)
             .setFieldNames([ 'rbs' ]);

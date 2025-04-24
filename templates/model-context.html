@@ -1,0 +1,354 @@
+<template data-tab-template-id="model-context">
+    <section class="model-context tab-area">
+        <header>
+            <section class="banner">
+                <input class="model-name-input" 
+                    spellcheck="false"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    placeholder="Untitled Model">
+            </section>
+            <section class="mode-buttons">
+                <button class="action" data-mode="view"><i class="fas fa-eye"></i></button>
+                <button class="action active" data-mode="select"><i class="fas fa-arrow-pointer"></i></button>
+                <div class="v-divider"></div>
+            </section>
+            <section class="action-buttons">
+                <button class="action" data-action="undo"><i class="fas fa-undo"></i></button>
+                <button class="action" data-action="redo"><i class="fas fa-redo"></i></button>
+                <button class="action" data-action="save"><i class="fas fa-save"></i></button>
+                <div class="v-divider"></div>
+                <button class="action" data-action="add"><i class="fas fa-plus"></i></button>
+                <button class="action" data-action="upload"><i class="fas fa-arrow-up-from-bracket"></i></button>
+                <button class="action" data-action="download"><i class="fas fa-arrow-down"></i></button>
+                <div class="v-divider"></div>
+                <button class="action" data-action="settings"><i class="fas fa-sliders"></i></button>
+            </section>
+        </header>
+        <section class="tab-buttons">
+            <div class="tab-button" data-tab-id="main-model"><i class="fas fa-hexagon-nodes"></i> Main Model</div>
+        </section>
+        <main class="main-view">
+            <div class="subworkspace tab-area" data-tab-id="main-model">
+                <aside class="left-panels">
+                    <section class="tab-buttons">
+                        <div class="tab-button" data-tab-id="palette"><i class="fas fa-palette"></i> Palette</div>
+                        <div class="tab-button" data-tab-id="components"><i class="fas fa-shapes"></i> Components</div>
+                    </section>
+                    <main class="panel-tabs">
+                        <div class="tab-area panel" data-tab-id="palette" data-panel-id="palette">
+                            <div class="collapsible">
+                                <header>Basic Components</header>
+                                <main>
+                                    <section class="palette-group">
+                                        <div class="palette-draggable-element" data-element="component" data-component-type="entity">
+                                            <img src="./assets/templates/components/entity.svg">
+                                            Entity
+                                        </div>
+                                        <div class="palette-draggable-element" data-element="component" data-component-type="boundary">
+                                            <img src="./assets/templates/components/boundary.svg">
+                                            Boundary
+                                        </div>
+                                        <div class="palette-draggable-element" data-element="component" data-component-type="controller">
+                                            <img src="./assets/templates/components/controller.svg">
+                                            Controller
+                                        </div>
+                                    </section>
+                                </main>
+                            </div>
+                        </div>
+                        <div class="tab-area panel" data-tab-id="components" data-panel-id="components">
+                            Components here
+                        </div>
+                    </main>
+                </aside>
+                <main> 
+                    <section class="drawing">
+                        <svg></svg>
+                    </section>
+                </main>
+                <aside class="right-panels">
+                    <section class="tab-buttons">
+                        <div class="tab-button" data-tab-id="properties"><i class="fas fa-list-ul"></i> Properties</div>
+                        <div class="tab-button" data-tab-id="execute"><i class="fas fa-play"></i> Execute</div>
+                        <div class="tab-button" data-tab-id="verifications"><i class="fas fa-circle-check"></i> Verifications</div>
+                    </section>
+                    <main class="panel-tabs">
+                        <div class="tab-area panel" data-tab-id="properties" data-panel-id="properties" data-view-none>
+                            <div data-viewonly="none">
+                                Select a component, arc, or annotation
+                            </div>
+                            <div data-viewonly="component">
+                                <header>
+                                    <div><h2>Component</h2></div>
+                                    <div><button data-action="remove-component"><i class="fas fa-minus"></i> &nbsp;Remove</button></div>
+                                </header>
+                                <div class="status-chip hidden">
+                                    <div class="status-title"></div>
+                                    <div class="status-description"></div>
+                                </div>
+                                <div class="collapsible">
+                                    <header>Attributes</header>
+                                    <main>
+                                        <select class="full-width input-group" name="type">
+                                            <option value="boundary">Boundary</option>
+                                            <option value="entity">Entity</option>
+                                            <option value="controller">Controller</option>
+                                        </select>
+                                        <section class="columns input-group">
+                                            <div>
+                                                <label>Short identifier</label>
+                                                <input placeholder="x1" class="full-width" name="identifier" />
+                                            </div>
+                                            <div>
+                                                <label>Label</label>
+                                                <input placeholder="Set a label" class="full-width" name="label" />
+                                            </div>
+                                        </section>
+                                        <section class="input-group checkbox-item">
+                                            <input type="checkbox" name="isRBSCenter"><label>This is the center of an RBS</label>
+                                        </section>
+                                    </main>
+                                </div>
+                                <div class="collapsible">
+                                    <header>Geometry</header>
+                                    <main>
+                                        <section class="columns input-group">
+                                            <div>
+                                                <label>X</label>
+                                                <input placeholder="0" class="full-width" name="x" type="number"/>
+                                            </div>
+                                            <div>
+                                                <label>Y</label>
+                                                <input placeholder="0" class="full-width" name="y" type="number" />
+                                            </div>
+                                        </section>
+                                    </main>
+                                </div>
+                                <div class="collapsible">
+                                    <header>Styling</header>
+                                    <main>
+                                    </main>
+                                </div>
+                            </div>
+                            <div data-viewonly="arc">
+                                <header>
+                                    <div><h2>Arc</h2></div>
+                                    <div><button data-action="remove-arc"><i class="fas fa-minus"></i> &nbsp;Remove</button></div>
+                                </header>
+                                <div class="status-chip hidden">
+                                    <div class="status-title"></div>
+                                    <div class="status-description"></div>
+                                </div>
+                                <div class="collapsible">
+                                    <header>Vertices</header>
+                                    <main class="arcvertices">
+                                        <div class="arcvertices-from">
+                                            <div>
+                                                <div>
+                                                    <div class="vertex-identifier">v1</div>
+                                                    <div class="vertex-type">Entity</div>
+                                                </div>
+                                                <div>
+                                                    <img src="./assets/templates/components/entity.svg" height="40" />
+                                                </div>
+                                            </div>
+                                            <button>Properties &nbsp;<i class="fa-solid fa-up-right-from-square"></i></button>
+                                        </div>
+                                        <div class="arcvertices-arrow-container">
+                                            <img src="./assets/images/arcvertices-arrow.svg" class="arcvertices-arrow" />
+                                        </div>
+                                        <div class="arcvertices-to">
+                                            <div> 
+                                                <div>
+                                                    <img src="./assets/templates/components/boundary.svg" height="40" />
+                                                </div>
+                                                <div>
+                                                    <div class="vertex-identifier">v2</div>
+                                                    <div class="vertex-type">Boundary</div>
+                                                </div>
+                                            </div>
+                                            <button>Properties &nbsp;<i class="fa-solid fa-up-right-from-square"></i></button>
+                                        </div>
+                                    </main>
+                                </div>
+                                <div class="collapsible">
+                                    <header>Attributes</header>
+                                    <main>
+                                        <section class="columns input-group">
+                                            <div>
+                                                <label>C-attibute</label>
+                                                <input placeholder="ϵ" class="full-width" name="C" />
+                                            </div>
+                                            <div>
+                                                <label>L-attibute</label>
+                                                <input placeholder="1" class="full-width" name="L" type="number" min="1" step="1" />
+                                            </div>
+                                        </section>
+                                    </main>
+                                </div>
+                                <div class="collapsible">
+                                    <header>Geometry</header>
+                                    <main>
+                                        <section class="columns input-group" style="align-items: flex-end;">
+                                            <div>
+                                                <label>Path Style</label>
+                                                <select class="full-width" name="pathType">
+                                                    <option value="straight">Straight</option>
+                                                    <option value="elbowed">Elbowed</option>
+                                                </select>
+                                            </div>
+                                            <div class="checkbox-item" style="margin-bottom: 8px; margin-left: 12px;">
+                                                <input type="checkbox" name="isAutoDraw"><label>Auto Draw</label>
+                                            </div>
+                                        </section>
+                                    </main>
+                                </div>
+                                <div class="collapsible">
+                                    <header>Styling</header>
+                                    <main>
+                                    </main>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-area panel" data-tab-id="execute" data-panel-id="execute">
+                            <div class="collapsible" data-section-id="activities">
+                                <header>Activities</header>
+                                <main>
+                                    <table class="anchor-right">
+                                        <tbody></tbody>
+                                    </table>
+                                    <div class="action-buttons">
+                                        <button data-subaction="add-activity"><i class="fas fa-plus"></i>&nbsp; Add Activity</button>
+                                        <button data-subaction="import"><i class="fas fa-file-lines"></i>&nbsp; Import Activity</button>
+                                    </div>
+                                </main>
+                            </div>
+                            <div class="collapsible" data-section-id="ae">
+                                <header>Activity Extraction</header>
+                                <main>
+                                    <div class="input-group">
+                                        <label>Activity Name</label>
+                                        <input name="name" placeholder="Set a name for the activity" class="full-width" name="C" />
+                                    </div>
+                                    <div class="input-group columns full-width">
+                                        <div>
+                                            <label>Source</label>
+                                            <div style="display: flex; gap: 6px;">
+                                                <select name="source" style="flex: 1"></select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label>Sink</label>
+                                            <div style="display: flex; gap: 6px;">
+                                                <select name="sink" style="flex: 1"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Mode</label>
+                                        <select name="mode" class="full-width">
+                                            <option value="pseudorandom">Pseudo-random selection</option>
+                                            <option value="user">User-based selection</option>
+                                        </select>
+                                    </div>
+                                    <div class="input-group checkbox-item">
+                                        <input type="checkbox" name="isTargeted"> <label>Targeted Selection</label>
+                                    </div>
+                                    <div class="section-action-buttons">
+                                        <button data-subaction="generate">Generate</button>
+                                        <button data-subaction="simulate"><i class="fas fa-play"></i> &nbsp;Simulate</button>
+                                    </div>
+                                </main>
+                            </div>
+                            <div class="collapsible" data-section-id="vs">
+                                <header>Expanded Vertex Simplification</header>
+                                <main>
+                                    <table class="anchor-right">
+                                        <tbody>
+                                            <tr>
+                                                <td>Level 1</td>
+                                                <td><button data-subaction="vs-generate-1"><i class="fas fa-eye"></i> Generate</button></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Level 2</td>
+                                                <td>
+                                                    <select name="rbs">
+                                                        <option>x1</option>
+                                                    </select>
+                                                    <button data-subaction="vs-generate-2"><i class="fas fa-eye"></i> Generate</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </main>
+                            </div>
+                        </div>
+                        <div class="tab-area panel" data-tab-id="verifications" data-panel-id="verifications">
+                            <header>
+                                <h2>Verifications</h2>
+                            </header>
+                            <br/>
+                            <div class="collapsible" data-section-id="poi">
+                                <header>Points of Interest</header>
+                                <main>
+                                    <div class="section-description">
+                                        Analyze this model for presence of points of delays, synchronicity, deadlocks, reoptimization, and its timeliness of response.
+                                    </div>
+                                    <div class="input-group columns full-width" style="display: flex; align-items: end;">
+                                        <div>
+                                            <label>Source</label>
+                                            <div style="display: flex; gap: 6px;">
+                                                <select name="source" style="flex: 1"></select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label>Sink</label>
+                                            <div style="display: flex; gap: 6px;">
+                                                <select name="sink" style="flex: 1"></select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <button data-subaction="start"><i class="fas fa-magnifying-glass"></i>&nbsp; Start</button>
+                                        </div>
+                                    </div>
+                                </main>
+                            </div>
+                            <div class="collapsible" data-section-id="fc">
+                                <header>Free Choiceness</header>
+                                <main>
+                                    <div class="section-description">
+                                        Verify the input RDLT whether it is free-choice or inconclusive.
+                                    </div>
+                                    <div class="input-group columns full-width">
+                                        <div>
+                                            <label>Source</label>
+                                            <div style="display: flex; gap: 6px;">
+                                                <select name="source" style="flex: 1"></select>
+                                                <button><i class="fas fa-hand"></i></button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label>Sink</label>
+                                            <div style="display: flex; gap: 6px;">
+                                                <select name="sink" style="flex: 1"></select>
+                                                <button><i class="fas fa-hand"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <select name="type">
+                                            <option value="SDPCS">Σ-distinct PCS</option>
+                                        </select>
+                                        <button data-subaction="start">Start</button>
+                                    </div>
+                                </main>
+                            </div>
+                        </div>
+                    </main>
+                </aside>
+            </div>
+        </main>
+    </section>
+</template>

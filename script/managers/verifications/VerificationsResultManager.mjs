@@ -78,8 +78,8 @@ export class VerificationsResultManager {
         this.#initialize();
     }
 
-    #initialize() {
-        const subworkspaceTabManager = this.context.managers.workspace.addVerificationResultSubworkspace(this.id, this.result.title);
+    async #initialize() {
+        const subworkspaceTabManager = await this.context.managers.workspace.addVerificationResultSubworkspace(this.id, this.result.title);
         const rootElement = subworkspaceTabManager.tabAreaElement;
         
         // this.#drawingManager = new AESDrawingManager(this, rootElement.querySelector(".drawing > svg"));

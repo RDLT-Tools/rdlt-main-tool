@@ -46,11 +46,10 @@ export class VertexSimplificationManager {
         this.id = generateUniqueID();
 
         this.#initialize();
-        this.#start();
     }
 
-    #initialize() {
-        const subworkspaceTabManager = this.context.managers.workspace.addVSSubworkspace(this.id, "Vertex Simplification");
+    async #initialize() {
+        const subworkspaceTabManager = await this.context.managers.workspace.addVSSubworkspace(this.id, "Vertex Simplification");
         const rootElement = subworkspaceTabManager.tabAreaElement;
         
         this.#drawingManager = new BaseModelDrawingManager(rootElement.querySelector(".drawing > svg"), "vs");
@@ -62,6 +61,9 @@ export class VertexSimplificationManager {
             const rbsCenter = this.context.managers.visualModel.getComponent(this.#rbsCenterUID);
             this.#subworkspaceManager.setup(2, rbsCenter.identifier);
         }
+
+        
+        this.#start();
     }
 
     #start() {

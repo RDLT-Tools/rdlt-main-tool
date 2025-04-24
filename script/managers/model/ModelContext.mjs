@@ -9,7 +9,7 @@ import PalettePanelManager from "../panels/PalettePanelManager.mjs";
 import PropertiesPanelManager from "../panels/PropertiesPanelManager.mjs";
 import TransformManager from "../modelling/TransformManager.mjs";
 import UserEventsManager from "../modelling/events/UserEventsManager.mjs";
-import WorkspaceManager from "../modelling/WorkspaceManager.mjs";
+import WorkspaceManager from "../workspace/WorkspaceManager.mjs";
 import ExportManager from "../file/export/ExportManager.mjs";
 import ExecutePanelManager from "../panels/ExecutePanelManager.mjs";
 import VisualRDLTModel from "../../entities/model/visual/VisualRDLTModel.mjs";
@@ -49,10 +49,12 @@ export default class ModelContext {
     */
     managers = {};
 
+    #visualModel;
+
 
     constructor(id, visualModel) {
+        this.#visualModel = visualModel;
         this.#id = id || this.#generateID();
-        this.#initialize(visualModel);
     }
 
     get id() { return this.#id; }
@@ -68,19 +70,18 @@ export default class ModelContext {
         return `${timestamp}${randomChars}`;
     }
 
-    #initialize(visualModel) {
-        this.#setupManagers(visualModel);
+    async initialize() {
+        await this.#setupManagers();
     }
 
     /**
      * 
      * @param {VisualRDLTModel} visualModel 
      */
-    #setupManagers(visualModel) {
+    async #setupManagers() {
         // Setup workspace manager and its views
-        
 
-        this.managers.visualModel = new VisualModelManager(this, visualModel);
+        this.managers.visualModel = new VisualModelManager(this, this.#visualModel);
         this.managers.model = new ModelManager(this);
         this.managers.modelling = new ModellingManager(this); 
         
@@ -94,6 +95,8 @@ export default class ModelContext {
         this.managers.activities = new ActivitiesManager(this);
 
         const workspaceManager = new WorkspaceManager(this);
+        await workspaceManager.initialize();
+        
         this.managers.workspace = workspaceManager;
         this.managers.userEvents = new UserEventsManager(this,
             { drawingSVG: workspaceManager.getDrawingSVG() });

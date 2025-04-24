@@ -60,7 +60,7 @@ export default class App {
         GlobalKeyEventsManager.initialize();
     }
 
-    static #initializeContexts() {
+    static async #initializeContexts() {
         const contextsJSON = LocalSessionManager.loadAllContexts();
 
         if(contextsJSON.length > 0) {
@@ -70,6 +70,9 @@ export default class App {
                 new ModelContext()
             ];
         }
+
+        // Load all contexts
+        await Promise.all(App.contexts.map(c => c.initialize()));
 
         for(const context of this.contexts) {
             App.#addContextTab(context);
@@ -92,8 +95,10 @@ export default class App {
      * @param {VisualRDLTModel} visualModel 
      * @returns 
      */
-    static addContext(visualModel) {
+    static async addContext(visualModel) {
         const context = new ModelContext(null, visualModel);
+        await context.initialize();
+        
         App.contexts.push(context);
         App.#addContextTab(context);
         LocalSessionManager.saveContextIDs(App.contexts);

@@ -101,8 +101,8 @@ export class AESimulationManager {
         this.#initialize();
     }
 
-    #initialize() {
-        const subworkspaceTabManager = this.context.managers.workspace.addAESSubworkspace(this.id);
+    async #initialize() {
+        const subworkspaceTabManager = await this.context.managers.workspace.addAESSubworkspace(this.id);
         const rootElement = subworkspaceTabManager.tabAreaElement;
         this.#drawingManager = new AESDrawingManager(this, rootElement.querySelector(".drawing > svg"));
         this.#subworkspaceManager = new AESSubworkspaceManager(this, rootElement);
@@ -126,10 +126,12 @@ export class AESimulationManager {
 
         
         this.#subworkspaceManager.setup(this.configs);
+
+        this.#start();
     }
 
     
-    start() {
+    #start() {
         const startVertexUID = this.configs.source;
         this.#states.steps = [
             new AESStep({ action: "start", previousVertex: startVertexUID, currentVertex: startVertexUID }),

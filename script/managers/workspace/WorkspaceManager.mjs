@@ -1,5 +1,6 @@
 import App from "../../App.mjs";
 import Activity from "../../entities/activity/Activity.mjs";
+import { instantiateTemplate } from "../../utils.mjs";
 import { AESimulationManager } from "../activity/extraction/AESimulationManager.mjs";
 import { ActivityInputManager } from "../activity/input/ActivityInputManager.mjs";
 import { ActivitySimulationManager } from "../activity/simulation/ActivitySimulationManager.mjs";
@@ -76,14 +77,17 @@ export default class WorkspaceManager {
      */
     constructor(context) {
         this.context = context;
-        this.#initializeView();
+    }
+    
+    async initialize() {
+        await this.#initializeView();
         this.#setupSubworkspaceTabs();
         this.#setupMainModelTabs();
     }
 
-    #initializeView() {
-        const rootElementTemplate = document.querySelector(`template[data-tab-template-id="model-context"]`).content;
-        const rootElement = rootElementTemplate.cloneNode(true).firstElementChild;
+    async #initializeView() {
+        const rootElement = await instantiateTemplate("./templates/model-context.html");
+        
         this.#view.root = rootElement;
 
         this.#view.main = rootElement.querySelector(".main-view");
@@ -248,9 +252,8 @@ export default class WorkspaceManager {
      * @param {string} templateID 
      * @returns {TabManager}
      */
-    #addTemplatedSubworkspace(id, title, templateID) {
-        const templateTabArea = this.#view.root.querySelector(`template[data-tab-template-id='${templateID}']`).content;
-        const tabArea = templateTabArea.cloneNode(true).firstElementChild;
+    async #addTemplatedSubworkspace(id, title, templateID) {
+        const tabArea = await instantiateTemplate(`./templates/subworkspaces/${templateID}.html`);
         const tabManager = new TabManager(this.context, this.tabs.subworkspaces, id, title, true);
         tabManager.tabAreaElement = tabArea;
 
@@ -269,28 +272,28 @@ export default class WorkspaceManager {
         this.tabs.right.selectTab(panelID);
     }
 
-    addAESSubworkspace(aesID) {
-        return this.#addTemplatedSubworkspace(`aes-${aesID}`, "Activity Extraction", "aes");
+    async addAESSubworkspace(aesID) {
+        return await this.#addTemplatedSubworkspace(`aes-${aesID}`, "Activity Extraction", "aes");
     }
 
-    addVerificationResultSubworkspace(verID, title) {
-        return this.#addTemplatedSubworkspace(`ver-${verID}`, title, "ver");
+    async addVerificationResultSubworkspace(verID, title) {
+        return await this.#addTemplatedSubworkspace(`ver-${verID}`, title, "ver");
     }
 
-    addVSSubworkspace(vsID, title) {
-        return this.#addTemplatedSubworkspace(`vs-${vsID}`, title, "vs");
+    async addVSSubworkspace(vsID, title) {
+        return await this.#addTemplatedSubworkspace(`vs-${vsID}`, title, "vs");
     }
 
-    addASSubworkspace(asID) {
-        return this.#addTemplatedSubworkspace(`as-${asID}`, "Activity Simulation", "as");
+    async addASSubworkspace(asID) {
+        return await this.#addTemplatedSubworkspace(`as-${asID}`, "Activity Simulation", "as");
     }
 
-    addAISubworkspace(aiID) {
-        return this.#addTemplatedSubworkspace(`ai-${aiID}`, "Create Activity", "ai");
+    async addAISubworkspace(aiID) {
+        return await this.#addTemplatedSubworkspace(`ai-${aiID}`, "Create Activity", "ai");
     }
 
-    addPOISubworkspace(poiID) {
-        return this.#addTemplatedSubworkspace(`poi-${poiID}`, "Points of Interest", "poi");
+    async addPOISubworkspace(poiID) {
+        return await this.#addTemplatedSubworkspace(`poi-${poiID}`, "Points of Interest", "poi");
     }
 
     /** @param {{ name, source, sink, mode }} configs */

@@ -566,3 +566,13 @@ export function ellipsize(str, maxLength) {
 export function isVertexAnObject(vertex) {
     return [ "boundary", "entity" ].includes(vertex.type);
 }
+
+export async function instantiateTemplate(path) {
+    const response = await fetch(path);
+    const rawHTML = await response.text();
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(rawHTML, 'text/html');
+    const template = doc.querySelector("template");
+    return template.content.cloneNode(true).firstElementChild;
+}

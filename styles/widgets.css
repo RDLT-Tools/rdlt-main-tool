@@ -324,9 +324,17 @@ table.subtable tr {
     display: none;
 }
 
-.arc-tag {
+.arc-tag > div:first-child:after {
+    content: '';
+    height: 16px;
+    width: 16px;
+    margin: 0;
+    vertical-align: middle;
+    display: inline-block;
+    margin: 0 2px;
+    transform: translateY(-2px);
     background-image: url("../assets/icons/arc-tag-arrow.svg");
-    background-size: auto 40%;
+    background-size: 100% auto;
     background-repeat: no-repeat;
     background-position: center;
 }
@@ -334,10 +342,6 @@ table.subtable tr {
 .arc-tag > div {
     display: inline-block;
     vertical-align: middle;
-}
-
-.arc-tag > div:first-child {
-    margin-right: 20px;
 }
 
 .status-chip {

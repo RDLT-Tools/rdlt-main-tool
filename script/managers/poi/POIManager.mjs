@@ -47,14 +47,11 @@ export class POIManager {
         this.configs = configs;
         this.#modelSnapshot = visualModelSnapshot;
 
-        console.log(this.configs);
-
         this.#initialize();
-        this.#start();
     }
 
-    #initialize() {
-        const subworkspaceTabManager = this.context.managers.workspace.addPOISubworkspace(this.id);
+    async #initialize() {
+        const subworkspaceTabManager = await this.context.managers.workspace.addPOISubworkspace(this.id);
         const rootElement = subworkspaceTabManager.tabAreaElement;
         
         this.#drawingManager = new BaseModelDrawingManager(rootElement.querySelector(".drawing > svg"), "poi");
@@ -63,6 +60,8 @@ export class POIManager {
         this.#panels = {
             poi: new POIPanelManager(this, rootElement.querySelector(`[data-panel-id="poi"]`))
         };
+
+        this.#start();
 
     }
 

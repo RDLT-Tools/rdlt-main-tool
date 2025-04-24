@@ -63,8 +63,8 @@ export class ActivityInputManager {
         this.#initialize();
     }
 
-    #initialize() {
-        this.#subworkspaceTabManager = this.context.managers.workspace.addAISubworkspace(this.id);
+    async #initialize() {
+        this.#subworkspaceTabManager = await this.context.managers.workspace.addAISubworkspace(this.id);
         const rootElement = this.#subworkspaceTabManager.tabAreaElement;
         this.#drawingManager = new AIDrawingManager(this, rootElement.querySelector(".drawing > svg"));
         this.#subworkspaceManager = new AISubworkspaceManager(this, rootElement);
