@@ -85,26 +85,40 @@ export default class ExecutePanelManager {
         aeSectionViews.generateButton = aeSectionRoot.querySelector("button[data-subaction='generate']");
         aeSectionViews.simulateButton = aeSectionRoot.querySelector("button[data-subaction='simulate']");
 
-        aeSectionViews.generateButton.addEventListener("click", () => {
-            const { name, source, sink } = this.#forms.activityExtraction.getValues();
+        aeSectionViews.generateButton.addEventListener("click", async () => {
+            const { name, source, sink, isTargeted } = this.#forms.activityExtraction.getValues();
             if(!source || !sink) return;
+
+            let targetedArcs = new Set();
+            const visualModel = this.context.managers.visualModel.makeCopy();
+            
+            if(isTargeted) {
+                targetedArcs = await this.context.managers.workspace.startTargetedArcSelection(visualModel);
+            }
 
             this.context.managers.activities.generateActivity({ 
                 name: name?.trim() || "<Untitled Activity>", 
                 source: Number(source), 
-                sink: Number(sink) 
-            });
+                sink: Number(sink),
+                targetedArcs
+            }, visualModel);
         });
 
-        aeSectionViews.simulateButton.addEventListener("click", () => {
+        aeSectionViews.simulateButton.addEventListener("click", async () => {
             const { name, source, sink, mode, isTargeted } = this.#forms.activityExtraction.getValues();
             if(!source || !sink || !mode) return;
 
-            console.log({ isTargeted });
+            let targetedArcs = new Set();
+            const visualModel = this.context.managers.visualModel.makeCopy();
+            
+            if(isTargeted) {
+                targetedArcs = await this.context.managers.workspace.startTargetedArcSelection(visualModel);
+            }
             
             const aesManager = this.context.managers.workspace.startAESimulation({
-                name, source: Number(source), sink: Number(sink), mode
-            });
+                name, source: Number(source), sink: Number(sink), mode,
+                targetedArcs
+            }, visualModel);
         });
     }
 

@@ -25,7 +25,8 @@ export class AESimulationManager {
      *      name: string,
      *      source: ComponentID,
      *      sink: ComponentID,
-     *      mode: ActivityExtractionMode
+     *      mode: ActivityExtractionMode,
+     *      targetedArcs: Set<number>
      * }} 
     */
     configs;

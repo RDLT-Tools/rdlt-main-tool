@@ -1,0 +1,36 @@
+<template data-tab-template-id="tas">
+    <div class="subworkspace tab-area tas-subworkspace">
+        <main class="tas-main">
+            <header>
+                <div>
+                    <h1>Select Arcs for Targeted Selection</h1>
+                </div>
+                <div class="tas-status-view"></div>
+                <div class="tas-quick-controls">
+                    <button data-tas-action="continue">Continue &nbsp;<i class="fas fa-arrow-right"></i></button>
+                </div>
+            </header>
+            <main>
+                <section class="drawing arcs-clickable">
+                    <svg></svg>
+                </section>
+            </main>
+        </main>
+        <aside class="right-panels">
+            <section class="tab-buttons">
+                <div class="tab-button" data-tab-id="arcs">Selected Arcs</div>
+            </section>
+            <main class="panel-tabs">
+                <div class="tab-area panel" data-tab-id="arcs" data-panel-id="arcs">
+                    <header><h2>Selected Arcs</h2></header>
+                    <br>
+                    <main>
+                        <table class="anchor-right">
+                            <tbody></tbody>
+                        </table>
+                    </main>
+                </div>
+            </main>
+        </aside>
+    </div>
+</template>

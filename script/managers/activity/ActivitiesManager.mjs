@@ -27,11 +27,12 @@ export class ActivitiesManager {
      *      name: string,
      *      source: ComponentID,
      *      sink: ComponentID,
-     *      mode: ActivityExtractionMode
+     *      mode: ActivityExtractionMode,
+     *      targetedArcs: Set<number>
      * }} configs
     */
-    generateActivity(configs) {
-        const modelSnapshot = this.context.managers.visualModel.makeCopy();
+    generateActivity(configs, visualModel = null) {
+        const modelSnapshot = visualModel || this.context.managers.visualModel.makeCopy();
         const vertices = modelSnapshot.getAllComponents().map(v => v.simplify());
         const arcs = modelSnapshot.getAllArcs().map(a => a.simplify());
 

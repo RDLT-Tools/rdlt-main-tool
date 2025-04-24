@@ -1,9 +1,11 @@
 import App from "../../App.mjs";
 import Activity from "../../entities/activity/Activity.mjs";
+import VisualRDLTModel from "../../entities/model/visual/VisualRDLTModel.mjs";
 import { instantiateTemplate } from "../../utils.mjs";
 import { AESimulationManager } from "../activity/extraction/AESimulationManager.mjs";
 import { ActivityInputManager } from "../activity/input/ActivityInputManager.mjs";
 import { ActivitySimulationManager } from "../activity/simulation/ActivitySimulationManager.mjs";
+import { TargetedArcSelectManager } from "../activity/targeted/TargetedArcSelectManager.mjs";
 import ImportManager from "../file/import/ImportManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import { POIManager } from "../poi/POIManager.mjs";
@@ -250,7 +252,7 @@ export default class WorkspaceManager {
      * @param {string} id 
      * @param {string} title 
      * @param {string} templateID 
-     * @returns {TabManager}
+     * @returns {Promise<TabManager>}
      */
     async #addTemplatedSubworkspace(id, title, templateID) {
         const tabArea = await instantiateTemplate(`./templates/subworkspaces/${templateID}.html`);
@@ -296,10 +298,14 @@ export default class WorkspaceManager {
         return await this.#addTemplatedSubworkspace(`poi-${poiID}`, "Points of Interest", "poi");
     }
 
-    /** @param {{ name, source, sink, mode }} configs */
-    startAESimulation(configs) {
+    async addTASSubworkspace(tasID) {
+        return await this.#addTemplatedSubworkspace(`tas-${tasID}`, "Select Targeted Arcs", "tas");
+    }
+
+    /** @param {{ name, source, sink, mode, targetedArcs }} configs */
+    startAESimulation(configs, visualModel = null) {
         return new AESimulationManager(this.context, configs, 
-            this.context.managers.visualModel.makeCopy()
+            visualModel || this.context.managers.visualModel.makeCopy()
         );
     }
 
@@ -330,5 +336,16 @@ export default class WorkspaceManager {
 
     createdInputtedActivity() {
         return new ActivityInputManager(this.context, this.context.managers.visualModel.makeCopy());
+    }
+
+    /**
+     * @param {VisualRDLTModel} visualModel
+     * @param {(arcs: Set<number>) => void} onArcsSelected
+     * @returns {Promise<Set<number>>} 
+     */
+    startTargetedArcSelection(visualModel) {
+        return new Promise(resolve => {
+            new TargetedArcSelectManager(this.context, visualModel, (arcs) => resolve(arcs));
+        });
     }
 }

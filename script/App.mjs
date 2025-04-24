@@ -26,7 +26,7 @@ export default class App {
     static async initialize() {
         App.#initializeStates();
         App.#initializeViews();
-        App.#initializeContexts();
+        await App.#initializeContexts();
     }
 
     static #initializeStates() {
