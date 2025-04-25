@@ -46,9 +46,9 @@ export default class VisualComponent {
         this.styles = styles || new ComponentStyles();
     }
 
-    copy() {
+    copy(newInstance = false) {
         const copied = new VisualComponent({
-            uid: this.uid,
+            uid: newInstance ? null : this.uid,
             identifier: this.identifier,
             label: this.label,
             type: this.type,

@@ -7,6 +7,7 @@ import ComponentStyles from "../../entities/styling/ComponentStyles.mjs";
 import { isVertexAnObject } from "../../utils.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import { LocalSessionManager } from "../session/LocalSessionManager.mjs";
+import { ClipboardManager } from "../workspace/ClipboardManager.mjs";
 
 export default class ModellingManager {
     /** @type { ModelContext } */
@@ -235,6 +236,12 @@ export default class ModellingManager {
                         break;
                     case "key-arrowright":
                         this.#moveSelectedRelative(relativeMoveOffset.x, 0);
+                        break;
+                    case "key-copy":
+                        this.#copySelected();
+                        break;
+                    case "key-paste":
+                        this.#pasteFromClipboard();
                         break;
                 }
             break;
@@ -794,6 +801,69 @@ export default class ModellingManager {
         }
 
         return { valid: true };
+    }
+
+    #copySelected() {
+        const objects = { vertices: [], arcs: [] };
+        for(const vertexUID of this.modellingStates.selected.components) {
+            objects.vertices.push(this.getComponentById(vertexUID).copy());
+        }
+
+        for(const arcUID of this.modellingStates.selected.arcs) {
+            objects.arcs.push(this.getArcById(arcUID).copy());
+        }
+
+        console.log("Copied", objects);
+
+        if(objects.vertices.length === 0 && objects.arcs.length === 0) return;
+
+        ClipboardManager.copy(objects);
+    }
+
+    #pasteFromClipboard() {
+        const { vertices, arcs } = ClipboardManager.get();
+
+        const copyOffset = { x: 20, y: 20 };
+        const copiedVertexUID = {};
+
+        
+        this.#clearSelection();
+
+        for(const { uid, type, identifier, label, isRBSCenter, geometry, styles } of vertices) {
+            const copiedGeometry = geometry.copy();
+            copiedGeometry.position.x += copyOffset.x;
+            copiedGeometry.position.y += copyOffset.y;
+
+            const copiedStyles = styles.copy();
+
+            const newComponent = this.addComponent(
+                type, { identifier, label, isRBSCenter },
+                copiedGeometry, copiedStyles
+            );
+
+            copiedVertexUID[uid] = newComponent.uid;
+            this.#addComponentToSelection(newComponent.uid);
+        }
+
+        for(const { C, L, fromVertexUID, toVertexUID, geometry, styles } of arcs) {
+            const copiedGeometry = geometry.copy();
+            for(const waypoint of copiedGeometry.waypoints) {
+                waypoint.x += copyOffset.x;
+                waypoint.y += copyOffset.y;
+            }
+
+            const copiedStyles = styles.copy();
+
+            const newArc = this.addArc(
+                copiedVertexUID[fromVertexUID] || fromVertexUID, 
+                copiedVertexUID[toVertexUID] || toVertexUID, 
+                { C, L },
+                copiedGeometry, copiedStyles
+            );
+            
+            this.#addArcToSelection(newArc.uid);
+        }
+
     }
 
     #saveModel() {
