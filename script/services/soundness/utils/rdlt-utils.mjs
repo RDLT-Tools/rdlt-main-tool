@@ -219,5 +219,27 @@ export const utils = {
         g[s].push(e);
       });
       return g;
+    },
+
+    /**
+     * Identifies the source and sink vertices of a graph.
+     * @param {Graph} graph - The graph to analyze.
+     * @returns {Object} - An object containing the source and sink vertices.
+     */
+    getSourceAndSinkVertices(graph) {
+        let source = null;
+        let sink = null;
+
+        // Find the source vertex (no incoming edges)
+        source = graph.vertices.find(vertex => 
+            !graph.edges.some(edge => edge.to === vertex)
+        );
+
+        // Find the sink vertex (no outgoing edges)
+        sink = graph.vertices.find(vertex => 
+            !graph.edges.some(edge => edge.from === vertex)
+        );
+
+        return { source, sink };
     }
   };

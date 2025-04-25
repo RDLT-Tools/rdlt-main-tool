@@ -1,6 +1,7 @@
 import { Graph } from '../models/graph.js';
 import { SoundnessCriteria } from './soundness-criteria.js';
 import { GraphOperations } from './graph-operations.js';
+import { utils } from './rdlt-utils.mjs';
 
 /**
  * Utility class for verifying soundness properties.
@@ -29,21 +30,28 @@ export class Soundness {
 
     /** 
     * Verifies the easy soundness property of an RDLT by checking for
-    * the existence of a contraction path from the source to the sink
+    * the existence of a contraction path from the source to the sink.
     * @param {Graph} graph - The original RDLT.
     * @param {Graph[]} evsa - Collection of vertex-simplified RDLTs.
-    * @param {Vertex} source - The source vertex
-    * @param {Vertex} sink - The sink vertex.
     * @returns {boolean} - True if the RDLT is easy sound, false otherwise.
     */
-    static isEasySound(graph, evsa, source, sink) {
-        const easySound = true;
-        let rdltClear; // Flag to indicate if a contraction path is found for current rdlt structure
+    static isEasySound(graph, evsa) {
+        console.log("received evsa", evsa); // Debug: Check the received evsa
 
         for (const rdlt of evsa) {
+            // Get the source and sink vertices for the current RDLT
+            const { source, sink } = utils.getSourceAndSinkVertices(rdlt);
+
+            if (!source || !sink) {
+                console.warn("Source or sink vertex not found in the graph.");
+                return false; // If either source or sink is missing, the graph is not easy sound
+            }
+
+            console.log(`Source: ${source.id}, Sink: ${sink.id}`); // Debug: Log source and sink
+
             // Get the contracted RDLT by applying the graph contraction strategy
             const contractedRDLT = GraphOperations.contractGraph(rdlt, source);
-            rdltClear = false; // Reset the flag for each RDLT
+            let rdltClear = false; // Flag to indicate if a contraction path is found for the current RDLT
 
             // Check if the contracted RDLT has a contraction path from the source to the sink
             for (const vertex of contractedRDLT.vertices) {
@@ -58,11 +66,11 @@ export class Soundness {
                 }
             }
 
-            if (rdltClear === false){
+            if (!rdltClear) {
                 return false; // If no contraction path is found in the RDLT, return false
             }
         }
 
-        return true;
+        return true; // Return true if all RDLTs have a contraction path
     }
 }

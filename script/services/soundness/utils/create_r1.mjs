@@ -2,7 +2,7 @@
 
 import { AbstractArc } from './abstract.mjs';
 import { Cycle } from './cycle.mjs';
-import * as utils from './rdlt-utils.mjs';
+import { utils } from './rdlt-utils.mjs';
 
 /**
  * Processes R1 components: extracts arcs, vertices, attributes, and calculates eRU.
@@ -33,24 +33,32 @@ export function ProcessR1(arcsList, R1, centersList, inList, outList, R2) {
   // 3. If R2 exists, generate abstract arcs
   if (R2 && R2.length) {
     const abstract = new AbstractArc(R1, R2, inList, outList, centersList, arcsList);
-    const abstractVertices = abstract.find_abstract_vertices();                             // :contentReference[oaicite:2]{index=2}&#8203;:contentReference[oaicite:3]{index=3}
+    let abstractVertices = abstract.findAbstractVertices(); // Returns an array of objects and strings
+    console.log("Raw abstract vertices:", abstractVertices);
+
+    // Process abstractVertices to extract only the identifiers
+    abstractVertices = abstractVertices.map(v => (typeof v === 'object' && v.identifier ? v.identifier : v));
+    console.log("Processed abstract vertices (identifiers only):", abstractVertices);
 
     // Step A → B → C
     let stepA, stepB, finalAbstractArcs;
     try {
-      stepA = abstract.make_abstract_arcs_stepA(abstractVertices);                           // :contentReference[oaicite:4]{index=4}&#8203;:contentReference[oaicite:5]{index=5}
+      stepA = abstract.makeAbstractArcsStepA(abstractVertices);                           // :contentReference[oaicite:4]{index=4}&#8203;:contentReference[oaicite:5]{index=5}
+      console.log("abstractArcsStepA:", stepA);
     } catch (e) {
       console.error(`Failed Step A: ${e}`);
       return R1;
     }
     try {
-      stepB = abstract.make_abstract_arcs_stepB(stepA);                                      // :contentReference[oaicite:6]{index=6}&#8203;:contentReference[oaicite:7]{index=7}
+      stepB = abstract.makeAbstractArcsStepB(stepA);                                      // :contentReference[oaicite:6]{index=6}&#8203;:contentReference[oaicite:7]{index=7}
+      console.log("abstractArcsStepB:", stepB);
     } catch (e) {
       console.error(`Failed Step B: ${e}`);
       return R1;
     }
     try {
-      finalAbstractArcs = abstract.make_abstract_arcs_stepC(stepB);                           // :contentReference[oaicite:8]{index=8}&#8203;:contentReference[oaicite:9]{index=9}
+      finalAbstractArcs = abstract.makeAbstractArcsStepC(stepB);                           // :contentReference[oaicite:8]{index=8}&#8203;:contentReference[oaicite:9]{index=9}
+      console.log("finalAbstractArcs:", finalAbstractArcs);
     } catch (e) {
       console.error(`Failed Step C: ${e}`);
       return R1;
@@ -79,14 +87,14 @@ export function ProcessR1(arcsList, R1, centersList, inList, outList, R2) {
 
   // 4. Cycle detection and eRU updates
   const cycleInstance = new Cycle(R1);                                                       // :contentReference[oaicite:10]{index=10}&#8203;:contentReference[oaicite:11]{index=11}
-  const cycles = cycleInstance.evaluate_cycle();
+  const cycles = cycleInstance.evaluateCycle();
   if (cycles) {
     for (const { cycle: cycleArcs } of cycles) {
       const lValues = [];
       // Gather l-attributes
       for (const entry of cycleArcs) {
         const [rid, arcName] = entry.split(': ').map(s => s.trim());
-        const actualArc = utils.get_arc_from_rid(rid, R1);                                    // :contentReference[oaicite:12]{index=12}&#8203;:contentReference[oaicite:13]{index=13}
+        const actualArc = utils.getArcFromRid(rid, R1);                                    // :contentReference[oaicite:12]{index=12}&#8203;:contentReference[oaicite:13]{index=13}
         const match = R1.find(r => r.arc === actualArc);
         if (match && !match.is_abstract) {
           const l = parseInt(match['l-attribute'] ?? '0', 10);
@@ -98,7 +106,7 @@ export function ProcessR1(arcsList, R1, centersList, inList, outList, R2) {
         // Apply ca to non-abstract arcs in the cycle
         for (const entry of cycleArcs) {
           const [rid, arcName] = entry.split(': ').map(s => s.trim());
-          const actualArc = utils.get_arc_from_rid(rid, R1);
+          const actualArc = utils.getArcFromRid(rid, R1);
           const match = R1.find(r => r.arc === actualArc);
           if (match && !match.is_abstract) {
             match.eRU = String(ca);

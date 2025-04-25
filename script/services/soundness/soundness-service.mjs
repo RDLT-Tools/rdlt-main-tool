@@ -10,40 +10,83 @@ import { Activity } from './models/Activity.js';
 import { Graph } from './models/Graph.js';
 import { Soundness } from './utils/soundness.js';
 import { GraphOperations } from './utils/graph-operations.js';
+import { processR2 } from './utils/create_r2.mjs';
 
-function getInBridges(model){
+
+function getInBridges(model) {
     const arcMap = buildArcMap(model.arcs);
     const vertexMap = buildVertexMap(model.components);
 
+    console.log("arcMap:", arcMap);
+    console.log("vertexMap:", vertexMap);
+
     const rbsMatrix = buildRBSMatrix(vertexMap, model.arcs);
-    const inBridges = new Set();
-    for(const arc of model.arcs){
-        if(isInbridge(arc.uid, arcMap, rbsMatrix)){
-            inBridges.add(arc);
+
+    console.log("rbsMatrix:", rbsMatrix);
+
+    const inBridgesUIDs = new Set();
+    const inBridges = new Set(); // Set to collect "fromVertexIdentifier, toVertexIdentifier" strings
+
+    for (const arc of model.arcs) {
+        if (isInbridge(arc.uid, arcMap, rbsMatrix)) {
+            inBridgesUIDs.add(arc.uid); // Collect UIDs of in-bridge arcs
+        }
+    }
+
+    console.log("UIDs of in-bridge arcs:", inBridgesUIDs);
+
+    // Map UIDs to their corresponding "fromVertexIdentifier, toVertexIdentifier" and add to inBridges
+    for (const uid of inBridgesUIDs) {
+        const arc = arcMap[uid]; // Retrieve the arc using the UID
+        const fromVertex = vertexMap[arc.fromVertexUID]; // Retrieve the "from" vertex
+        const toVertex = vertexMap[arc.toVertexUID]; // Retrieve the "to" vertex
+
+        if (fromVertex && toVertex) {
+            const entry = `${fromVertex.identifier}, ${toVertex.identifier}`;
+            inBridges.add(entry); // Add the formatted string to the inBridges set
         }
     }
 
     return inBridges;
 }
 
-function getOutBridges(model){
+function getOutBridges(model) {
     const arcMap = buildArcMap(model.arcs);
     const vertexMap = buildVertexMap(model.components);
 
     const rbsMatrix = buildRBSMatrix(vertexMap, model.arcs);
-    const outBridges = new Set();
-    for(const arc of model.arcs){
-        if(isOutbridge(arc.uid, arcMap, rbsMatrix)){
-            outBridges.add(arc);
+    const outBridgesUIDs = new Set();
+    const outBridges = new Set(); // Set to collect "fromVertexIdentifier, toVertexIdentifier" strings
+
+    for (const arc of model.arcs) {
+        if (isOutbridge(arc.uid, arcMap, rbsMatrix)) {
+            outBridgesUIDs.add(arc.uid); // Collect UIDs of out-bridge arcs
+        }
+    }
+
+    console.log("UIDs of out-bridge arcs:", outBridgesUIDs);
+
+    // Map UIDs to their corresponding "fromVertexIdentifier, toVertexIdentifier" and add to outBridges
+    for (const uid of outBridgesUIDs) {
+        const arc = arcMap[uid]; // Retrieve the arc using the UID
+        const fromVertex = vertexMap[arc.fromVertexUID]; // Retrieve the "from" vertex
+        const toVertex = vertexMap[arc.toVertexUID]; // Retrieve the "to" vertex
+
+        if (fromVertex && toVertex) {
+            const entry = `${fromVertex.identifier}, ${toVertex.identifier}`;
+            outBridges.add(entry); // Add the formatted string to the outBridges set
         }
     }
 
     return outBridges;
 }
 
+function getVertexFromID(rdlt, id) {
+    return rdlt.vertices.find(vertex => vertex.id === id);
+}
+
 export function verifySoundness(model, source, sink, soundnessNotion) {
     console.log({ model, source, sink, soundnessNotion });
-    const filepath = "rdlt_text\\sample_ronnie.txt";
 
     const inVertices = getInBridges(model);
     const outVertices = getOutBridges(model);
@@ -52,13 +95,37 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
     console.log("inVertices:", inVertices);
     console.log('outVertices:', outVertices);
 
-    const rdlt = new InputRDLT(model, inVertices, outVertices);
-    const evsa = rdlt.evaluate();
-
-    ProcessR1(rdlt.model.arcs, evsa.R1.R1, rdlt.centersList, rdlt._inUIDs, rdlt._outUIDs, evsa.Rs);
-
-    console.log("rdlt:", rdlt);
+    const input_rdlt = new InputRDLT(model, inVertices, outVertices);
+    const evsa = input_rdlt.evaluate();
+    let R2;
+    if(input_rdlt.centersList.length === 0){
+        R2 = [];
+    }
+    else{
+        R2 = processR2(evsa.Rs);
+    }
+    
+    console.log("rdlt:", input_rdlt);
     console.log("evsa:", evsa);
+
+    const R1 = ProcessR1(input_rdlt.model.arcs, evsa.R1.R1, input_rdlt.centersList, input_rdlt.in_list, input_rdlt.out_list, R2);
+
+    console.log("R1:", R1);
+    console.log("R2:", R2);
+
+    const { rdltGraph, r2Graphs, r1Graph } = mapToGraphs(input_rdlt, R2, R1);
+    console.log("rdltGraph:", rdltGraph);
+    console.log("r2Graphs:", r2Graphs);
+    console.log("r1Graph:", r1Graph);
+
+    let combinedEvsa;
+    if(r2Graphs.length > 0){
+        combinedEvsa = [...r2Graphs.map(item => item.graph), r1Graph];
+    }
+    else{
+        combinedEvsa = [r1Graph];
+    }
+    
 
     // fetch('http://localhost:3000/verify', {
     //     method: 'POST',
@@ -86,6 +153,26 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
     // });
 
     //  TODO Implement soundness
+
+    switch(soundnessNotion){
+        case 'easy':
+            console.log("Easy Soundness Check");
+
+            const result = Soundness.isEasySound(rdltGraph, combinedEvsa);
+
+            console.log("Easy Soundness Result:", result);
+            break;
+        case 'classical':
+            console.log("Classical Soundness Check");
+            break;
+        case 'relaxed':
+            console.log("Relaxed Soundness Check");
+            break;
+        case 'weak':
+            console.log("Weak Soundness Check");
+            break;
+    }
+
     return {
         title: "Lorem Ipsum",
         instances: [
@@ -121,24 +208,6 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
         ]
         
     };
-}
-
-// Simple usage example:
-function demo() {
-    const boundaryV = new Vertex('v1', VertexType.BOUNDARY_OBJECT);
-    const entityV = new Vertex('v2', VertexType.ENTITY_OBJECT);
-  
-    boundaryV.setAttribute('description', 'Boundary object');
-    entityV.setAttribute('description', 'Entity object');
-  
-    const edge1 = new Edge(1, boundaryV, entityV, 'constraintExample', 3, []);
-  
-    const graph = new Graph();
-    graph.addVertex(boundaryV);
-    graph.addVertex(entityV);
-    graph.addEdge(edge1);
-  
-    console.log('Demo Graph:', graph);
 }
 
 function testActExtract(){
@@ -480,3 +549,137 @@ function testContraction(){
 // }).catch((error) => {
 //     console.error("Error running Python scripts:", error);
 // });
+
+/**
+ * Maps RDLT, R2, and R1 data to their respective Graph models.
+ * @param {Object} rdlt - The RDLT model data.
+ * @param {Object[]} R2 - The R2 data (array of reset-bound subsystems).
+ * @param {Object[]} R1 - The R1 data (array of arcs).
+ * @returns {Object} An object containing the mapped Graph models for RDLT, R2, and R1.
+ */
+function mapToGraphs(rdlt, R2, R1) {
+    const rdltGraph = new Graph();
+    let r2Graphs; // Array to hold multiple R2 graphs
+    const r1Graph = new Graph();
+
+    // Map RDLT to Graph
+    if (rdlt && rdlt.model && rdlt.model.components && rdlt.model.arcs) {
+        console.log("Mapping RDLT to Graph...");
+        
+        // Add vertices
+        rdlt.model.components.forEach(component => {
+            const vertex = new Vertex(component.uid, VertexType.ENTITY_OBJECT, {}, component.identifier || '');
+            rdltGraph.addVertex(vertex);
+        });
+
+        // Add edges
+        rdlt.model.arcs.forEach(arc => {
+            const fromVertex = rdltGraph.vertices.find(v => v.id === arc.fromVertexUID);
+            const toVertex = rdltGraph.vertices.find(v => v.id === arc.toVertexUID);
+            const edge = new Edge(arc.uid, fromVertex, toVertex, arc.C, arc.L, []);
+            rdltGraph.addEdge(edge);
+        });
+
+        // Map Reset-Bound Subsystems (RBS)
+        if (rdlt.centersList && rdlt.centersList.length > 0) {
+            console.log("Mapping Reset-Bound Subsystems...");
+            rdlt.centersList.forEach(centerId => {
+                const centerVertex = rdltGraph.vertices.find(v => v.id === centerId.uid);
+                if (!centerVertex) {
+                    console.error(`Center vertex with ID ${centerId.uid} not found in the graph.`);
+                    return;
+                }
+
+                // Get members of the RBS (vertices connected to the center)
+                const members = rdltGraph.edges
+                    .filter(edge => edge.from.id === centerId.uid)
+                    .map(edge => (edge.from.id === centerId.uid ? edge.to : edge.from));
+
+                // Get in-bridges (arcs in in_list connected to members)
+                const inBridges = rdlt.in_list
+                    .map(entry => {
+                        const [fromId, toId] = entry.split(', ');
+                        const fromVertex = rdltGraph.vertices.find(v => v.name === fromId);
+                        const toVertex = rdltGraph.vertices.find(v => v.name === toId);
+
+                        // Find the edge in the graph
+                        return rdltGraph.edges.find(edge => edge.from === fromVertex && edge.to === toVertex);
+                    })
+                    .filter(edge => edge && (members.includes(edge.to) || centerVertex === edge.to));
+
+                // Get out-bridges (arcs in out_list connected to members)
+                const outBridges = rdlt.out_list
+                    .map(entry => {
+                        const [fromId, toId] = entry.split(', ');
+                        const fromVertex = rdltGraph.vertices.find(v => v.name === fromId);
+                        const toVertex = rdltGraph.vertices.find(v => v.name === toId);
+                        return rdltGraph.edges.find(edge => edge.from === fromVertex && edge.to === toVertex);
+                    })
+                    .filter(edge => edge && members.includes(edge.from));
+
+                // Create and add the ResetBoundSubsystem
+                const resetBoundSubsystem = new ResetBoundSubsystem(centerVertex, members, inBridges, outBridges);
+                rdltGraph.addResetBoundSubsystem(resetBoundSubsystem);
+            });
+        }
+    }
+
+    // Map R2 to Graphs
+    if (R2 && R2.length > 0) {
+        console.log("Mapping R2 to Graphs...");
+
+        // Group R2 entries by r_number
+        const r2Groups = R2.reduce((groups, arc) => {
+            const rNumber = arc['r-id'].split('-')[0]; // Extract r_number from r-id
+            if (!groups[rNumber]) {
+                groups[rNumber] = [];
+            }
+            groups[rNumber].push(arc);
+            return groups;
+        }, {});
+
+        // Create a Graph for each group
+        r2Graphs = Object.entries(r2Groups).map(([rNumber, arcs]) => {
+            const graph = new Graph();
+            console.log(`Creating Graph for R2 group: ${rNumber}`);
+
+            arcs.forEach(arc => {
+                const [fromId, toId] = arc.arc.split(', ');
+                const fromVertex = graph.vertices.find(v => v.id === fromId) || new Vertex(fromId, VertexType.ENTITY_OBJECT, {}, fromId);
+                const toVertex = graph.vertices.find(v => v.id === toId) || new Vertex(toId, VertexType.ENTITY_OBJECT, {}, toId);
+
+                // Add vertices if not already present
+                if (!graph.vertices.find(v => v.id === fromId)) graph.addVertex(fromVertex);
+                if (!graph.vertices.find(v => v.id === toId)) graph.addVertex(toVertex);
+
+                const edge = new Edge(arc['r-id'], fromVertex, toVertex, arc['c-attribute'], parseInt(arc['l-attribute'], 10), []);
+                graph.addEdge(edge);
+            });
+
+            return { rNumber, graph };
+        });
+
+        console.log("Mapped R2 Graphs:", r2Graphs);
+    }
+    else{
+        r2Graphs = [];
+    }
+
+    // Map R1 to Graph
+    if (R1 && R1.length > 0) {
+        console.log("Mapping R1 to Graph...");
+        R1.forEach((arc, index) => {
+            const [fromId, toId] = arc.arc.split(', ');
+            const fromVertex = r1Graph.vertices.find(v => v.id === fromId) || new Vertex(fromId, VertexType.ENTITY_OBJECT, {}, fromId);
+            const toVertex = r1Graph.vertices.find(v => v.id === toId) || new Vertex(toId, VertexType.ENTITY_OBJECT, {}, toId);
+
+            if (!r1Graph.vertices.find(v => v.id === fromId)) r1Graph.addVertex(fromVertex);
+            if (!r1Graph.vertices.find(v => v.id === toId)) r1Graph.addVertex(toVertex);
+
+            const edge = new Edge(`R1-${index}`, fromVertex, toVertex, arc['c-attribute'], parseInt(arc['l-attribute'], 10), []);
+            r1Graph.addEdge(edge);
+        });
+    }
+
+    return { rdltGraph, r2Graphs, r1Graph };
+}

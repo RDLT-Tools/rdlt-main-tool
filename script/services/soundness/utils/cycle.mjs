@@ -18,14 +18,32 @@ export class Cycle {
   }
 
   processArcs() {
-    this.R.forEach(e => {
-      if (e.arc && e['r-id']) {
-        const [s, t] = e.arc.split(', ').map(x => x.trim());
-        this.Arcs_List.push([e['r-id'], s, t]);
-        this.processed_arcs.push(e);
+    let arcList;
+
+    // Ensure correct processing based on R format (array or object)
+    if (Array.isArray(this.R)) {
+      arcList = this.R; // If R is an array, use it directly
+    } else if (typeof this.R === 'object' && this.R !== null) {
+      // If R is an object, flatten its values into a single array
+      arcList = Object.values(this.R).flat();
+    } else {
+      throw new TypeError(`Expected R to be an array or object, found ${typeof this.R}.`);
+    }
+
+    // Process each arc entry
+    arcList.forEach(arcEntry => {
+      const arc = arcEntry.arc;
+      const rId = arcEntry['r-id'];
+
+      if (typeof arc === 'string' && (typeof rId === 'string' || typeof rId === 'number')) {
+        const [startVertex, endVertex] = arc.split(', ').map(x => x.trim());
+        this.Arcs_List.push([rId, startVertex, endVertex]);
+        this.processed_arcs.push(arcEntry);
       }
     });
-    this.Vertices_List = [...new Set(this.Arcs_List.flatMap(([,a,b])=>[a,b]))];
+
+    // Extract unique vertices from arcs
+    this.Vertices_List = [...new Set(this.Arcs_List.flatMap(([, start, end]) => [start, end]))];
   }
 
   listToGraph(edgeList) {
@@ -115,5 +133,52 @@ export class Cycle {
         });
       }
     });
+  }
+
+  /**
+   * Evaluates cycles in the RDLT and returns them in a human-readable format.
+   *
+   * This is the main entry point for cycle analysis. It:
+   *  1. Populates the Cycle_List by calling storeToCycleList()
+   *  2. Formats each cycle as an array of "start: end" strings
+   *  3. Identifies which of those arcs are critical (minimum l-attribute)
+   *  4. Returns an array of objects, each containing:
+   *     - cycle-id: the cycle identifier
+   *     - cycle: array of formatted arcs
+   *     - ca:   array of formatted critical arcs
+   *
+   * @returns {Array<Object>} Array of cycle descriptions, e.g.
+   *   [ { "cycle-id": "c-1",
+   *       cycle: ["x1: x2", "x2: x3", "x3: x1"],
+   *       ca: ["x2: x3"] },
+   *     … ]
+   */
+  evaluateCycle() {
+    // Ensure Cycle_List is populated
+    this.storeToCycleList();
+
+    return this.Cycle_List
+      // Only consider cycles that actually have arcs
+      .filter(cycle => Array.isArray(cycle.cycle) && cycle.cycle.length > 0)
+      .map(cycle => {
+        // cycle.cycle is already an array of strings "start: end"
+        const formattedCycle = cycle.cycle.slice();
+
+        // Determine which arcs in this cycle are critical (l-attribute equals cycle.ca)
+        const formattedCriticalArcs = formattedCycle.filter(arcStr => {
+          // Convert "start: end" -> "start, end" to match RDLT arc notation
+          const arcKey = arcStr.replace(': ', ', ');
+          const entry = this.findRByArc(arcKey);
+          if (!entry || entry['l-attribute'] == null) return false;
+          const lVal = parseInt(entry['l-attribute'], 10);
+          return lVal === cycle.ca;
+        });
+
+        return {
+          'cycle-id': cycle['cycle-id'],
+          cycle: formattedCycle,
+          ca: formattedCriticalArcs
+        };
+      });
   }
 }
