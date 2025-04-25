@@ -66,9 +66,8 @@ export default class App {
         if(contextsJSON.length > 0) {
             App.contexts = contextsJSON.map(c => ModelContext.fromJSON(c))
         } else {
-            App.contexts = [
-                new ModelContext()
-            ];
+            App.contexts = [];
+            App.addContext();
         }
 
         // Load all contexts
