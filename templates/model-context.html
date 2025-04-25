@@ -345,6 +345,44 @@
                                     </div>
                                 </main>
                             </div>
+                            <div class="collapsible" data-section-id="soundness">
+                                <header>Soundness</header>
+                                <main>
+                                    <div class="section-description">
+                                        Verify the notion of soundness of the input RDLT.
+                                    </div>
+                                    <div class="input-group columns full-width">
+                                        <div>
+                                            <label>Source</label>
+                                            <div style="display: flex; gap: 6px;">
+                                                <select name="source" style="flex: 1"></select>
+                                                <button><i class="fas fa-hand"></i></button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label>Sink</label>
+                                            <div style="display: flex; gap: 6px;">
+                                                <select name="sink" style="flex: 1"></select>
+                                                <button><i class="fas fa-hand"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <div>
+                                            <label>Soundness Notion</label>
+                                            <select name="notion" class="full-width">
+                                                <option value="classical">Classical Soundness</option>
+                                                <option value="relaxed">Relaxed Soundness</option>
+                                                <option value="weak">Weak Soundness</option>
+                                                <option value="easy">Easy Soundness</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button data-subaction="start">Start</button>
+                                    </div>
+                                </main>
+                            </div>
                         </div>
                     </main>
                 </aside>
