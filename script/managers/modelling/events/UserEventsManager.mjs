@@ -54,6 +54,8 @@ export default class UserEventsManager {
                     modellingManager.onDrawingViewUserEvent("key-copy");
                 } else if(setHasExact(keys, "Control", "v")) {
                     modellingManager.onDrawingViewUserEvent("key-paste");
+                } else if(setHasExact(keys, "Control", "d")) {
+                    modellingManager.onDrawingViewUserEvent("key-duplicate");
                 }
             }
         });

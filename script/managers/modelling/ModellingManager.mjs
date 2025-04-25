@@ -243,6 +243,10 @@ export default class ModellingManager {
                     case "key-paste":
                         this.#pasteFromClipboard();
                         break;
+                    case "key-duplicate":
+                        this.#copySelected();
+                        this.#pasteFromClipboard();
+                        break;
                 }
             break;
         }
