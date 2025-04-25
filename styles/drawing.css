@@ -138,6 +138,10 @@ svg .arc-waypoint:not([data-nomove]) {
   pointer-events: none;
 }
 
+.aes-subworkspace .arc.targeted:not(.active) .arc-highlight {
+  stroke: #BBBBBB;
+}
+
 .arc-clickable {
   transition: all 200ms ease;
   stroke-width: 24;

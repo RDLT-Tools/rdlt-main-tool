@@ -26,4 +26,11 @@ export class AESDrawingManager extends BaseModelDrawingManager {
             arcBuilder.clickableElement.addEventListener("click", () => this.#simulationManager.chooseArc(Number(arcUID)));
         }
     }
+
+    highlightTargetedArcs(targetedArcs) {
+        for(const arcUID of targetedArcs) {
+            const arcBuilder = this.builders.arcs[arcUID];
+            arcBuilder.element.classList.add("targeted");
+        }
+    }
 }

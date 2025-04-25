@@ -1,6 +1,6 @@
 import Activity from "../../entities/activity/Activity.mjs";
 import { backtrack, checkArc, iterateAtVertex, traverseArc } from "../../services/aes.mjs";
-import { buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, pickRandomFromSet } from "../../utils.mjs";
+import { buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, getSetsIntersection, pickRandomFromSet } from "../../utils.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 
 export class ActivitiesManager {
@@ -56,9 +56,11 @@ export class ActivitiesManager {
         while(true) {
             // Check explorable arcs from current vertex
             const explorableArcs = iterateAtVertex({ vertexUID: currentVertex }, aeStates, aeCache);
+            const explorableTargetedArcs = getSetsIntersection(explorableArcs, configs.targetedArcs);
+            const choosableArcs = explorableTargetedArcs.size > 0 ? explorableTargetedArcs : explorableArcs;
 
             // If no explorable arcs, try to backtrack (if unable, report as failure)
-            if(explorableArcs.size === 0) {
+            if(choosableArcs.size === 0) {
                 const backtrackedVertex = backtrack(null, aeStates, aeCache);
                 if(backtrackedVertex !== null) {
                     currentVertex = backtrackedVertex;
@@ -71,7 +73,7 @@ export class ActivitiesManager {
             }
 
             // Choose random arc
-            const chosenArc = pickRandomFromSet(explorableArcs);
+            const chosenArc = pickRandomFromSet(choosableArcs);
 
             // Perform check on choosen arc
             const isUnconstrained = checkArc({ arcUID: chosenArc }, aeStates, aeCache);

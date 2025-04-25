@@ -58,30 +58,40 @@ export class AESStepsPanelManager {
 
                 // Step number column
                 stepRowCells.push(buildElement("td", {}, [ i+1 ]));
-                
+
                 // Action column
-                stepRowCells.push(buildElement("td", {}, [ 
-                    buildElement("div", { classname: "aes-step-indicator" }),
-                    " ",
-                    step.actionLabel ]));
+                const actionCell = buildElement("td", {
+                    colspan: step.action === "choosing" ? 3 : 1
+                }, [ 
+                    buildElement("div", { 
+                        classname: "aes-step-indicator"
+                    }) 
+                ]);
 
-                // Component column
-                if([ "start", "backtrack", "end-sink" ].includes(step.action)) {
-                    const currentVertexIdentifier = this.#simulationManager.getVertexIdentifier(step.currentVertex);
-                    stepRowCells.push(buildElement("td", {}, [
-                        buildVertexTagElement(currentVertexIdentifier)
-                    ]));
-                } else if([ "try-explore", "explore", "check", "traverse" ].includes(step.action)) {
-                    const [ fromVertexIdentifier, toVertexIdentifier ] = this.#simulationManager.getArcIdentifierPair(step.currentArc);
-                    stepRowCells.push(buildElement("td", {}, [
-                        buildArcTagElement(fromVertexIdentifier, toVertexIdentifier)
-                    ]))
-                } else {
-                    stepRowCells.push(buildElement("td"));
+                actionCell.innerHTML += " " + step.actionLabel;
+                stepRowCells.push(actionCell);
+
+                if(step.action !== "choosing") {
+                    // Component column
+                    if([ "start", "backtrack", "end-sink" ].includes(step.action)) {
+                        const currentVertexIdentifier = this.#simulationManager.getVertexIdentifier(step.currentVertex);
+                        stepRowCells.push(buildElement("td", {}, [
+                            buildVertexTagElement(currentVertexIdentifier)
+                        ]));
+                    } else if([ "try-explore", "explore", "check", "traverse" ].includes(step.action)) {
+                        const [ fromVertexIdentifier, toVertexIdentifier ] = this.#simulationManager.getArcIdentifierPair(step.currentArc);
+                        stepRowCells.push(buildElement("td", {}, [
+                            buildArcTagElement(fromVertexIdentifier, toVertexIdentifier)
+                        ]))
+                    } else {
+                        stepRowCells.push(buildElement("td"));
+                    }
+    
+                    // Remarks column
+                    const remarksCell = buildElement("td");
+                    remarksCell.innerHTML = step.remarks;
+                    stepRowCells.push(remarksCell);
                 }
-
-                // Remarks column
-                stepRowCells.push(buildElement("td", {}, [ step.remarks ]));
 
                 stepRow = buildElement("tr", {
                     "data-aes-step-action": step.action

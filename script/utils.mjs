@@ -181,6 +181,23 @@ export function setHasExact(setA, ...elements) {
     return true;
 }
 
+
+/**
+ * 
+ * @param {Set<number>} setA 
+ * @param {Set<number>} setB 
+ * @returns {Set<number>}
+ */
+export function getSetsIntersection(setA, setB) {
+    const intersection = new Set();
+
+    for(const element of setA) {
+        if(setB.has(element)) intersection.add(element);
+    }
+    
+    return intersection;
+}
+
 /**
  * 
  * @param {SVGElement} svgElement 
