@@ -1,4 +1,6 @@
 import Activity from "../../../entities/activity/Activity.mjs";
+import VisualArc from "../../../entities/model/visual/VisualArc.mjs";
+import VisualComponent from "../../../entities/model/visual/VisualComponent.mjs";
 import VisualRDLTModel from "../../../entities/model/visual/VisualRDLTModel.mjs";
 import { generateUniqueID } from "../../../utils.mjs";
 import { BaseModelDrawingManager } from "../../drawing/BaseModelDrawingManager.mjs";
@@ -6,6 +8,7 @@ import ModelContext from "../../model/ModelContext.mjs";
 import { ASSubworkspaceManager } from "./ASSubworkspaceManager.mjs";
 import { ASDetailsPanelManager } from "./panels/ASDetailsPanelManager.mjs";
 import { ASProfilePanelManager } from "./panels/ASProfilePanelManager.mjs";
+import { ASTORPanelManager } from "./panels/ASTORPanelManager.mjs";
 
 export class ActivitySimulationManager {
     /** @type {ModelContext} */
@@ -32,6 +35,7 @@ export class ActivitySimulationManager {
      * @type {{
      *      details: ASDetailsPanelManager,
      *      profile: ASProfilePanelManager,
+     *      tor: ASTORPanelManager
      * }} 
      * */
     #panels;
@@ -75,6 +79,7 @@ export class ActivitySimulationManager {
         this.#panels = {
             details: new ASDetailsPanelManager(this, rootElement.querySelector(".panel[data-panel-id='details']")),
             profile: new ASProfilePanelManager(this, rootElement.querySelector(".panel[data-panel-id='profile']")),
+            tor: new ASTORPanelManager(this, rootElement.querySelector(".panel[data-panel-id='tor']")),
         };
 
         this.#drawingManager.setupComponents(
@@ -84,6 +89,7 @@ export class ActivitySimulationManager {
         this.#panels.details.displayActivityDetails(this.#activity);
 
         this.#panels.profile.displayProfileList(this.#activity.profile);
+        this.#panels.tor.displayTOR(this.#activity.tor);
         this.setCurrentTimestep(1);
     }
     
@@ -124,6 +130,16 @@ export class ActivitySimulationManager {
         return this.#modelSnapshot.getComponent(vertexUID).identifier;
     }
 
+    /** @returns {VisualComponent} */
+    getVertex(vertexUID) {
+        return this.#modelSnapshot.getComponent(vertexUID);
+    }
+
+    /** @returns {VisualArc} */
+    getArc(arcUID) {
+        return this.#modelSnapshot.getArc(arcUID);
+    }
+
     /** @returns {[string, string]} */
     getArcIdentifierPair(arcUID) {
         const arc = this.#modelSnapshot.getArc(arcUID);
@@ -137,7 +153,4 @@ export class ActivitySimulationManager {
             vertexTo?.identifier || "" ];
     }
 
-    getComponent(uid) {
-        return this.context.managers.visualModel.getComponent(uid);
-    }
 }

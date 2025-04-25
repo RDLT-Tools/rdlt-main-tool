@@ -98,6 +98,12 @@ export class ASSubworkspaceManager {
             rightPanelsTabAreaContainer.querySelector(".tab-area[data-tab-id='profile']")
         ));
         
+        this.#tabs.right.loadTab(TabManager.load(
+            this, "tor", "Timeliness of Response",
+            rightPanelsTabButtonsContainer.querySelector(".tab-button[data-tab-id='tor']"),
+            rightPanelsTabAreaContainer.querySelector(".tab-area[data-tab-id='tor']")
+        ));
+        
         this.#tabs.left.selectTab("details");
         this.#tabs.right.selectTab("profile");
     }

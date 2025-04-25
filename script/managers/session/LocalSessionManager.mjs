@@ -78,4 +78,8 @@ export class LocalSessionManager {
     static saveDrawingStates(contextID, states) {
         return LocalSessionManager.#set(`rdlt-tool-drawing-states-${contextID}`, states);
     }
+
+    static removeDrawingStates(contextID) {
+        return LocalSessionManager.#remove(`rdlt-tool-drawing-states-${contextID}`);
+    }
 }

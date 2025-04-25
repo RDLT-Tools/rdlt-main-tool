@@ -49,6 +49,7 @@ export default class App {
             
             App.contexts = App.contexts.filter(context => context.id !== id);
             LocalSessionManager.removeModel(context);
+            LocalSessionManager.removeDrawingStates(context.id);
 
             if(App.contexts.length > 0) {
                 LocalSessionManager.saveContextIDs(App.contexts);

@@ -52,7 +52,7 @@ export class AESimulationManager {
 
 
     /** 
-     * @typedef {{ path, T, CTIndicator, activityProfile }} AESStatesValues
+     * @typedef {{ path, T, CTIndicator, activityProfile, tor }} AESStatesValues
      * @type {{
      *  currentStepIndex: number,
      *  steps: AESStep[],
@@ -141,7 +141,7 @@ export class AESimulationManager {
         ];
 
         const initialAEStates = {
-            T: {}, CTIndicator: {}, path: [ startVertexUID ], activityProfile: {}
+            T: {}, CTIndicator: {}, path: [ startVertexUID ], activityProfile: {}, tor: {}
         };
 
         this.#states.aeStates.checkpoints[0] = structuredClone(initialAEStates);
@@ -418,6 +418,7 @@ export class AESimulationManager {
         const result = this.#getCurrentStep().action;
         const pass = result === "end-sink";
 
+        const states = this.getStatesAtStepIndex(this.#states.currentStepIndex);
         const activity = new Activity({
             name: name.trim() || "<Untitled Activity>", 
             source: this.configs.source,
@@ -431,7 +432,8 @@ export class AESimulationManager {
                     "The activity was able to reach the sink" :
                     "The activity failed to reach the sink"
             },
-            profile: this.getStatesAtStepIndex(this.#states.currentStepIndex).activityProfile
+            profile: states.activityProfile,
+            tor: states.tor
         });
 
         this.context.managers.activities.addActivity(activity);

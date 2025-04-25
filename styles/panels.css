@@ -152,3 +152,8 @@
 .poi-subworkspace[data-active-poi="pore"] [data-poi-section]:not([data-poi-section="pore"]) {
   display: none;
 }
+
+.panel[data-panel-id="tor"]:not(.unavailable) .unavailable-message,
+.panel[data-panel-id="tor"].unavailable > main {
+  display: none;
+}

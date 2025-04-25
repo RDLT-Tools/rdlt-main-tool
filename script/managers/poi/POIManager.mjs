@@ -130,34 +130,6 @@ export class POIManager {
             vertices: deadlocksResult.vertices
         }
 
-
-        // TOR
-        const torResult = [
-            {
-                vertexUID: 1,
-                timeReached: [ 1 ],
-                parents: [
-                    { arcUID: 3, timeSatisfied: [ 2 ] },
-                ]
-            },
-            {
-                vertexUID: 4,
-                timeReached: [ 1, 2 ],
-                parents: [
-                    { arcUID: 3, timeSatisfied: [ 3 ] },
-                    { arcUID: 4, timeSatisfied: [ 4, 5 ] },
-                ]
-            },
-            {
-                vertexUID: 3,
-                timeReached: [ 1, 2 ],
-                parents: []
-            },
-        ];
-
-        this.#panels.poi.setupTORDisplay(torResult);
-
-
         // PORe
         const poreResult = [
             { vertexUID: 4, arcs: new Set([ 3 ]) }

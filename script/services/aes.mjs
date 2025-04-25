@@ -8,6 +8,7 @@ exploration, checking, and traversal may be performed over separate iterations.
 */
 
 import { areTypeAlikeIncoming, getIncomingArcs, getOutgoingArcs, isEpsilon, isOutbridge, isVertexAnObject } from "../utils.mjs";
+import { isVertexPOD } from "./poi.mjs";
 
 /**
  * @typedef {number} ArcUID
@@ -21,6 +22,13 @@ import { areTypeAlikeIncoming, getIncomingArcs, getOutgoingArcs, isEpsilon, isOu
  * 
  * @typedef {{ [arcUID: number]: number[] }} T
  * @typedef {{ [arcUID: number]: number[] }} CTIndicator - whether traversed (2), checked (1), or neither (0)
+ * 
+ * @typedef {{ [vertexUID: number]: { 
+ *      T_reached: Set<number>, 
+ *      T_condition_satisfied: { 
+ *          arcUID: number,  
+ *          checkedTime: number
+ *      }[] } }} TimelinessOfResponse 
  * 
  * @typedef {{ [vertexUID: number]: number }} VertexTimesteps
  * @typedef {VertexUID[]} TraversedPath
@@ -44,7 +52,8 @@ import { areTypeAlikeIncoming, getIncomingArcs, getOutgoingArcs, isEpsilon, isOu
  *  T: T,
  *  CTIndicator: CTIndicator,
  *  path: TraversedPath,
- *  activityProfile: ActivityProfile
+ *  activityProfile: ActivityProfile,
+ *  tor: TimelinessOfResponse
  * }} States
  */
 
@@ -112,7 +121,8 @@ export function checkArc(args, states, cache) {
     if(!(arcUID in CTIndicator)) CTIndicator[arcUID] = [];
     const previousIncomingArcs = getIncomingArcs(arc.fromVertexUID, arcsMatrix);
 
-    T[arcUID].push(getMaxT(previousIncomingArcs, T) + 1);
+    const checkedTime = getMaxT(previousIncomingArcs, T) + 1;
+    T[arcUID].push(checkedTime);
     CTIndicator[arcUID].push(1);
 
     // 2. Determine whether arc is unconstrained
@@ -175,6 +185,19 @@ export function checkArc(args, states, cache) {
         || areNeighborsCheckedAhead 
         || isArcEpsilonAndNeighborsCheckedBefore;
 
+    // 3. Register arc for timeliness of response (tor)
+    if(isVertexPOD(arc.toVertexUID, cache)) {
+        if(!(arc.toVertexUID in states.tor)) {
+            states.tor[arc.toVertexUID] = {
+                T_reached: new Set(),
+                T_condition_satisfied: []
+            }
+        }
+    
+        states.tor[arc.toVertexUID].T_condition_satisfied.push({
+            arcUID: arc.uid, checkedTime
+        });
+    }
     
     return isUnconstrained;
 }
@@ -288,6 +311,11 @@ export function traverseArc(args, states, cache) {
                 CTIndicator[arc.uid] = [];
             }
         }
+    }
+
+    // 7. Register traversal in timeliness of response
+    if(isVertexPOD(arc.toVertexUID, cache)) {
+        states.tor[arc.toVertexUID].T_reached.add(maxT);
     }
 
     return arc.toVertexUID;

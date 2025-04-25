@@ -45,8 +45,8 @@ export class ASDetailsPanelManager {
         const sinkVertexDisplay = sinkRootView.querySelector(".vertex-display");
         const originView = this.#rootElement.querySelector(`[data-as-detail="origin"]`);
 
-        const source = this.#simulationManager.getComponent(activity.source);
-        const sink = this.#simulationManager.getComponent(activity.sink);
+        const source = this.#simulationManager.getVertex(activity.source);
+        const sink = this.#simulationManager.getVertex(activity.sink);
 
         nameView.innerHTML = activity.name;
         sourceTextView.innerHTML = source.identifier;

@@ -30,6 +30,8 @@ export class ActivitiesManager {
      *      mode: ActivityExtractionMode,
      *      targetedArcs: Set<number>
      * }} configs
+     * 
+     * @returns {Activity}
     */
     generateActivity(configs, visualModel = null) {
         const modelSnapshot = visualModel || this.context.managers.visualModel.makeCopy();
@@ -46,7 +48,7 @@ export class ActivitiesManager {
         };
         
         const aeStates = {
-            T: {}, CTIndicator: {}, path: [ configs.source ], activityProfile: {}
+            T: {}, CTIndicator: {}, path: [ configs.source ], activityProfile: {}, tor: {}
         };
 
         
@@ -105,10 +107,13 @@ export class ActivitiesManager {
                     "The activity was able to reach the sink" :
                     "The activity failed to reach the sink"
             },
-            profile: aeStates.activityProfile
+            profile: aeStates.activityProfile,
+            tor: aeStates.tor
         });
 
         this.addActivity(activity);
+
+        return activity;
     }
 
     /**
