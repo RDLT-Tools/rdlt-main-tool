@@ -86,8 +86,11 @@ class R {
 
   setAttributes(c_attr, l_attr) {
     this.arcs.forEach((arc) => {
-      this.c_attr.set(arc, c_attr[arc]);
-      this.l_attr.set(arc, l_attr[arc]);
+      // this.c_attr.set(arc, c_attr[arc]);
+      // this.l_attr.set(arc, l_attr[arc]);
+      this.c_attr.set(arc, c_attr.get(arc) || 0);
+      this.l_attr.set(arc, l_attr.get(arc) || 1);
+      // this.l_attr.set(arc, l_attr[arc]);
     });
   }
 

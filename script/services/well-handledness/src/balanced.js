@@ -115,6 +115,10 @@ export function checkIfClosedStructure(
       }
 
       if (relevantSplits.length === 0) {
+        console.log(
+          "No relevant split with sibling paths for AND-join: ",
+          join.name
+        );
         relevantSplits = disjointPaths
           .filter((path) => path[path.length - 1] === join)
           .map((path) => path[0]);

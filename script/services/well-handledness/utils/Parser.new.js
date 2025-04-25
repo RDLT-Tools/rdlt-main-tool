@@ -45,8 +45,10 @@ export function findRBSBridges(RDLT) {
 }
 
 export function parseRDLT(model) {
-  const cAttributes = {};
-  const lAttributes = {};
+  // const cAttributes = {};
+  // const lAttributes = {};
+  const cAttributes = new Map();
+  const lAttributes = new Map();
 
   const RDLT = new R("RDLT");
 
@@ -78,8 +80,10 @@ export function parseRDLT(model) {
     newArc.c_attr = arc.C !== "" ? arc.C : 0;
     newArc.l_attr = arc.L;
     RDLT.arcs.push(newArc);
-    cAttributes[newArc] = newArc.c_attr;
-    lAttributes[newArc] = parseInt(newArc.l_attr);
+    // cAttributes[newArc] = newArc.c_attr;
+    // lAttributes[newArc] = parseInt(newArc.l_attr);
+    cAttributes.set(newArc, newArc.c_attr);
+    lAttributes.set(newArc, newArc.l_attr);
   });
   RDLT.setAttributes(cAttributes, lAttributes);
   if (RDLT.centers) {

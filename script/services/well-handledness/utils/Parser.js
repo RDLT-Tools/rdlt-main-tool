@@ -8,8 +8,8 @@ function parseRdltInput(jsonData, name) {
   const R = new RDLT(name);
   let idx = 0;
 
-  const cAttributes = {};
-  const lAttributes = {};
+  const cAttributes = new Map();
+  const lAttributes = new Map();
 
   // Parse center nodes
   if (jsonData.CENTER) {
@@ -72,8 +72,10 @@ function parseRdltInput(jsonData, name) {
       R.arcs.push(newArc);
       idx++;
 
-      cAttributes[newArc] = cAttr;
-      lAttributes[newArc] = lAttr;
+      cAttributes.set(newArc, cAttr);
+      lAttributes.set(newArc, lAttr);
+      // cAttributes[newArc] = cAttr;
+      // lAttributes[newArc] = lAttr;
     });
   }
 

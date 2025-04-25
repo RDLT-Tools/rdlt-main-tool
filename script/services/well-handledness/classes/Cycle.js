@@ -122,15 +122,35 @@ export class Cycle {
     // Convert Set to Array for iteration
     const arcsArray = Array.from(this.arcs);
 
-    // Find minimum L value arc using reduce
-    const criticalArc = arcsArray.reduce((minArc, currentArc) => {
-      const currentValue = currentArc.l_attr ?? Infinity;
-      const minValue = minArc ? minArc.l_attr ?? Infinity : Infinity;
-      return currentValue < minValue ? currentArc : minArc;
-    }, null);
+    // // Find minimum L value arc using reduce
+    // const criticalArc = arcsArray.reduce((minArc, currentArc) => {
+    //   const currentValue = currentArc.l_attr ?? Infinity;
+    //   const minValue = minArc ? minArc.l_attr ?? Infinity : Infinity;
+    //   return currentValue < minValue ? currentArc : minArc;
+    // }, null);
+
+    // Assume `arcs` is an array and `L` is a Map or plain object
+
+    // Find the minimum L value among arcs
+    // let minLValue = Infinity;
+    // for (const arc of arcs) {
+    //   const value = L[arc] !== undefined ? L[arc] : Infinity;
+    //   if (value < minLValue) {
+    //     minLValue = value;
+    //   }
+    // }
+    const minLValue = Math.min(
+      ...arcsArray.map((arc) => L.get(arc) || Infinity)
+    );
+
+    // Collect arcs with the minimum L value
+    const criticalArc = arcsArray.filter((arc) => {
+      const value = L.get(arc) !== undefined ? L.get(arc) : Infinity;
+      return value === minLValue;
+    });
 
     if (criticalArc) {
-      criticalArcs.push(criticalArc);
+      criticalArcs.push(...criticalArc);
     }
 
     // 2. Create Set of start vertices (lit_c)

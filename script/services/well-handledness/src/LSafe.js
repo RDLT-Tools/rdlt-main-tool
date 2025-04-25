@@ -38,7 +38,11 @@ function hasSafeCAs(R_obj) {
 
   R_obj.cycle_list.forEach((cycle) => {
     cycle.criticalArcs.forEach((ca) => {
-      if (!cycle.escapeArcs.some((ea) => ea._l_attr >= ea._eRU)) {
+      if (
+        !cycle.escapeArcs.some(
+          (ea) => ea._l_attr >= ea._eRU && ea.start == ca.start
+        )
+      ) {
         notSafeCAs.push(ca);
       }
     });

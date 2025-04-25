@@ -197,8 +197,8 @@ function generateVertexSimplifications(RDLT) {
     });
   }
 
-  let R1 = new R("R1"),
-    R2 = new R("R2");
+  let R1 = new R("R1");
+  let R2 = new R("R2");
   R1.addElements([...RDLT.in_bridges, ...RDLT.out_bridges]);
 
   if (RDLT.centers.size > 0) {
