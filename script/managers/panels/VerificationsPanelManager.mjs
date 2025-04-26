@@ -165,11 +165,17 @@ export default class VerificationsPanelManager {
       const modelSnapshot = this.context.managers.visualModel.makeCopy();
       const simpleModel = modelSnapshot.toSimpleModel();
 
-      const result = verifyWellHandledness(simpleModel, source, sink, type);
+      const { activityProfile, result } = verifyWellHandledness(
+        simpleModel,
+        source,
+        sink,
+        type
+      );
       console.log("Verification complete", result);
       this.context.managers.workspace.showVerificationResults(
         result,
-        modelSnapshot
+        modelSnapshot,
+        activityProfile
       );
     });
   }

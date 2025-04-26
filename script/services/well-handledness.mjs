@@ -41,11 +41,11 @@ export function verifyWellHandledness(model, source, sink, type) {
   console.log("RDLT:", RDLT);
   console.log("R1:", R1);
   console.log("R2:", R2);
-  const { isWellHandled, Violations } = verify(R1, R2);
+  const { isWellHandled, Violations, activityProfile } = verify(RDLT, R1, R2);
 
   console.log("Verification complete");
 
-  return {
+  let result = {
     title: "Well-Handledness",
     instances: [
       {
@@ -110,4 +110,6 @@ export function verifyWellHandledness(model, source, sink, type) {
       },
     ],
   };
+
+  return { activityProfile, result };
 }

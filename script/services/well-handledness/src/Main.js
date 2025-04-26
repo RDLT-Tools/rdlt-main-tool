@@ -10,13 +10,14 @@ import {
   isBalanced,
 } from "./LSafe.js";
 import { parseRDLT } from "../utils/Parser.new.js";
+import { modifiedActivityExtraction } from "./activity_extraction.js";
 
 // Logging setup (using console instead of a log file)
 function log(message) {
   console.log(message);
 }
 
-export function verify(R1, R2) {
+export function verify(RDLT, R1, R2) {
   let isWellHandled = true;
   const Violations = {
     "Loop safe NCAs": [],
@@ -136,7 +137,25 @@ export function verify(R1, R2) {
     }
   });
   log(`RDLT ${isWellHandled ? "IS" : "IS NOT"} WELL-HANDLED`);
-  return { isWellHandled, Violations };
+
+  let source = null;
+  let sink = null;
+
+  // Find source and sink vertices
+  for (const v of RDLT.vertices) {
+    if (!v.incoming || v.incoming.length === 0) {
+      source = v;
+    }
+    if (!v.outgoing || v.outgoing.length === 0) {
+      sink = v;
+    }
+  }
+
+  // Assuming you have a modifiedActivityExtraction function defined
+  const { activityProfile, problematicVertices, traversalTimes, checkedTimes } =
+    modifiedActivityExtraction(RDLT, source, sink);
+
+  return { isWellHandled, Violations, activityProfile };
 }
 
 function preprocess(RDLT) {
