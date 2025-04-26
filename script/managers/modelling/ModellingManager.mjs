@@ -426,6 +426,7 @@ export default class ModellingManager {
 
     #refreshSelected() {
         this.context.managers.panels.properties.refreshSelected();
+        this.context.managers.panels.components.refreshSelected();
     }
 
     /**
@@ -486,10 +487,14 @@ export default class ModellingManager {
             this.#notifyModelStructureChangesListeners();
         }
 
-        if('identifier' in props && component.isRBSCenter) {
-            drawingManager.updateRBSCenterIdentifier(id, component.identifier);
-
-            this.#notifyModelStructureChangesListeners();
+        if('identifier' in props) {
+            
+            if(component.isRBSCenter) {
+                drawingManager.updateRBSCenterIdentifier(id, component.identifier);
+                this.#notifyModelStructureChangesListeners();
+            } else {
+                this.context.managers.panels.components.refreshVertexAndIncidentArcs(component);
+            }
         }
 
         this.#saveModel();
@@ -590,6 +595,8 @@ export default class ModellingManager {
             this.context.managers.drawing.updateMultipleRBSBounds(rbsBounds);   
         }
 
+        this.context.managers.panels.components.refreshArc(arc);
+
         this.#saveModel();
     }
 
@@ -673,6 +680,12 @@ export default class ModellingManager {
         this.#refreshSelected();
     }
 
+    selectSingleArc(id) {
+        this.#clearSelection();
+        this.#addArcToSelection(id);
+        this.#refreshSelected();
+    }
+
     selectAll() {
         this.#clearSelection();
 
@@ -746,6 +759,7 @@ export default class ModellingManager {
 
     #notifyModelStructureChangesListeners() {
         // Update dependent listeners
+        this.context.managers.panels.components.refreshComponentsList();
         this.context.managers.panels.execute.refreshModelValues();
         this.context.managers.panels.verifications.refreshModelValues();
 
@@ -867,6 +881,8 @@ export default class ModellingManager {
             
             this.#addArcToSelection(newArc.uid);
         }
+
+        this.#refreshSelected();
 
     }
 

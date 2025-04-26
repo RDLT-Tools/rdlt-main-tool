@@ -18,6 +18,23 @@
   height: 100%;
 }
 
+.panel[data-panel-id="components"] .collapsible main {
+  padding: 0;
+}
+
+.panel[data-panel-id="components"] table td {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.panel[data-panel-id="components"] table .vertex-type {
+  opacity: 0.4;
+}
+
+.panel[data-panel-id="components"] table tr.active {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
 .panel[data-panel-id="properties"] *[data-viewonly] {
   display: none;
 }

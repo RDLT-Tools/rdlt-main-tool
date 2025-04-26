@@ -16,6 +16,7 @@ import VisualRDLTModel from "../../entities/model/visual/VisualRDLTModel.mjs";
 import VerificationsPanelManager from "../panels/VerificationsPanelManager.mjs";
 import { ActivitiesManager } from "../activity/ActivitiesManager.mjs";
 import ImportManager from "../file/import/ImportManager.mjs";
+import ComponentsPanelManager from "../panels/ComponentsPanelManager.mjs";
 
 export default class ModelContext {
     
@@ -24,6 +25,7 @@ export default class ModelContext {
     
     /**
      * @typedef {{ 
+     *      components: ComponentsPanelManager,
      *      palette: PalettePanelManager, 
      *      properties: PropertiesPanelManager, 
      *      execute: ExecutePanelManager,
@@ -103,6 +105,7 @@ export default class ModelContext {
         this.managers.drawing = new DrawingViewManager(this,
             { drawingSVG: workspaceManager.getDrawingSVG() });
         this.managers.panels = {
+            components: new ComponentsPanelManager(this, workspaceManager.getPanelRootElement("components")),
             palette: new PalettePanelManager(this, workspaceManager.getPanelRootElement("palette")),
             properties: new PropertiesPanelManager(this, workspaceManager.getPanelRootElement("properties")),
             execute: new ExecutePanelManager(this, workspaceManager.getPanelRootElement("execute")),

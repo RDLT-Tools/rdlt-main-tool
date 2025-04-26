@@ -82,6 +82,14 @@ export default class VisualComponent {
         };
     }
 
+    get typeLabel() {
+        return {
+            entity: "Entity",
+            boundary: "Boundary",
+            controller: "Controller"
+        }[this.type];
+    }
+
     static fromJSON(json) {
         return new VisualComponent({
             ...json,

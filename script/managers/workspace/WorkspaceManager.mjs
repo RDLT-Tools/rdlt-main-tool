@@ -234,7 +234,7 @@ export default class WorkspaceManager {
             rightPanelsTabAreaContainer.querySelector(".tab-area[data-tab-id='verifications']")
         ));
         
-        this.tabs.left.selectTab("palette");
+        this.tabs.left.selectTab("components");
         this.tabs.right.selectTab("execute");
 
     }

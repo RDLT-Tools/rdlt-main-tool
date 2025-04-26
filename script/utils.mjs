@@ -150,8 +150,8 @@ export function buildVertexTagElement(vertexIdentifier) {
 
 export function buildArcTagElement(fromIdentifier, toIdentifier) {
     return buildElement("div", { classname: "arc-tag" }, [
-        buildElement("div", {}, [ fromIdentifier ]),
-        buildElement("div", {}, [ toIdentifier ]),
+        buildElement("div", { classname: "from" }, [ fromIdentifier ]),
+        buildElement("div", { classname: "to" }, [ toIdentifier ]),
     ]);
 }
 
