@@ -1,6 +1,6 @@
 import Activity from "../../entities/activity/Activity.mjs";
 import { backtrack, checkArc, iterateAtVertex, traverseArc } from "../../services/aes.mjs";
-import { buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, getSetsIntersection, pickRandomFromSet } from "../../utils.mjs";
+import { buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, findAllLoopingArcs, getSetsIntersection, pickRandomFromSet } from "../../utils.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 
 export class ActivitiesManager {
@@ -28,12 +28,13 @@ export class ActivitiesManager {
      *      source: ComponentID,
      *      sink: ComponentID,
      *      mode: ActivityExtractionMode,
-     *      targetedArcs: Set<number>
+     *      targetedArcs: Set<number>,
+     *      isMaximal: boolean
      * }} configs
      * 
      * @returns {Activity}
     */
-    generateActivity(configs, visualModel = null) {
+    generateActivity(configs, visualModel = null, thenSave = true) {
         const modelSnapshot = visualModel || this.context.managers.visualModel.makeCopy();
         const vertices = modelSnapshot.getAllComponents().map(v => v.simplify());
         const arcs = modelSnapshot.getAllArcs().map(a => a.simplify());
@@ -44,9 +45,11 @@ export class ActivitiesManager {
             arcs,
             arcMap: buildArcMap(arcs),
             arcsMatrix: buildArcsAdjacencyMatrix(arcs),
-            rbsMatrix: buildRBSMatrix(vertexMap, arcs)
+            rbsMatrix: buildRBSMatrix(vertexMap, arcs),
         };
         
+        const loopingArcs = findAllLoopingArcs(configs.source, new Set(), aeCache.arcsMatrix);
+
         const aeStates = {
             T: {}, CTIndicator: {}, path: [ configs.source ], activityProfile: {}, tor: {}
         };
@@ -75,7 +78,17 @@ export class ActivitiesManager {
             }
 
             // Choose random arc
-            const chosenArc = pickRandomFromSet(choosableArcs);
+            let chosenArc;
+            if(configs.isMaximal) {
+                const choosableLoopingArcs = getSetsIntersection(choosableArcs, loopingArcs);
+                if(choosableLoopingArcs.size > 0) {
+                    chosenArc = pickRandomFromSet(choosableLoopingArcs);
+                } else {
+                    chosenArc = pickRandomFromSet(choosableArcs);
+                }
+            } else {
+                chosenArc = pickRandomFromSet(choosableArcs);
+            }
 
             // Perform check on choosen arc
             const isUnconstrained = checkArc({ arcUID: chosenArc }, aeStates, aeCache);
@@ -111,7 +124,9 @@ export class ActivitiesManager {
             tor: aeStates.tor
         });
 
-        this.addActivity(activity);
+        if(thenSave) {
+            this.addActivity(activity);
+        }
 
         return activity;
     }

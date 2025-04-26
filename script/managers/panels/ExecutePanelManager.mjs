@@ -86,7 +86,7 @@ export default class ExecutePanelManager {
         aeSectionViews.simulateButton = aeSectionRoot.querySelector("button[data-subaction='simulate']");
 
         aeSectionViews.generateButton.addEventListener("click", async () => {
-            const { name, source, sink, isTargeted } = this.#forms.activityExtraction.getValues();
+            const { name, source, sink, isTargeted, isMaximal } = this.#forms.activityExtraction.getValues();
             if(!source || !sink) return;
 
             let targetedArcs = new Set();
@@ -100,7 +100,8 @@ export default class ExecutePanelManager {
                 name: name?.trim() || "<Untitled Activity>", 
                 source: Number(source), 
                 sink: Number(sink),
-                targetedArcs
+                targetedArcs,
+                isMaximal
             }, visualModel);
         });
 
@@ -143,9 +144,14 @@ export default class ExecutePanelManager {
     }
 
     #initializeForms() {
+        // Activity Extraction
         this.#forms.activityExtraction = new Form(this.#views.activityExtraction.root)
-            .setFieldNames([ 'name', 'source', 'sink', 'mode', 'isTargeted' ]);
-
+            .setFieldNames([ 'name', 'source', 'sink', 'mode', 'isTargeted', 'isMaximal' ]);
+        this.#forms.activityExtraction.getFieldElement('mode').addEventListener("change", (event) => 
+            this.#views.activityExtraction.root.setAttribute("data-value-mode", event.target.value));
+        this.#forms.activityExtraction.getFieldElement('isMaximal').addEventListener("change", (event) => 
+            this.#views.activityExtraction.root.setAttribute("data-value-ismaximal", event.target.checked));
+ 
         this.#forms.vertexSimplification = new Form(this.#views.vertexSimplification.root)
             .setFieldNames([ 'rbs' ]);
     }
