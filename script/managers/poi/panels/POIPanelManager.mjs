@@ -1,3 +1,4 @@
+import Activity from "../../../entities/activity/Activity.mjs";
 import { buildArcDisplayElement, buildArcTagElement, buildElement, buildVertexDisplayElement, buildVertexTagElement } from "../../../utils.mjs";
 import { POIManager } from "../POIManager.mjs";
 
@@ -25,6 +26,7 @@ export default class POIPanelManager {
      *   },
      *   shared: {
      *      section: HTMLDivElement,
+     *      activitiesTable: HTMLTableElement,
      *      table: HTMLTableElement,
      *   },
      *   pore: {
@@ -56,7 +58,8 @@ export default class POIPanelManager {
         this.#view.deadlocks.section = this.#rootElement.querySelector(`[data-poi-section="deadlocks"]`);
         this.#view.deadlocks.table = this.#rootElement.querySelector(`[data-poi-section="deadlocks"] table`);
         this.#view.shared.section = this.#rootElement.querySelector(`[data-poi-section="shared"]`);
-        this.#view.shared.table = this.#rootElement.querySelector(`[data-poi-section="shared"] table`);
+        this.#view.shared.table = this.#rootElement.querySelector(`[data-poi-section="shared"] .sr-table`);
+        this.#view.shared.activitiesTable = this.#rootElement.querySelector(`[data-poi-section="shared"] .acts-table`);
         this.#view.pore.section = this.#rootElement.querySelector(`[data-poi-section="pore"]`);
         this.#view.pore.table = this.#rootElement.querySelector(`[data-poi-section="pore"] table`);
     }
@@ -110,11 +113,34 @@ export default class POIPanelManager {
     }
 
     /**
+     * @param {Activity[]} activities
+     */
+    setupSharedResourcesActivitiesDisplay(activities) {
+        // Setup activities table
+        const actsTableBody = this.#view.shared.activitiesTable.querySelector("tbody");
+        actsTableBody.innerHTML = "";
+
+        for(const activity of activities) {
+            const checkbox = buildElement("input", { type: "checkbox" });
+            checkbox.addEventListener("change", (event) => {
+                this.#parentManager.toggleSRSelectedActivity(activity.id, event.target.checked);
+            });
+
+            const activityRow = buildElement("tr", {}, [
+                buildElement("td", {}, [ checkbox ]),
+                buildElement("td", {}, [ activity.name || "<Untitled Activity>" ]),
+            ]);
+
+            actsTableBody.appendChild(activityRow);
+        }
+    }
+
+    /**
      * @param {{
      *      arcs: Set<number>
      * }} result 
      */
-    setupSharedResourcesDisplay(result) {
+    refreshSharedResourcesDisplay(result) {
         const tableBody = this.#view.shared.table.querySelector("tbody");
         tableBody.innerHTML = "";
 

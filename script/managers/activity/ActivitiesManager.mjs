@@ -140,6 +140,10 @@ export class ActivitiesManager {
         this.#refreshActivitiesList();
     }
 
+    getAllActivities() {
+        return [...this.#activities];
+    }
+
     #refreshActivitiesList() {
         this.context.managers.panels.execute.refreshActivitiesList(this.#activities);
     }

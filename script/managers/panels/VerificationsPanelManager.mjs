@@ -90,7 +90,7 @@ export default class VerificationsPanelManager {
             this.context.managers.workspace.showPOIs({ 
                 source: Number(source), 
                 sink: Number(sink) 
-            });
+            }).initialize();
         });
     }
 

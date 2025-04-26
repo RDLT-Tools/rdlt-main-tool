@@ -16,7 +16,7 @@
  * }} Cache
  */
 
-import { areTypeAlikeIncoming, buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, findAllLoopingArcs, getIncomingArcs } from "../utils.mjs";
+import { areTypeAlikeIncoming, buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, findAllLoopingArcs, getIncomingArcs, getSetsUnion } from "../utils.mjs";
 
 
 /** 
@@ -84,4 +84,26 @@ export function getPOSs(source, cache) {
     }
 
     return posSet;
+}
+
+
+/**
+ * 
+ * @param {{ [timestep: number]: Set<ArcUID> }[]} profiles 
+ * @returns {Set<ArcUID>}
+ */
+export function getSharedResources(profiles) {
+    const countedArcs = new Set();
+    const sharedArcs = new Set();
+
+    for(const profile of profiles) {
+        const profileArcs = getSetsUnion(...Object.values(profile));
+
+        for(const arcUID of profileArcs) {
+            if(countedArcs.has(arcUID)) sharedArcs.add(arcUID);
+            else countedArcs.add(arcUID);
+        }
+    }
+
+    return sharedArcs;
 }

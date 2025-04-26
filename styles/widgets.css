@@ -263,6 +263,15 @@ table td {
     padding: 6px 0;
 }
 
+table.extend-last-col td:last-child {
+    width: 100%;
+}
+
+table tr > td:not(:last-child),
+table tr > th:not(:last-child) {
+    padding-right: 8px;
+}
+
 table tr > td:first-child, table tr > th:first-child {
     padding-left: 8px;
 }

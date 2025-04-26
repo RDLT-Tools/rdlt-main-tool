@@ -198,6 +198,17 @@ export function getSetsIntersection(setA, setB) {
     return intersection;
 }
 
+export function getSetsUnion(...sets) {
+    const union = new Set();
+    for(const set of sets) {
+        for(const element of set) {
+            union.add(element);
+        }
+    }
+
+    return union;
+}
+
 /**
  * 
  * @param {SVGElement} svgElement 
