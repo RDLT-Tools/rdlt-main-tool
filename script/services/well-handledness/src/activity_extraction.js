@@ -1,6 +1,7 @@
 export function modifiedActivityExtraction(RDLT, source, sink) {
   // Initialize data structures using Maps to handle object keys
-  const activityProfile = new Map();
+  // const activityProfile = new Map();
+  const activityProfile = {};
   const traversalTimes = new Map();
   let currentVertex = source;
   let reachesSink = false;
@@ -107,10 +108,10 @@ export function modifiedActivityExtraction(RDLT, source, sink) {
           if (!traversalTimes.has(arc)) traversalTimes.set(arc, []);
           traversalTimes.get(arc).push(maxTime);
 
-          if (!activityProfile.has(maxTime)) {
-            activityProfile.set(maxTime, []);
+          if (!activityProfile[maxTime]) {
+            activityProfile[maxTime] = new Set();
           }
-          activityProfile.get(maxTime).push(arc.id);
+          activityProfile[maxTime].add(arc.id);
         });
 
         joinArcs.forEach((arc) => checkedTimes.delete(arc));
