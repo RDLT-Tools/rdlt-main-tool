@@ -110,7 +110,7 @@ export function modifiedActivityExtraction(RDLT, source, sink) {
           if (!activityProfile.has(maxTime)) {
             activityProfile.set(maxTime, []);
           }
-          activityProfile.get(maxTime).push(arc);
+          activityProfile.get(maxTime).push(arc.id);
         });
 
         joinArcs.forEach((arc) => checkedTimes.delete(arc));
