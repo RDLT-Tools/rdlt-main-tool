@@ -247,6 +247,9 @@ export default class ModellingManager {
                         this.#copySelected();
                         this.#pasteFromClipboard();
                         break;
+                    case "key-cut":
+                        this.#cutSelected();
+                        break;
                 }
             break;
         }
@@ -821,6 +824,12 @@ export default class ModellingManager {
         return { valid: true };
     }
 
+    #cutSelected() {
+        this.#copySelected();
+        this.removeSelectedComponents(false);
+        this.removedSelectedArcs();
+    }
+
     #copySelected() {
         const objects = { vertices: [], arcs: [] };
         for(const vertexUID of this.modellingStates.selected.components) {
@@ -831,7 +840,6 @@ export default class ModellingManager {
             objects.arcs.push(this.getArcById(arcUID).copy());
         }
 
-        console.log("Copied", objects);
 
         if(objects.vertices.length === 0 && objects.arcs.length === 0) return;
 

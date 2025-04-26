@@ -12,9 +12,13 @@ export default class ComponentsPanelManager {
 
 
     /**
-     * @type {{ verticesTable: HTMLTableElement, arcsTable: HTMLTableElement }}
+     * @type {{ 
+     *      search: HTMLInputElement,
+     *      verticesTable: HTMLTableElement, 
+     *      arcsTable: HTMLTableElement }}
      */
     #views = {
+        search: null,
         verticesTable: null,
         arcsTable: null,
     };
@@ -29,6 +33,8 @@ export default class ComponentsPanelManager {
         vertexRows: {},
         arcRows: {}
     };
+
+    #searchKeyword = "";
 
     #selected = {
         vertices: new Set(),
@@ -48,6 +54,13 @@ export default class ComponentsPanelManager {
     #initializeViews() {
         this.#views.verticesTable = this.#rootElement.querySelector(`[data-section-id='vertices'] table`);
         this.#views.arcsTable = this.#rootElement.querySelector(`[data-section-id='arcs'] table`);
+        this.#views.search = this.#rootElement.querySelector("input[name='search']");
+
+        this.#views.search.addEventListener("input", (event) => {
+            this.#searchKeyword = event.target.value.trim().toLowerCase();
+            this.refreshComponentsList();
+        });
+
     }
 
     /**
@@ -63,6 +76,8 @@ export default class ComponentsPanelManager {
         verticesTableBody.innerHTML = "";
 
         for(const vertex of vertices) {
+            if(!this.#vertexMatchesSearch(vertex)) continue;
+
             let vertexRow = this.#cache.vertexRows[vertex.uid];
 
             if(!vertexRow) {
@@ -90,6 +105,8 @@ export default class ComponentsPanelManager {
         arcsTableBody.innerHTML = "";
 
         for(const arc of arcs) {
+            if(!this.#arcMatchesSearch(arc)) continue; 
+            
             const from = this.context.managers.modelling.getComponentById(arc.fromVertexUID);
             const to = this.context.managers.modelling.getComponentById(arc.toVertexUID);
 
@@ -206,6 +223,33 @@ export default class ComponentsPanelManager {
         for(const arcUID of prevSelected.arcs) {
             this.#cache.arcRows[arcUID]?.classList.remove("active");
         }
+    }
+
+    /**
+     * @param {VisualComponent} vertex 
+     */
+    #vertexMatchesSearch(vertex) {
+        const keyword = this.#searchKeyword;
+        if(!keyword) return true;
+
+        return vertex.identifier.toLowerCase().includes(keyword)
+            || vertex.label.toLowerCase().includes(keyword)
+            || vertex.type.includes(keyword);
+    }
+
+    /**
+     * @param {VisualArc} arc 
+     */
+    #arcMatchesSearch(arc) {
+        const keyword = this.#searchKeyword;
+        if(!keyword) return true;
+
+        const from = this.context.managers.visualModel.getComponent(arc.fromVertexUID);
+        const to = this.context.managers.visualModel.getComponent(arc.toVertexUID);
+
+        return from.identifier.toLowerCase().includes(keyword)
+            || to.identifier.toLowerCase().includes(keyword)
+            || arc.C.includes(keyword);
     }
 
 

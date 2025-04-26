@@ -138,6 +138,8 @@ svg .arc-waypoint:not([data-nomove]) {
   pointer-events: none;
 }
 
+
+
 .aes-subworkspace .arc.targeted:not(.active) .arc-highlight {
   stroke: #BBBBBB;
 }
@@ -211,6 +213,7 @@ svg .arc-waypoint:not([data-nomove]) {
 
 
 [data-tab-id="main-model"] .arc-highlight {
+  transition: none;
   opacity: 0.3;
 }
 
