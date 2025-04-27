@@ -13,10 +13,11 @@ export class GraphOperations {
     * vertices are considered for contraction. Algorithm stops if no more contractions are possible.
     * @param {Graph} graph - The vertex-simplified RDLT to contract.
     * @param {Vertex} source - The source vertex to start the contraction from.
+    * @param {number} mode - The mode of contraction (1 or 2).
     * @returns {Graph} - The contracted graph.
     */
-    static contractGraph(graph, source) {
-        console.log("Starting graph contraction from source:", source.id);
+    static contractGraph(graph, source, mode = 1) {
+        console.log(`Starting graph contraction in mode ${mode}...`);
 
         const contractedGraph = new Graph();
 
@@ -29,8 +30,8 @@ export class GraphOperations {
 
         // Helper function to gather type-alike incoming edges for a given vertex
         const getIncomingEdges = (candidateEdge, vertex) => {
-        const incomingEdges = edges.filter(edge => edge.to === vertex);
-        let typeAlike = [];
+            const incomingEdges = edges.filter(edge => edge.to === vertex);
+            let typeAlike = [];
 
             if (graph.resetBoundSubsystems && graph.resetBoundSubsystems.length > 0) {
                 // If there is an RBS present, check for type-alike arcs
@@ -55,8 +56,8 @@ export class GraphOperations {
             return [...incomingConstraints].every(constraint => candidateConstraints.has(constraint));
         };
 
-        // Start with the source vertex
-        let activeVertices = [source];
+        // Initialize active vertices based on the mode
+        let activeVertices = mode === 1 ? [source] : [...vertices];
         let contractionPossible = true;
 
         while (contractionPossible) {
@@ -78,8 +79,8 @@ export class GraphOperations {
                 const { from: x, to: y } = candidateEdge;
                 console.log(`Checking candidate edge (${x.id}, ${y.id})...`);
 
-                // Only consider edges originating from active vertices
-                if (!activeVertices.some(v => v.id === x.id)) {
+                // Only consider edges originating from active vertices in mode 1
+                if (mode === 1 && !activeVertices.some(v => v.id === x.id)) {
                     console.log(`Skipping edge (${x.id}, ${y.id}) as it does not originate from an active vertex.`);
                     continue;
                 }
@@ -121,8 +122,12 @@ export class GraphOperations {
                     vertices.push(mergedVertex);
 
                     // Update active vertices to include the new merged vertex
-                    activeVertices = activeVertices.filter(v => v !== x && v !== y);
-                    activeVertices.push(mergedVertex);
+                    if (mode === 1) {
+                        activeVertices = activeVertices.filter(v => v !== x && v !== y);
+                        activeVertices.push(mergedVertex);
+                    } else {
+                        activeVertices = [...vertices]; // In mode 2, consider all vertices for the next iteration
+                    }
 
                     console.log(`Vertices after merging: ${vertices.map(v => v.id).join(", ")}`);
                     console.log(`Active vertices after merging: ${activeVertices.map(v => v.id).join(", ")}`);

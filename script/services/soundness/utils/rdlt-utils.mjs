@@ -154,6 +154,7 @@ export const utils = {
       const allX = new Set(R.map(r => r.arc.split(', ')[0]));
       const allY = new Set(R.map(r => r.arc.split(', ')[1]));
       const sources = [...allX].filter(x => !allY.has(x));
+      console.log({ allX:[...allX], allY:[...allY], sources });
   
       let bestPath = [];
       let bestSrc = null;
@@ -175,11 +176,14 @@ export const utils = {
   
       sources.forEach(s => {
         const p = dfs(s, new Set(), []);
+        console.log(`from ${s} → path =`, p);
         if (p.length > bestPath.length) {
           bestPath = p;
           bestSrc = s;
         }
       });
+
+      console.log({ bestPath, length: bestPath.length, last: bestPath[bestPath.length-1] });
   
       return { source: bestSrc, target: bestPath[bestPath.length - 1] };
     },
