@@ -120,50 +120,27 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
 
     let combinedEvsa;
     if(r2Graphs.length > 0){
-        combinedEvsa = [...r2Graphs.map(item => item.graph), r1Graph];
+        combinedEvsa = [r1Graph, ...r2Graphs.map(item => item.graph)];
     }
     else{
         combinedEvsa = [r1Graph];
     }
-    
-
-    // fetch('http://localhost:3000/verify', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({
-    //         soundnessNotion,
-    //         filepath: filepath,
-    //         model: model,
-    //         inVertices: Array.from(inVertices), // Convert Set to Array
-    //         outVertices: Array.from(outVertices) // Convert Set to Array
-    //     })
-    // })
-    // .then(res => res.json())
-    // .then(response => {
-    //     console.log("Output from backend:", response);
-    
-    //     // Assume your backend returns parsed graph info and verification result
-    //     const { result, pythonOutput } = response;
-    
-    //     // You may want to recreate your Graph objects here from pythonOutput if needed
-    //     console.log("Verification Result:", result);
-    // })
-    // .catch(error => {
-    //     console.error("Error calling backend:", error);
-    // });
-
-    //  TODO Implement soundness
 
     switch(soundnessNotion){
         case 'easy':
             console.log("Easy Soundness Check");
 
-            const result = Soundness.isEasySound(rdltGraph, combinedEvsa);
+            const easyResult = Soundness.isEasySound(rdltGraph, combinedEvsa);
 
-            console.log("Easy Soundness Result:", result);
+            console.log("Easy Soundness Result:", easyResult);
             break;
         case 'classical':
             console.log("Classical Soundness Check");
+
+            // Use the structures RDLT structures of Asoy
+            const classicalResult = Soundness.isClassicalSound(input_rdlt, R1, R2);
+            console.log("Classical Soundness Result:", classicalResult);
+
             break;
         case 'relaxed':
             console.log("Relaxed Soundness Check");
@@ -369,186 +346,6 @@ function testContraction(){
 // testUtils();
 
 // demo();
-
-// // Define the file path as an argument (not as JSON)
-// const filepath = "rdlt_text\\sample_ronnie.txt";
-
-// // Function to check if a string is valid JSON
-// function isValidJSON(str) {
-//     try {
-//         JSON.parse(str);
-//         return true;
-//     } catch (e) {
-//         return false;
-//     }
-// }
-
-// // Function to spawn a Python process and handle its output
-// function runPythonScript(scriptPath, args) {
-//     return new Promise((resolve, reject) => {
-//         const pythonProcess = spawn("python", [scriptPath, ...args]);
-
-//         let pythonOutput = '';
-//         pythonProcess.stdout.on("data", (data) => {
-//             pythonOutput += data.toString();
-//         });
-
-//         pythonProcess.on("close", (code) => {
-//             console.log(`Python process ${scriptPath} exited with code ${code}`);
-//             if (isValidJSON(pythonOutput)) {
-//                 const result = JSON.parse(pythonOutput); // If output is JSON, parse it
-//                 resolve(result);
-//             } else {
-//                 resolve(pythonOutput);
-//             }
-//         });
-
-//         pythonProcess.stderr.on("data", (data) => {
-//             console.error(`Python stderr from ${scriptPath}: ${data.toString()}`);
-//             reject(data.toString());
-//         });
-//     });
-// }
-
-// // Function to map the parsed graph data to the Graph model
-// //TODO this function does not consider na "rs" could be multiple graphs based sa output ni asoy
-// function mapParsedGraph(data) {
-    
-//     const originalGraph = new Graph(); // Graph for original_rdlt
-//     const rsGraph = new Graph(); // Graph for Rs
-//     const r1Graph = new Graph(); // Graph for R1
-
-//     // Map original_rdlt if it exists
-//     if (data.original_rdlt) {
-//         console.log("Mapping original_rdlt...");
-//         // Add vertices
-//         data.original_rdlt.Vertices_List.forEach(vertexId => {
-//             const vertex = new Vertex(vertexId, VertexType.ENTITY_OBJECT); // Assuming ENTITY_OBJECT for all vertices
-//             originalGraph.addVertex(vertex);
-//         });
-
-//         // Add edges
-//         data.original_rdlt.Arcs_List.forEach((arc, index) => {
-//             const [sourceId, targetId] = arc.split(', ');
-//             const sourceVertex = originalGraph.vertices.find(v => v.id === sourceId);
-//             const targetVertex = originalGraph.vertices.find(v => v.id === targetId);
-//             const constraint = data.original_rdlt.C_attribute_list[index];
-//             const maxTraversal = parseInt(data.original_rdlt.L_attribute_list[index], 10);
-//             const edge = new Edge(index, sourceVertex, targetVertex, constraint, maxTraversal, []); // Assuming empty array for additional attributes
-//             originalGraph.addEdge(edge);
-//         });
-//     }
-
-//     // Map Rs if it exists and is not empty
-//     if (data.Rs && data.Rs.length > 0) {
-//         console.log("Mapping Rs...");
-//         data.Rs.forEach((resetSubsystem, rsIndex) => {
-//             Object.entries(resetSubsystem).forEach(([key, edges]) => {
-//                 console.log(`Mapping ${key} in Rs[${rsIndex}]...`);
-//                 edges.forEach((edgeData, edgeIndex) => {
-//                     const [sourceId, targetId] = edgeData.arc.split(', ');
-//                     const sourceVertex = rsGraph.vertices.find(v => v.id === sourceId) || new Vertex(sourceId, VertexType.ENTITY_OBJECT);
-//                     const targetVertex = rsGraph.vertices.find(v => v.id === targetId) || new Vertex(targetId, VertexType.ENTITY_OBJECT);
-
-//                     // Add vertices if not already present
-//                     if (!rsGraph.vertices.find(v => v.id === sourceId)) rsGraph.addVertex(sourceVertex);
-//                     if (!rsGraph.vertices.find(v => v.id === targetId)) rsGraph.addVertex(targetVertex);
-
-//                     const constraint = edgeData["c-attribute"];
-//                     const maxTraversal = parseInt(edgeData["l-attribute"], 10);
-//                     const edge = new Edge(`${key}-${edgeIndex}`, sourceVertex, targetVertex, constraint, maxTraversal, []); // Assuming empty array for additional attributes
-//                     rsGraph.addEdge(edge);
-//                 });
-//             });
-//         });
-//     }
-
-//     // Map R1 if it exists
-//     if (data.R1) {
-//         console.log("Mapping R1...");
-//         data.R1.forEach((edgeData, edgeIndex) => {
-//             const [sourceId, targetId] = edgeData.arc.split(', ');
-//             const sourceVertex = r1Graph.vertices.find(v => v.id === sourceId) || new Vertex(sourceId, VertexType.ENTITY_OBJECT);
-//             const targetVertex = r1Graph.vertices.find(v => v.id === targetId) || new Vertex(targetId, VertexType.ENTITY_OBJECT);
-
-//             // Add vertices if not already present
-//             if (!r1Graph.vertices.find(v => v.id === sourceId)) r1Graph.addVertex(sourceVertex);
-//             if (!r1Graph.vertices.find(v => v.id === targetId)) r1Graph.addVertex(targetVertex);
-
-//             const constraint = edgeData["c-attribute"];
-//             const maxTraversal = parseInt(edgeData["l-attribute"], 10);
-//             const edge = new Edge(`R1-${edgeIndex}`, sourceVertex, targetVertex, constraint, maxTraversal, []); // Assuming empty array for additional attributes
-//             r1Graph.addEdge(edge);
-//         });
-//     }
-
-//     // Log the separate graphs
-//     console.log('Original Graph:', JSON.stringify(originalGraph, null, 2));
-//     console.log('Rs Graph:', JSON.stringify(rsGraph, null, 2));
-//     console.log('R1 Graph:', JSON.stringify(r1Graph, null, 2));
-
-//     // Return the graphs for further use
-//     return { originalGraph, rsGraph, r1Graph };
-// }
-
-// // Function to clean up and format the output
-// function formatOutput(output) {
-//     if (typeof output !== 'string') {
-//         output = JSON.stringify(output);
-//     }
-//     try {
-//         const parsedOutput = JSON.parse(output);
-//         return JSON.stringify(parsedOutput, null, 2);
-//     } catch (e) {
-//         return output.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n');
-//     }
-// }
-
-// // Run both main.py and input_rdlt.py
-// let originalGraph, rsGraph, r1Graph;
-
-// fetch('http://localhost:3000/verify', {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify({
-//         soundnessNotion: 'easy',
-//         filepath: filepath
-//     })
-// })
-// .then(res => res.json())
-// .then(response => {
-//     console.log("Output from backend:", response);
-
-//     // Assume your backend returns parsed graph info and verification result
-//     const { result, pythonOutput } = response;
-
-//     // You may want to recreate your Graph objects here from pythonOutput if needed
-//     console.log("Verification Result:", result);
-// })
-// .catch(error => {
-//     console.error("Error calling backend:", error);
-// });
-
-
-// Promise.all([
-//     runPythonScript("python\\ClassicalSoundness-Automation-Tool\\main.py", [filepath]),
-//     runPythonScript("python\\ClassicalSoundness-Automation-Tool\\input_rdlt.py", [filepath])
-// ]).then((results) => {
-//     console.log("Output from main.py:", formatOutput(results[0]));
-//     console.log("Output from input_rdlt.py:", formatOutput(results[1]));
-//     ({ originalGraph, rsGraph, r1Graph } = mapParsedGraph(results[1]));
-
-//     // Group all members of rsGraph and r1Graph into a single array
-//     const evsa = [r1Graph];
-
-//     // Find vertex in the graph (TODO make this a function sa graph class)
-//     const sourceVertex = originalGraph.vertices.find(v => v.id === 'x1');
-//     const sinkVertex = originalGraph.vertices.find(v => v.id === 'x6');
-
-//     console.log(Soundness.isEasySound(originalGraph, evsa, sourceVertex, sinkVertex));
-// }).catch((error) => {
-//     console.error("Error running Python scripts:", error);
-// });
 
 /**
  * Maps RDLT, R2, and R1 data to their respective Graph models.
