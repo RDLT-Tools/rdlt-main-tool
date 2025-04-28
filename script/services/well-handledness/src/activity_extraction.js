@@ -11,7 +11,10 @@ export function modifiedActivityExtraction(RDLT, source, sink) {
 
   // Helper functions
   function isUnconstrainedArc(currentArc) {
-    if (currentArc.end.join_type === "AND") {
+    if (
+      currentArc.end.join_type === "AND" ||
+      currentArc.end.join_type === "MIX"
+    ) {
       const candidateArcs = RDLT.arcs.filter(
         (arc) => arc.end === currentArc.end && arc.start !== currentArc.start
       );
