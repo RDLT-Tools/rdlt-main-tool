@@ -35,7 +35,6 @@ import { Cycle } from './cycle.mjs';
  *   If any required field is missing or invalid.
  */
 export function processR2(R2) {
-<<<<<<< HEAD
     if (R2 && typeof R2 === 'object' && !Array.isArray(R2) && Array.isArray(R2.R2)) {
         R2 = R2.R2;
     }
@@ -97,77 +96,4 @@ export function processR2(R2) {
     });
 
     return mergedArcs;
-=======
-  // Handle the case: R2 = { R2: [ {arc,…}, … ] }
-  if (R2 && typeof R2 === 'object' && !Array.isArray(R2) && Array.isArray(R2.R2)) {
-    R2 = R2.R2;
-  }
-
-  // Merge all components except 'R1'
-  const mergedArcs = [];
-  if (Array.isArray(R2)) {
-    for (const comp of R2) {
-      for (const [key, val] of Object.entries(comp)) {
-        if (key !== 'R1') mergedArcs.push(...val);
-      }
-    }
-  } else if (typeof R2 === 'object') {
-    for (const [key, val] of Object.entries(R2)) {
-      if (key !== 'R1') mergedArcs.push(...val);
-    }
-  } else {
-    throw new Error(`Unsupported R2 format: ${R2}`);
-  }
-
-  // Validate and collect basic attributes
-  const arcsList = [], cAttrList = [], lAttrList = [], verticesSet = new Set();
-  for (const arcObj of mergedArcs) {
-    const { arc, ['c-attribute']: cAttr, ['l-attribute']: lAttr } = arcObj;
-    if (!arc || cAttr == null || lAttr == null) {
-      throw new Error(`Missing required fields in arc: ${JSON.stringify(arcObj)}`);
-    }
-    arcsList.push(arc);
-    cAttrList.push(cAttr);
-    lAttrList.push(lAttr);
-    arc.split(', ').forEach(v => verticesSet.add(v));
-  }
-  const verticesList = Array.from(verticesSet).sort();
-
-  // Cycle detection and eRU assignment
-  const cycleInstance = new Cycle({ merged: mergedArcs });
-  const cycles = cycleInstance.evaluateCycle();
-
-  // Initialize all eRU to '0'
-  for (const arcObj of mergedArcs) arcObj.eRU = '0';
-
-  if (cycles && cycles.length) {
-    // For each cycle, find its min l‐attribute, assign to all cycle arcs
-    for (const { cycle: cycleArcs } of cycles) {
-      const lValues = cycleArcs
-        .map(ca => ca.split(': ')[1].trim())
-        .map(name => mergedArcs.find(a => a.arc === name))
-        .filter(a => a && a['l-attribute'] != null)
-        .map(a => parseInt(String(a['l-attribute']).replace(/\D/g, ''), 10))
-        .filter(n => !isNaN(n));
-      if (!lValues.length) continue;
-      const ca = Math.min(...lValues).toString();
-      for (const caEntry of cycleArcs) {
-        const name = caEntry.split(': ')[1].trim();
-        const arcObj = mergedArcs.find(a => a.arc === name);
-        if (arcObj) arcObj.eRU = ca;
-      }
-    }
-  }
-
-  // Debug output (console)
-  console.log('R2:', '-'.repeat(20));
-  console.log(`Arcs List (${arcsList.length}):`, arcsList.map(a => `(${a})`));
-  console.log(`Vertices List (${verticesList.length}):`, verticesList);
-  console.log(`C-attribute List (${cAttrList.length}):`, cAttrList);
-  console.log(`L-attribute List (${lAttrList.length}):`, lAttrList);
-  console.log(`eRU List (${mergedArcs.length}):`, mergedArcs.map(a => a.eRU));
-  console.log('='.repeat(60));
-
-  return mergedArcs;
->>>>>>> 21f6fdfc11e02ff9b0fd591e0accabc1aff93729
 }

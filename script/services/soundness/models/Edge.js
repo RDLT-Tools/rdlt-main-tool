@@ -51,10 +51,7 @@ export class Edge {
    * Checks if this edge has been checked or traversed.
    */
   isCheckedTraversed(){
-<<<<<<< HEAD
     console.log(`CTI: `, this.CTI); // Debug: CTI state
-=======
->>>>>>> 21f6fdfc11e02ff9b0fd591e0accabc1aff93729
     return this.CTI.includes(1) || this.CTI.includes(2); // Check if any slot in CTI is marked as checked
   }
 
@@ -111,20 +108,12 @@ export class Edge {
    * @returns {boolean}
    */
   isUnconstrained(typeAlikeEdges) {
-<<<<<<< HEAD
     console.log(`Checking if Edge (${this.from.name}, ${this.to.name}) is unconstrained relative to type-alike edges.`); // Debug: Start
-=======
-    console.log(`Checking if Edge (${this.from.id}, ${this.to.id}) is unconstrained relative to type-alike edges.`); // Debug: Start
->>>>>>> 21f6fdfc11e02ff9b0fd591e0accabc1aff93729
 
     let criteria = [true, true, true]; // Three criteria for unconstrained arc
 
     typeAlikeEdges.forEach(edge => {
-<<<<<<< HEAD
       console.log(`Comparing with Edge (${edge.from.name}, ${edge.to.name})`); // Debug: Comparison
-=======
-      console.log(`Comparing with Edge (${edge.from.id}, ${edge.to.id})`); // Debug: Comparison
->>>>>>> 21f6fdfc11e02ff9b0fd591e0accabc1aff93729
       console.log(`[EDGE VS EDGE INFORMATION] This constraint: ${this.constraint}, Edge constraint: ${edge.constraint}, Edge check/traversal time: ${edge.getCheckTraversalCount()}`); // 
 
       if (!(edge.constraint === this.constraint || edge.constraint === "")) {
@@ -140,11 +129,7 @@ export class Edge {
     });
 
     const isUnconstrained = criteria.some(value => value === true);
-<<<<<<< HEAD
     console.log(`Edge (${this.from.name}, ${this.to.name}) unconstrained status: ${isUnconstrained}, Criteria: ${criteria}`); // Debug: Result
-=======
-    console.log(`Edge (${this.from.id}, ${this.to.id}) unconstrained status: ${isUnconstrained}, Criteria: ${criteria}`); // Debug: Result
->>>>>>> 21f6fdfc11e02ff9b0fd591e0accabc1aff93729
     return isUnconstrained;
   }
 
@@ -157,7 +142,6 @@ export class Edge {
         }
     }
 
-<<<<<<< HEAD
     console.log(`Edge (${this.from.name}, ${this.to.name}) has no non-zero traversal times.`); // Debug: No valid time
     return 0; // Default to 0 if no valid traversal time is found
   }
@@ -170,12 +154,6 @@ export class Edge {
     this.CTI = Array(this.maxTraversals).fill(0);
   }
 
-=======
-    console.log(`Edge (${this.from.id}, ${this.to.id}) has no non-zero traversal times.`); // Debug: No valid time
-    return 0; // Default to 0 if no valid traversal time is found
-  }
-
->>>>>>> 21f6fdfc11e02ff9b0fd591e0accabc1aff93729
   /**
    * Converts the edge to a JSON representation.
    * @returns {Object}
