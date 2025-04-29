@@ -257,9 +257,6 @@ export function traverseArc(args, states, cache) {
         if(!isArcPreviouslyChecked(incomingArcUID, CTIndicator)) continue;
 
         const incomingArc = arcMap[incomingArcUID];
-        
-        // Skip if epsilon
-        if(isEpsilon(incomingArc.C) && arcUID !== incomingArcUID) continue;
 
         const t = T[incomingArcUID];
         t[t.length-1] = maxT;
