@@ -129,7 +129,7 @@ export default class VERResultTabManager {
                         buildArcTagElement(...identifierPair)
                     ]),
                     buildElement("td", {}, [
-                        violatingRemarks.arcs[arcUID]
+                        violatingRemarks?.arcs[arcUID] || ""
                     ])
                 ]);
 
@@ -154,7 +154,7 @@ export default class VERResultTabManager {
                         buildVertexTagElement(identifier)
                     ]),
                     buildElement("td", {}, [
-                        violatingRemarks.vertices[vertexUID]
+                        violatingRemarks?.vertices[arcUID] || ""
                     ])
                 ]);
     
