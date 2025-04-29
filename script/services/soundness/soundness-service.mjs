@@ -252,10 +252,7 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
             // Perform activity extraction to get all possible cases
             const relaxedResult = Soundness.checkRelaxedSound(rdltGraph, combinedEvsa);
 
-            console.log("Violations: ", relaxedResult.violations);
-
-            const mappedWeakenedPTViolations = mapVerticesToUIDs(relaxedResult.violations.weakenedPTViolations, vertexMap);
-            const mappedLivenessViolations = mapVerticesToUIDs(relaxedResult.violations.livenessViolations, vertexMap);
+            // console.log("Violations: ", relaxedResult.violations);
             
             // Format output
             soundnessPass = relaxedResult.pass;
@@ -263,14 +260,19 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
             soundnessDescription = relaxedResult.description;
             soundnessCriteria = relaxedResult.criteria;
 
-            soundnessViolation.vertices = mappedWeakenedPTViolations.map(violation => violation.uid);
-            soundnessViolation.vertices = mappedLivenessViolations.map(violation => violation.uid);
+            if(relaxedResult.violations){
+                const mappedWeakenedPTViolations = mapVerticesToUIDs(relaxedResult.violations.weakenedPTViolations, vertexMap);
+                const mappedLivenessViolations = mapVerticesToUIDs(relaxedResult.violations.livenessViolations, vertexMap);
 
-            for(const violation of mappedWeakenedPTViolations) {
-                soundnessViolationRemarks.vertices[violation.uid] = "Fails Proper Termination";
-            }
-            for(const violation of mappedLivenessViolations) {
-                soundnessViolationRemarks.vertices[violation.uid] = "Vertex is not used in any activity";
+                soundnessViolation.vertices = mappedWeakenedPTViolations.map(violation => violation.uid);
+                soundnessViolation.vertices = mappedLivenessViolations.map(violation => violation.uid);
+
+                for(const violation of mappedWeakenedPTViolations) {
+                    soundnessViolationRemarks.vertices[violation.uid] = "Fails Proper Termination";
+                }
+                for(const violation of mappedLivenessViolations) {
+                    soundnessViolationRemarks.vertices[violation.uid] = "Vertex is not used in any activity";
+                }
             }
             
             console.log("soundness violation vertices: ", soundnessViolation.vertices);
@@ -293,7 +295,7 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
     }
     
     return {
-        title: "Lorem Ipsum",
+        title: "Soundness Verification",
         instances: [
             {
                 name: "Main Model",

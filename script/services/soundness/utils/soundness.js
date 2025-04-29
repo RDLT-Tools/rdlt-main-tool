@@ -38,7 +38,7 @@ export class Soundness {
             const activities = new Set();
 
             // Undergo activity extraction to get all cases
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 50; i++) {
                 const activityProfile = rdlt.extractActivityProfile(source.id, sink.id);
 
                 // Serialize the activities array for uniqueness
@@ -108,7 +108,17 @@ export class Soundness {
             return {
                 pass: true, 
                 message: "The model is Relaxed Sound",
-                description: "The given RDLT satisfied relaxed soundness checks. Therefore it is relaxed sound."
+                description: "The given RDLT satisfied relaxed soundness checks. Therefore it is relaxed sound.",
+                criteria:[
+                    {   
+                        pass: true,
+                        description: "Weakened Proper Termination: Satisfied"
+                    },
+                    {   
+                        pass: true,
+                        description: "Liveness: Satisfied"
+                    }
+                ]
             };
         }
     }
