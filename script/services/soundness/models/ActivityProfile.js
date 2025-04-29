@@ -1,13 +1,13 @@
 export class ActivityProfile {
-    constructor(source, sink) {
+    constructor(source, sink, activities = [], duration = 0) {
         this.source = source;
         this.sink = sink;
-        this.activities = []; // Array of activities
-        this.duration = 0; // Number of time steps k needed to complete this activity from source to sink.
+        this.activities = activities; // Array of activities
+        this.duration = duration; // Number of time steps k needed to complete this activity from source to sink.
     }
 
     addActivity(edge, timeStep) {
-        console.log(`Adding activity (${edge.from.id}, ${edge.to.id}) at time step ${timeStep}`); // Debug: Adding activity
+        console.log(`Adding activity (${edge.from.name}, ${edge.to.name}) at time step ${timeStep}`); // Debug: Adding activity
 
         // Ensure the activities array has enough sets to accommodate the time step
         while (this.activities.length < timeStep) {
@@ -15,7 +15,7 @@ export class ActivityProfile {
         }
 
         // Add the activity to the specified time step's Set
-        this.activities[timeStep - 1].add([edge.from.id, edge.to.id]);
+        this.activities[timeStep - 1].add([edge.from, edge.to]);
 
         console.log(
             "Activities at time step " + timeStep + ": " + Array.from(this.activities[timeStep - 1])
@@ -28,5 +28,14 @@ export class ActivityProfile {
 
     getActivities() {
         return this.activities;
+    }
+
+    clone() {
+        return new ActivityProfile(
+          this.source,
+          this.sink,
+          this.activities.slice(),
+          this.duration,
+        );
     }
 }

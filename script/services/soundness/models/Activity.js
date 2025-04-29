@@ -9,11 +9,11 @@ export class Activity {
    * @param {Vertex} source
    * @param {Vertex} target
    */
-  constructor(source, target) {
+  constructor(source, target, reachabilityConfigurations = []) {
     this.source = source;
     this.target = target;
     this.steps = []; // Initialize steps as an empty array
-    this.reachabilityConfigurations = []; // Initialize reachabilityConfigurations as an empty array
+    this.reachabilityConfigurations = reachabilityConfigurations; // Initialize reachabilityConfigurations as an empty array
   }
 
   /**

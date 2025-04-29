@@ -1,3 +1,6 @@
+import { Graph } from "../models/Graph.js";
+import { GraphOperations } from "./graph-operations.js";
+
 /**
  * Utility class for verifying soundness properties.
  */
@@ -43,72 +46,6 @@ export class SoundnessCriteria {
     }
 
     /**
-    * Verifies the proper termination property. Checks an input activity profile.
-    * Ensures the last reachability configuration has no unfinished processes in every activity.
-    * @param {ActivityProfile} activityProfile - The activity profile to check.
-    * @returns {boolean} - True if the activity profile satisfies the proper termination property, false otherwise.
-    */
-    static hasProperTermination(activityProfile) {
-        let invalidVertices = []; // Array to store vertices that do not satisfy continuity
-
-        // Iterate through each activity in the activity profile
-        for (const [index, activity] of activityProfile.activities.entries()) {
-            console.log(`Checking activity #${index + 1} with target vertex: ${activity.target.id}`); // Debug: Activity target
-
-            // Get the last reachability configuration
-            const lastConfiguration = activity.reachabilityConfigurations.at(-1); // Use `.at(-1)` to get the last element
-            if (!lastConfiguration) {
-                console.log(`Activity #${index + 1} has no reachability configurations.`); // Debug: No configurations
-                return false; // If any activity has no configurations, proper termination fails
-            }
-
-            console.log(`Last reachability configuration for activity #${index + 1}: `, lastConfiguration); // Debug: Last configuration
-
-            // Check if all "to-vertices" in the last configuration match the target vertex
-            const allToVerticesMatchTarget = Array.from(lastConfiguration).every(([from, to]) => {
-                console.log(`Checking vertex pair (${from.id}, ${to.id}) for activity #${index + 1}`); // Debug: Vertex pair
-                return to === activity.target;
-            });
-
-            if (!allToVerticesMatchTarget) {
-                console.log(`Activity #${index + 1} does not satisfy proper termination.`); // Debug: Failure
-                return false; // If any activity fails the condition, proper termination fails
-            }
-
-            // Ensure continuity of flow: "to-vertex" must appear as a "from-vertex" in future configurations
-            let satisfiesContinuity = true;
-            for (let timestep = 0; timestep < activity.reachabilityConfigurations.length; timestep++) {
-                const currentConfiguration = activity.reachabilityConfigurations[timestep];
-                const futureConfigurations = activity.reachabilityConfigurations.slice(timestep + 1);
-
-                for (const [from, to] of currentConfiguration) {
-                    const isToVertexInFuture = futureConfigurations.some(futureConfig =>
-                        Array.from(futureConfig).some(([futureFrom]) => futureFrom === to)
-                    );
-
-                    if (!isToVertexInFuture && to.id !== activity.target.id) {
-                        invalidVertices.push({ vertex: to.id, activity: index + 1, timestep }); // Add to invalid vertices list
-                        satisfiesContinuity = false;
-                    }
-                }
-            }
-
-            if (!satisfiesContinuity) {
-                console.log(`Activity #${index + 1} does not satisfy continuity of flow.`); // Debug: Success
-                continue; // Skip to the next activity
-            }
-        }
-
-        if (invalidVertices.length > 0) {
-            console.log("The following vertices do not satisfy continuity of flow:", invalidVertices); // Debug: List invalid vertices
-            return false; // If any violating vertices are found, proper termination fails
-        }
-
-        console.log("All activities satisfy the proper termination property."); // Debug: Success
-        return true; // All activities satisfy the condition
-    }
-
-    /**
     * Verifies the weakened proper termination property. Checks an input activity profile.
     * Checks for the existence of at least one activity where the last reachability configuration
     * has no unfinished processes.
@@ -116,10 +53,12 @@ export class SoundnessCriteria {
     * @returns {boolean} - True if the activity profile satisfies the weakened proper termination property, false otherwise.
     */
     static hasWeakenedProperTermination(activityProfile) {
+        console.log("Checking for weakened proper termination for activity profile: ", activityProfile); // Debug: Start
         let invalidVertices = []; // Array to store vertices that do not satisfy continuity
-
+        
         // Iterate through each activity in the activity profile
         for (const [index, activity] of activityProfile.activities.entries()) {
+            console.log("=".repeat(50));
             console.log(`Checking activity #${index + 1} with target vertex: ${activity.target.id}`); // Debug: Activity target
 
             // Get the last reachability configuration
@@ -133,8 +72,9 @@ export class SoundnessCriteria {
 
             // Check if all "to-vertices" in the last configuration match the target vertex
             const allToVerticesMatchTarget = Array.from(lastConfiguration).every(([from, to]) => {
-                console.log(`Checking vertex pair (${from.id}, ${to.id}) for activity #${index + 1}`); // Debug: Vertex pair
-                return to === activity.target;
+                console.log(`Checking vertex pair (${from.name}, ${to.name}) for activity #${index + 1}`); // Debug: Vertex pair
+                console.log(`to: ${to.id}, target: ${activity.target.id}, comparison result: ${to.id === activity.target.id}`); // Debug: Target comparison
+                return to.id === activity.target.id;
             });
 
             if (!allToVerticesMatchTarget) {
@@ -143,12 +83,16 @@ export class SoundnessCriteria {
             }
 
             // Ensure continuity of flow: "to-vertex" must appear as a "from-vertex" in future configurations
+            console.log("Checking if continuity of flow is satisfied..."); // Debug: Continuity check
             let satisfiesContinuity = true;
             for (let timestep = 0; timestep < activity.reachabilityConfigurations.length; timestep++) {
                 const currentConfiguration = activity.reachabilityConfigurations[timestep];
                 const futureConfigurations = activity.reachabilityConfigurations.slice(timestep + 1);
+                console.log("Current timestep:", timestep);
+                console.log("Future configurations: ", futureConfigurations); // Debug: Future configurations
 
                 for (const [from, to] of currentConfiguration) {
+                    console.log(`Checking vertex pair (${from.name}, ${to.name}) for continuity...`); // Debug: Continuity check
                     const isToVertexInFuture = futureConfigurations.some(futureConfig =>
                         Array.from(futureConfig).some(([futureFrom]) => futureFrom === to)
                     );
@@ -172,5 +116,64 @@ export class SoundnessCriteria {
 
         console.log("No activity satisfies the weakened proper termination property."); // Debug: Failure
         return false; // No activity satisfies the condition
+    }
+
+    /**
+    * Verifies the deadlock-resolving property.
+    * @param {Graph} rdlt - The rdlt structure to verify deadlock-resolving property.
+    * @param {Vertex[]} deadlockPoints - The deadlock points in the graph.
+    * @param {Vertex[]} reachedVertices - The reached vertices in the graph.
+    * @param {Vertex} sink - The sink of the rdlt structure.
+    * @returns {Object}
+    */
+    static isDeadlockResolving(rdlt, deadlockPoints, reachedVertices, sink){
+        let deadlockResolving = true;
+        const violations = [];
+
+        for(const point of deadlockPoints){
+            // Get the parent of all deadlock points
+            const parent = new Set();
+            const incomingEdges = rdlt.edges.filter(edge => edge.to.id === point.id);
+            console.log("(deadlock resolving) Incoming edges: ", incomingEdges);
+
+            incomingEdges.forEach(edge => {
+                parent.add(edge.from);
+            });
+            console.log("Parent set: ", parent);
+
+            // Look for an escape contraction path for each reached parent of deadlock points
+            let contractionPathFound = false;
+            parent.forEach(parentVertex => {
+                if(reachedVertices.includes(parentVertex.id)){
+                    // Contract graph from the parent
+                    const contractedGraph = GraphOperations.contractGraph(rdlt, parentVertex);
+                    // console.log("(deadlock resolving) Contracted graph: ", contractedGraph);
+
+                    // Check if the contracted RDLT has a contraction path from the parent to the sink
+                    for (const vertex of contractedGraph.vertices) {
+                        // Split the vertex ID by the underscore to get the merged vertex components (if there are any)
+                        const mergedVertexIds = vertex.id.split('_');
+                        // console.log("(deadlock resolving) Merged vertex ids: ", mergedVertexIds);
+                        
+                        // Check if both the source and sink IDs are present in the merged vertex components
+                        if (mergedVertexIds.includes(parentVertex.id) && mergedVertexIds.includes(sink.id)) {
+                            console.log(`There is a contraction path from ${parentVertex.id} to ${sink.id} in the contracted RDLT.`);
+                            contractionPathFound = true; // Set the flag to true if a path is found
+                            break;
+                        }
+                    }
+                }
+            });
+
+            if (!contractionPathFound) {
+                violations.push(point)
+                deadlockResolving = false;
+            }
+        }
+
+        return{
+            pass: deadlockResolving,
+            violations
+        };
     }
 }

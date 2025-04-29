@@ -143,7 +143,7 @@ export class Matrix {
     /**
     * Evaluates the RDLT structure to check if it satisfies L-safeness criteria.
     */
-    evaluate(){
+    evaluateLSafeness(){
         const matrix = [];
         
         for(let r of this.rdltStructure){
@@ -177,6 +177,43 @@ export class Matrix {
         
         this.matrixOperations = matrix;
         return { l_safe_vector: this.l_safe_vector, matrix};
+    }
+
+    /**
+    * Evaluates the RDLT structure to check if it satisfies safeness of CAs and loop-safeness of NCAs.
+    */
+    evaluateSafeLoopSafe(){
+        const matrix = [];
+        
+        for(let r of this.rdltStructure){
+            let cv, cyc = this.cycleVectorOperation(r);
+            let ls = this.loopSafe(r, cv);
+            let safeVector = this.outCycleVectorOperation(r);
+            this.joinSafe();
+            matrix.push([cv, cyc, ls, safeVector]);
+        }
+        
+        // Check each safety condition independently
+        const loopSafe = this.checkIfAllPositive("loop");
+        const safe = this.checkIfAllPositive("safe");
+        
+        // Only report Loop-Safe NCAs as not satisfied if there are actual violations
+        if(!loopSafe && !this.loop_safe_violations){
+            loopSafe = true;
+        }
+        
+        let safeLoopSafe;
+        if(loopSafe && safe){
+            safeLoopSafe = true;
+        }
+        else{
+            safeLoopSafe = false;
+        }
+        console.log(`Loop-Safe NCAs: ${loopSafe ? 'Satisfied.' : 'Not Satisfied.'}`);
+        console.log(`Safe CAs: ${safe ? 'Satisfied.' : 'Not Satisfied.'}\n`);
+        
+        this.matrixOperations = matrix;
+        return { pass: safeLoopSafe, matrix};
     }
     
     /**
