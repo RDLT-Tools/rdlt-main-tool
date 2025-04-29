@@ -133,7 +133,7 @@
     margin-top: 12px;
 }
 
-.panel[data-panel-id="execute"] [data-section-id="ae"][data-value-mode="user"] button[data-subaction="simulate"],
+.panel[data-panel-id="execute"] [data-section-id="ae"][data-value-mode="user"] button[data-subaction="generate"],
 .panel[data-panel-id="execute"] [data-section-id="ae"][data-value-ismaximal="true"] button[data-subaction="simulate"] {
   pointer-events: none;
   opacity: 0.4;
