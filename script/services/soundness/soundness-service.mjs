@@ -77,10 +77,6 @@ function getOutBridges(model, arcMap, vertexMap) {
     return outBridges;
 }
 
-function getVertexFromID(rdlt, id) {
-    return rdlt.vertices.find(vertex => vertex.id === id);
-}
-
 function mapGUIModelToSoundness(model, source, sink){
     const arcMap = buildArcMap(model.arcs);
     const vertexMap = buildVertexMap(model.components);
@@ -484,6 +480,8 @@ function mapToGraphs(rdlt, R2, R1) {
 
 export function getDeadlockPoints(model, input_source, input_sink){
     const {rdlt, combinedEvsa} = mapGUIModelToSoundness(model, input_source, input_sink);
+    const arcMap = buildArcMap(model.arcs);
+    const vertexMap = buildVertexMap(model.components);
 
     let deadlockPoints = [];
     for(const evsa of combinedEvsa){
@@ -498,12 +496,15 @@ export function getDeadlockPoints(model, input_source, input_sink){
         deadlockPoints.push(...GraphOperations.gatherDeadlockPoints(evsa, source).deadlockPoints);
     }
 
-    const deadlockPointIDs = []
-    for(const deadlockPoint of deadlockPoints){
-        deadlockPointIDs.push(deadlockPoint.id);
-    }
+    // Map deadlock points to objects with an `id` attribute
+    const deadlockPointIDs = deadlockPoints.map(deadlockPoint => ({
+        id: deadlockPoint.id
+    }));
 
-    return deadlockPointIDs
+    const mappedVertices = mapVerticesToUIDs(deadlockPointIDs, vertexMap);
+    const uids = mappedVertices.map(vertex => vertex.uid).filter(uid => uid !== null); // Filter out null UIDs if necessary
+
+    return uids;
 }
 
 function mapVerticesToUIDs(vertices, vertexMap) {
