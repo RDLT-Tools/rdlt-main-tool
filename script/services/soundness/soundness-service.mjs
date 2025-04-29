@@ -180,6 +180,15 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
             soundnessPass = easyResult.pass;
             soundnessTitle = easyResult.message;
             soundnessDescription = easyResult.description;
+            soundnessCriteria = easyResult.criteria
+
+            const mappedViolations = mapVerticesToUIDs(easyResult.violations, vertexMap);
+
+            soundnessViolation.vertices = mappedViolations.map(violation => violation.uid);
+            for(const violation of mappedViolations) {
+                soundnessViolationRemarks.vertices[violation.uid] = "Vertex cannot be used for contraction";
+            }
+
             break;
         case 'classical':
             // Use the structures RDLT structures of Asoy
@@ -498,21 +507,21 @@ export function getDeadlockPoints(model, input_source, input_sink){
 }
 
 function mapVerticesToUIDs(vertices, vertexMap) {
-    return vertices.map(violation => {
-        if (!violation.id) {
-            console.warn(`Violation is missing an 'id' property:`, violation);
-            return { ...violation, uid: null }; // Return the violation with a null UID
+    return vertices.map(vertex => {
+        if (!vertex.id) {
+            console.warn(`Vertex is missing an 'id' property:`, vertex);
+            return { ...vertex, uid: null }; // Return the vertex with a null UID
         }
 
         // Normalize the ID if necessary (e.g., trim whitespace, convert case)
-        const normalizedId = violation.id.trim();
+        const normalizedId = vertex.id.trim();
         const uid = Object.keys(vertexMap).find(key => vertexMap[key].identifier === normalizedId);
 
         if (uid) {
-            return { ...violation, uid: Number(uid) }; // Add the UID to the violation object
+            return { ...vertex, uid: Number(uid) }; // Add the UID to the vertex object
         } else {
-            console.warn(`No UID found for identifier: ${violation.id}`);
-            return { ...violation, uid: null }; // Add a null UID if not found
+            console.warn(`No UID found for identifier: ${vertex.id}`);
+            return { ...vertex, uid: null }; // Add a null UID if not found
         }
     });
 }

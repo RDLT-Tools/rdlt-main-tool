@@ -305,27 +305,37 @@ export class Soundness {
     */
     static checkEasySound(graph, evsa) {
         console.log("received evsa", evsa); // Debug: Check the received evsa
-        
+
         for (const rdlt of evsa) {
             // Get the source and sink vertices for the current RDLT
             const { source, sink } = utils.getSourceAndSinkVertices(rdlt);
-            
+
             if (!source || !sink) {
                 console.warn("Source or sink vertex not found in the graph.");
-                return false; // If either source or sink is missing, the graph is not easy sound
+                return {
+                    pass: false,
+                    message: "Easy Soundness Check was inconclusive",
+                    description: "Source or sink vertex is missing in the graph.",
+                    violations: []
+                };
             }
-            
-            // console.log(`Source: ${source.id}, Sink: ${sink.id}`); // Debug: Log source and sink
-            
+
             // Get the contracted RDLT by applying the graph contraction strategy
             const contractedRDLT = GraphOperations.contractGraph(rdlt, source);
             let rdltClear = false; // Flag to indicate if a contraction path is found for the current RDLT
-            
+            const reachableVertices = new Set(); // Track reachable vertices
+            const blockingVertices = []; // Track blocking vertices
+
             // Check if the contracted RDLT has a contraction path from the source to the sink
             for (const vertex of contractedRDLT.vertices) {
                 // Split the vertex ID by the underscore to get the merged vertex components (if there are any)
                 const mergedVertexIds = vertex.id.split('_');
-                
+
+                // Add all reachable vertices to the set
+                if(mergedVertexIds.includes(source.id)){
+                    mergedVertexIds.forEach(id => reachableVertices.add(id));
+                }
+
                 // Check if both the source and sink IDs are present in the merged vertex components
                 if (mergedVertexIds.includes(source.id) && mergedVertexIds.includes(sink.id)) {
                     console.log(`There is a contraction path from ${source.id} to ${sink.id} in the contracted RDLT.`); // Debug: Path found
@@ -333,21 +343,44 @@ export class Soundness {
                     break; // Exit the loop if a path is found
                 }
             }
-            //TODO pass violations as well
+
+            // Identify blocking vertices (vertices not reachable from the source)
+            for (const vertex of rdlt.vertices) {
+                if (!reachableVertices.has(vertex.id) && vertex.id !== sink.id) {
+                    blockingVertices.push(vertex);
+                }
+            }
+
+            // If no contraction path is found, return the blocking vertices as violations
             if (!rdltClear) {
                 return {
-                    pass: false, 
+                    pass: false,
                     message: "Easy Soundness Check was inconclusive",
                     description: "There was no contraction path from the source to the sink. Therefore, further verification is needed to verify easy soundness.",
-                    violations: []
+                    violations: blockingVertices.map(vertex => ({
+                        id: vertex.id,
+                    })),
+                    criteria: [
+                        {   
+                            pass: false, 
+                            description: "Contraction Path From Source to Sink: Not Satisfied" 
+                        }
+                    ]
                 }; // If no contraction path is found in the RDLT, return false
             }
         }
-        
+
         return {
-            pass: true, 
+            pass: true,
             message: "The model is Easy Sound",
-            description: "A contraction path from the source to the sink was found. Therefore, the given RDLT is easy sound."
+            description: "A contraction path from the source to the sink was found. Therefore, the given RDLT is easy sound.",
+            violations: [],
+            criteria: [
+                {   
+                    pass: true, 
+                    description: "Contraction Path From Source to Sink: Satisfied" 
+                }
+            ]
         }; // Return true if all RDLTs have a contraction path
     }
     
