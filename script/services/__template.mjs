@@ -2,7 +2,7 @@
 /**
  * 
  * @param {{ 
- *      vertices: { uid, identifier, type }[],
+ *      components: { uid, identifier, isRBSCenter, type }[],
  *      arcs: { uid, fromVertexUID, toVertexUID, C, L }[] 
  * }} model 
  * 
