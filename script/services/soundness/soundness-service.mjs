@@ -247,10 +247,29 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
             // Perform activity extraction to get all possible cases
             const relaxedResult = Soundness.checkRelaxedSound(rdltGraph, combinedEvsa);
 
+            console.log("Violations: ", relaxedResult.violations);
+
+            const mappedWeakenedPTViolations = mapVerticesToUIDs(relaxedResult.violations.weakenedPTViolations, vertexMap);
+            const mappedLivenessViolations = mapVerticesToUIDs(relaxedResult.violations.livenessViolations, vertexMap);
+            
+            // Format output
             soundnessPass = relaxedResult.pass;
             soundnessTitle = relaxedResult.message;
             soundnessDescription = relaxedResult.description;
             soundnessCriteria = relaxedResult.criteria;
+
+            soundnessViolation.vertices = mappedWeakenedPTViolations.map(violation => violation.uid);
+            soundnessViolation.vertices = mappedLivenessViolations.map(violation => violation.uid);
+
+            for(const violation of mappedWeakenedPTViolations) {
+                soundnessViolationRemarks.vertices[violation.uid] = "Fails Proper Termination";
+            }
+            for(const violation of mappedLivenessViolations) {
+                soundnessViolationRemarks.vertices[violation.uid] = "Vertex is not used in any activity";
+            }
+            
+            console.log("soundness violation vertices: ", soundnessViolation.vertices);
+            console.log("soundness violation remarks vertices: ", soundnessViolationRemarks.vertices);
             
             break;
         case 'weak':
@@ -286,12 +305,7 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
                     },
                     violatingRemarks: {
                         arcs: soundnessViolationRemarks.arcs,
-                        // arcs: {
-                        //     14: "Invalid Join Input: arc not in valid paths",
-                        //     25: "Disconnected Path: split arc not reaching join",
-                        //     26: "Disconnected Path: split arc not reaching join",
-                        //     24: "Disconnected Path: split arc not reaching join"
-                        // }
+                        vertices: soundnessViolationRemarks.vertices
                     },
                 },
             }
@@ -311,25 +325,37 @@ function mapToGraphs(rdlt, R2, R1) {
     const rdltGraph = new Graph();
     let r2Graphs; // Array to hold multiple R2 graphs
     const r1Graph = new Graph();
-    
+
     // Map RDLT to Graph
     if (rdlt && rdlt.model && rdlt.model.components && rdlt.model.arcs) {
         console.log("Mapping RDLT to Graph...");
-        
-        // Add vertices
+
+        // Add vertices with UIDs
         rdlt.model.components.forEach(component => {
-            const vertex = new Vertex(component.uid, VertexType.ENTITY_OBJECT, {}, component.identifier || '');
+            const vertex = new Vertex(
+                component.uid, // Use the UID from the original model
+                VertexType.ENTITY_OBJECT,
+                {}, // Additional attributes can be added here
+                component.identifier || '' // Use the identifier
+            );
             rdltGraph.addVertex(vertex);
         });
-        
-        // Add edges
+
+        // Add edges with UIDs
         rdlt.model.arcs.forEach(arc => {
             const fromVertex = rdltGraph.vertices.find(v => v.id === arc.fromVertexUID);
             const toVertex = rdltGraph.vertices.find(v => v.id === arc.toVertexUID);
-            const edge = new Edge(arc.uid, fromVertex, toVertex, arc.C, arc.L, []);
+            const edge = new Edge(
+                arc.uid, // Use the UID from the original model
+                fromVertex,
+                toVertex,
+                arc.C,
+                arc.L,
+                [] // Additional attributes can be added here
+            );
             rdltGraph.addEdge(edge);
         });
-        
+
         // Map Reset-Bound Subsystems (RBS)
         if (rdlt.centersList && rdlt.centersList.length > 0) {
             console.log("Mapping Reset-Bound Subsystems...");
@@ -339,45 +365,45 @@ function mapToGraphs(rdlt, R2, R1) {
                     console.error(`Center vertex with ID ${centerId.uid} not found in the graph.`);
                     return;
                 }
-                
+
                 // Get members of the RBS (vertices connected to the center)
                 const members = rdltGraph.edges
-                .filter(edge => edge.from.id === centerId.uid)
-                .map(edge => (edge.from.id === centerId.uid ? edge.to : edge.from));
-                
+                    .filter(edge => edge.from.id === centerId.uid)
+                    .map(edge => (edge.from.id === centerId.uid ? edge.to : edge.from));
+
                 // Get in-bridges (arcs in in_list connected to members)
                 const inBridges = rdlt.in_list
-                .map(entry => {
-                    const [fromId, toId] = entry.split(', ');
-                    const fromVertex = rdltGraph.vertices.find(v => v.name === fromId);
-                    const toVertex = rdltGraph.vertices.find(v => v.name === toId);
-                    
-                    // Find the edge in the graph
-                    return rdltGraph.edges.find(edge => edge.from === fromVertex && edge.to === toVertex);
-                })
-                .filter(edge => edge && (members.includes(edge.to) || centerVertex === edge.to));
-                
+                    .map(entry => {
+                        const [fromId, toId] = entry.split(', ');
+                        const fromVertex = rdltGraph.vertices.find(v => v.name === fromId);
+                        const toVertex = rdltGraph.vertices.find(v => v.name === toId);
+
+                        // Find the edge in the graph
+                        return rdltGraph.edges.find(edge => edge.from === fromVertex && edge.to === toVertex);
+                    })
+                    .filter(edge => edge && (members.includes(edge.to) || centerVertex === edge.to));
+
                 // Get out-bridges (arcs in out_list connected to members)
                 const outBridges = rdlt.out_list
-                .map(entry => {
-                    const [fromId, toId] = entry.split(', ');
-                    const fromVertex = rdltGraph.vertices.find(v => v.name === fromId);
-                    const toVertex = rdltGraph.vertices.find(v => v.name === toId);
-                    return rdltGraph.edges.find(edge => edge.from === fromVertex && edge.to === toVertex);
-                })
-                .filter(edge => edge && members.includes(edge.from));
-                
+                    .map(entry => {
+                        const [fromId, toId] = entry.split(', ');
+                        const fromVertex = rdltGraph.vertices.find(v => v.name === fromId);
+                        const toVertex = rdltGraph.vertices.find(v => v.name === toId);
+                        return rdltGraph.edges.find(edge => edge.from === fromVertex && edge.to === toVertex);
+                    })
+                    .filter(edge => edge && members.includes(edge.from));
+
                 // Create and add the ResetBoundSubsystem
                 const resetBoundSubsystem = new ResetBoundSubsystem(centerVertex, members, inBridges, outBridges);
                 rdltGraph.addResetBoundSubsystem(resetBoundSubsystem);
             });
         }
     }
-    
+
     // Map R2 to Graphs
     if (R2 && R2.length > 0) {
         console.log("Mapping R2 to Graphs...");
-        
+
         // Group R2 entries by r_number
         const r2Groups = R2.reduce((groups, arc) => {
             const rNumber = arc['r-id'].split('-')[0]; // Extract r_number from r-id
@@ -387,34 +413,40 @@ function mapToGraphs(rdlt, R2, R1) {
             groups[rNumber].push(arc);
             return groups;
         }, {});
-        
+
         // Create a Graph for each group
         r2Graphs = Object.entries(r2Groups).map(([rNumber, arcs]) => {
             const graph = new Graph();
             console.log(`Creating Graph for R2 group: ${rNumber}`);
-            
+
             arcs.forEach(arc => {
                 const [fromId, toId] = arc.arc.split(', ');
                 const fromVertex = graph.vertices.find(v => v.id === fromId) || new Vertex(fromId, VertexType.ENTITY_OBJECT, {}, fromId);
                 const toVertex = graph.vertices.find(v => v.id === toId) || new Vertex(toId, VertexType.ENTITY_OBJECT, {}, toId);
-                
+
                 // Add vertices if not already present
                 if (!graph.vertices.find(v => v.id === fromId)) graph.addVertex(fromVertex);
                 if (!graph.vertices.find(v => v.id === toId)) graph.addVertex(toVertex);
-                
-                const edge = new Edge(arc['r-id'], fromVertex, toVertex, arc['c-attribute'], parseInt(arc['l-attribute'], 10), []);
+
+                const edge = new Edge(
+                    arc['r-id'], // Use the UID from the processed R2
+                    fromVertex,
+                    toVertex,
+                    arc['c-attribute'],
+                    parseInt(arc['l-attribute'], 10),
+                    []
+                );
                 graph.addEdge(edge);
             });
-            
+
             return { rNumber, graph };
         });
-        
+
         console.log("Mapped R2 Graphs:", r2Graphs);
-    }
-    else{
+    } else {
         r2Graphs = [];
     }
-    
+
     // Map R1 to Graph
     if (R1 && R1.length > 0) {
         console.log("Mapping R1 to Graph...");
@@ -422,15 +454,22 @@ function mapToGraphs(rdlt, R2, R1) {
             const [fromId, toId] = arc.arc.split(', ');
             const fromVertex = r1Graph.vertices.find(v => v.id === fromId) || new Vertex(fromId, VertexType.ENTITY_OBJECT, {}, fromId);
             const toVertex = r1Graph.vertices.find(v => v.id === toId) || new Vertex(toId, VertexType.ENTITY_OBJECT, {}, toId);
-            
+
             if (!r1Graph.vertices.find(v => v.id === fromId)) r1Graph.addVertex(fromVertex);
             if (!r1Graph.vertices.find(v => v.id === toId)) r1Graph.addVertex(toVertex);
-            
-            const edge = new Edge(`R1-${index}`, fromVertex, toVertex, arc['c-attribute'], parseInt(arc['l-attribute'], 10), []);
+
+            const edge = new Edge(
+                arc['r-id'],
+                fromVertex,
+                toVertex,
+                arc['c-attribute'],
+                parseInt(arc['l-attribute'], 10),
+                []
+            );
             r1Graph.addEdge(edge);
         });
     }
-    
+
     return { rdltGraph, r2Graphs, r1Graph };
 }
 
@@ -456,4 +495,24 @@ export function getDeadlockPoints(model, input_source, input_sink){
     }
 
     return deadlockPointIDs
+}
+
+function mapVerticesToUIDs(vertices, vertexMap) {
+    return vertices.map(violation => {
+        if (!violation.id) {
+            console.warn(`Violation is missing an 'id' property:`, violation);
+            return { ...violation, uid: null }; // Return the violation with a null UID
+        }
+
+        // Normalize the ID if necessary (e.g., trim whitespace, convert case)
+        const normalizedId = violation.id.trim();
+        const uid = Object.keys(vertexMap).find(key => vertexMap[key].identifier === normalizedId);
+
+        if (uid) {
+            return { ...violation, uid: Number(uid) }; // Add the UID to the violation object
+        } else {
+            console.warn(`No UID found for identifier: ${violation.id}`);
+            return { ...violation, uid: null }; // Add a null UID if not found
+        }
+    });
 }
