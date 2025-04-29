@@ -184,13 +184,13 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
         case 'classical':
             // Use the structures RDLT structures of Asoy
             const classicalResult = Soundness.checkClassicalSound(input_rdlt, R1, R2);
-            console.log("Classical Soundness Result:", classicalResult.pass);
+            console.log("Classical Soundness Result:", classicalResult);
             
             // Format output
             soundnessPass = classicalResult.pass;
             soundnessTitle = classicalResult.message;
             soundnessDescription = classicalResult.description;
-            console.log("Classical soundness violations: ", classicalResult.violations);
+            soundnessCriteria = classicalResult.criteria;
 
             classicalResult.violations.forEach(violation => {
                 const transformedArcMap = utils.transformArcMap(arcMap);
@@ -240,9 +240,6 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
                     console.warn(`No match found for arc: ${violation.arc}`);
                 }
             });
-
-            console.log("Soundness violation arcs:", soundnessViolation.arcs);
-            console.log("Soundness violation remarks:", soundnessViolationRemarks.arcs);
             
             break;
         case 'relaxed':

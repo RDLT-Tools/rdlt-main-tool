@@ -168,7 +168,21 @@ export class Soundness {
                 return {
                     pass: true, 
                     message: "The model is Classical Sound", 
-                    description: "The model has satisfied L-safeness checks and therefore is classical sound."
+                    description: "The model has satisfied L-safeness checks and therefore is classical sound.",
+                    criteria: [
+                        {   
+                            pass: true,
+                            description: "JOIN-Safeness: Satisfied"
+                        },
+                        {   
+                            pass: true,
+                            description: "LOOP-Safeness: Satisfied" 
+                        },
+                        {   
+                            pass: true,
+                            description: "Safeness: Satisfied" 
+                        }
+                    ]
                 };
             }
             else{
@@ -180,7 +194,27 @@ export class Soundness {
                     pass: false, 
                     violations, 
                     message: "Classical Soundness check was inconclusive", 
-                    description: "The model has not satisfied L-safeness checks and therefore needs further verification."
+                    description: "The model has not satisfied L-safeness checks and therefore needs further verification.",
+                    criteria: [
+                        {   
+                            pass: matrixInstance.checkIfAllPositive("join"),
+                            description: matrixInstance.checkIfAllPositive("join") 
+                            ? "JOIN-Safeness: Satisfied" 
+                            : "JOIN-Safeness: Not Satisfied"
+                        },
+                        {   
+                            pass: matrixInstance.checkIfAllPositive("loop"),
+                            description: matrixInstance.checkIfAllPositive("loop")
+                            ? "LOOP-Safeness: Satisfied" 
+                            : "LOOP-Safeness: Not Satisfied"
+                        },
+                        {   
+                            pass: matrixInstance.checkIfAllPositive("safe"),
+                            description: matrixInstance.checkIfAllPositive("safe")
+                            ? "Safeness: Satisfied" 
+                            : "Safeness: Not Satisfied"
+                        }
+                    ]
                 };
             }
         }
@@ -192,7 +226,7 @@ export class Soundness {
             // Perform matrix operations to determine L-safeness
             let l_safe_vector, matrix;
             ({ l_safe_vector, matrix } = matrixInstance.evaluateLSafeness());
-            
+                        
             console.log(`Matrix evaluation result: (R1 only): ${l_safe_vector === true ? 'RDLT is L-Safe' : 'RDLT is not L-Safe'}`);
             
             if(l_safe_vector){
@@ -200,7 +234,21 @@ export class Soundness {
                 return {
                     pass: true, 
                     message: "The model is Classical Sound", 
-                    description: "The model has satisfied L-safeness checks and therefore is classical sound."
+                    description: "The model has satisfied L-safeness checks and therefore is classical sound.",
+                    criteria: [
+                        {   
+                            pass: true,
+                            description: "JOIN-Safeness: Satisfied"
+                        },
+                        {   
+                            pass: true,
+                            description: "LOOP-Safeness: Satisfied" 
+                        },
+                        {   
+                            pass: true,
+                            description: "Safeness: Satisfied" 
+                        }
+                    ]
                 };
             }
             else{
@@ -212,7 +260,27 @@ export class Soundness {
                     pass: false,
                     violations, 
                     message: "Classical Soundness check was inconclusive", 
-                    description: "The model has not satisfied L-safeness checks and therefore needs further verification."
+                    description: "The model has not satisfied L-safeness checks and therefore needs further verification.",
+                    criteria: [
+                        {   
+                            pass: matrixInstance.checkIfAllPositive("join"),
+                            description: matrixInstance.checkIfAllPositive("join") 
+                            ? "JOIN-Safeness: Satisfied" 
+                            : "JOIN-Safeness: Not Satisfied"
+                        },
+                        {   
+                            pass: matrixInstance.checkIfAllPositive("loop"),
+                            description: matrixInstance.checkIfAllPositive("loop")
+                            ? "LOOP-Safeness: Satisfied" 
+                            : "LOOP-Safeness: Not Satisfied"
+                        },
+                        {   
+                            pass: matrixInstance.checkIfAllPositive("safe"),
+                            description: matrixInstance.checkIfAllPositive("safe")
+                            ? "Safeness: Satisfied" 
+                            : "Safeness: Not Satisfied"
+                        }
+                    ]
                 };
             }
         }
