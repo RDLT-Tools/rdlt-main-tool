@@ -6,11 +6,13 @@ import { GraphOperations } from "./graph-operations.js";
  */
 export class SoundnessCriteria {
     /**
-    * Verifies the liveness property. Checks an input activity profile.
-    * @param {ActivityProfile} activityProfile - The activity profile to check.
-    * @param {Vertex[]} vertices - The vertices in the graph.
-    * @returns {boolean} - True if the activity profile is live, false otherwise.
-    */
+     * Verifies the liveness property. Checks an input activity profile.
+     * @param {ActivityProfile} activityProfile - The activity profile to check.
+     * @param {Vertex[]} vertices - The vertices in the graph.
+     * @returns {Object} An object containing:
+     *   - `pass` {boolean}: Whether the liveness property is satisfied.
+     *   - `violations` {Vertex[]}: An array of vertices that are not used in the activity profile.
+     */
     static hasLiveness(activityProfile, vertices) {
         // Create a Set to store all unique vertex IDs used in the activity profile
         const usedVertices = new Set();
@@ -22,15 +24,17 @@ export class SoundnessCriteria {
             for (const configuration of activity.reachabilityConfigurations) {
                 // Add each vertex from the configuration to the usedVertices Set
                 for (const [from, to] of configuration) {
-                    usedVertices.add(from);
-                    usedVertices.add(to);
+                    usedVertices.add(from.id);
+                    usedVertices.add(to.id);
                 }
             }
         }
 
+        console.log("UsedVertices set: ", usedVertices);
+
         // Check if all input vertices are present in the usedVertices Set
         for (const vertex of vertices) {
-            if (!usedVertices.has(vertex)) {
+            if (!usedVertices.has(vertex.id)) {
                 // console.log(`Vertex ${vertex.id} is not used in the activity profile.`); // Debug: Missing vertex
                 unusedVertices.add(vertex); // Add to unused vertices Set
             }
@@ -39,19 +43,31 @@ export class SoundnessCriteria {
         // If there are any unused vertices, return false
         if (unusedVertices.size > 0) {
             console.log(`Liveness check failed. Unused vertices: ${Array.from(unusedVertices).map(v => v.id).join(', ')}`); // Debug: Unused vertices
-            return false;
+            return {
+                pass: false,
+                violations: Array.from(unusedVertices)
+            };
         }
         // If all vertices are used, return true
-        return true;
+        return {
+            pass: true,
+            violations: []
+        };
     }
 
     /**
-    * Verifies the weakened proper termination property. Checks an input activity profile.
-    * Checks for the existence of at least one activity where the last reachability configuration
-    * has no unfinished processes.
-    * @param {ActivityProfile} activityProfile - The activity profile to check.
-    * @returns {boolean} - True if the activity profile satisfies the weakened proper termination property, false otherwise.
-    */
+     * Verifies the weakened proper termination property. Checks an input activity profile.
+     * Checks for the existence of at least one activity where the last reachability configuration
+     * has no unfinished processes.
+     * @param {ActivityProfile} activityProfile - The activity profile to check.
+     * @returns {Object} An object containing:
+     *   - `pass` {boolean}: Whether the weakened proper termination property is satisfied.
+     *   - `violations` {Array<Object>}: An array of objects representing invalid vertices that do not satisfy continuity of flow.
+     *     Each object contains:
+     *       - `vertex` {Vertex}: The invalid vertex.
+     *       - `activity` {number}: The activity index (1-based) where the violation occurred.
+     *       - `timestep` {number}: The timestep where the violation occurred.
+     */
     static hasWeakenedProperTermination(activityProfile) {
         console.log("Checking for weakened proper termination for activity profile: ", activityProfile); // Debug: Start
         let invalidVertices = []; // Array to store vertices that do not satisfy continuity
@@ -92,13 +108,13 @@ export class SoundnessCriteria {
                 console.log("Future configurations: ", futureConfigurations); // Debug: Future configurations
 
                 for (const [from, to] of currentConfiguration) {
-                    console.log(`Checking vertex pair (${from.name}, ${to.name}) for continuity...`); // Debug: Continuity check
+                    console.log(`Checking vertex pair (${from.name}, ${to.name}) for continuity...`, to); // Debug: Continuity check
                     const isToVertexInFuture = futureConfigurations.some(futureConfig =>
-                        Array.from(futureConfig).some(([futureFrom]) => futureFrom === to)
+                        Array.from(futureConfig).some(([futureFrom]) => futureFrom.id === to.id)
                     );
 
                     if (!isToVertexInFuture && to.id !== activity.target.id) {
-                        invalidVertices.push({ vertex: to.id, activity: index + 1, timestep }); // Add to invalid vertices list
+                        invalidVertices.push({ vertex: to, activity: index + 1, timestep }); // Add to invalid vertices list
                         satisfiesContinuity = false;
                     }
                 }
@@ -106,7 +122,10 @@ export class SoundnessCriteria {
 
             if (satisfiesContinuity) {
                 console.log(`Input activity profile satisfies weakened proper termination through Activity #${index + 1}.`); // Debug: Success
-                return true; // Found an activity that satisfies the condition
+                return {
+                    pass: true,
+                    violations: invalidVertices
+                }; // Found an activity that satisfies the condition
             }
         }
 
@@ -115,18 +134,23 @@ export class SoundnessCriteria {
         }
 
         console.log("No activity satisfies the weakened proper termination property."); // Debug: Failure
-        return false; // No activity satisfies the condition
+        return {
+            pass: false,
+            violations: invalidVertices
+        }; // No activity satisfies the condition
     }
 
     /**
-    * Verifies the deadlock-resolving property.
-    * @param {Graph} rdlt - The rdlt structure to verify deadlock-resolving property.
-    * @param {Vertex[]} deadlockPoints - The deadlock points in the graph.
-    * @param {Vertex[]} reachedVertices - The reached vertices in the graph.
-    * @param {Vertex} sink - The sink of the rdlt structure.
-    * @returns {Object}
-    */
-    static isDeadlockResolving(rdlt, deadlockPoints, reachedVertices, sink){
+     * Verifies the deadlock-resolving property.
+     * @param {Graph} rdlt - The RDLT structure to verify the deadlock-resolving property.
+     * @param {Vertex[]} deadlockPoints - The deadlock points in the graph.
+     * @param {Vertex[]} reachedVertices - The vertices that have been reached in the graph.
+     * @param {Vertex} sink - The sink vertex of the RDLT structure.
+     * @returns {Object} An object containing:
+     *   - `pass` {boolean}: Whether the deadlock-resolving property is satisfied.
+     *   - `violations` {Vertex[]}: An array of deadlock points that do not have an escape contraction path.
+     */
+    static isDeadlockResolving(rdlt, deadlockPoints, reachedVertices, sink) {
         let deadlockResolving = true;
         const violations = [];
 

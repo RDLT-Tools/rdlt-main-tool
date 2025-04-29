@@ -16,66 +16,100 @@ export class Soundness {
     * Verifies the relaxed soundness property of an RDLT by checking for
     * weakened proper termination and liveness conditions.
     * @param {Graph} graph - The graph to check.
+    * @param {Graph} evsa - The vertex-simplified RDLTs to check.
     * @returns {boolean} - True if the RDLT is relaxed sound, false otherwise.
     */
-    static checkRelaxedSound(graph) {
-        // Clear activity profiles array of the graph object
-        graph.activityProfiles = [];
+    static checkRelaxedSound(graph, evsa) {
 
-        console.log("input graph for the relaxed soundness check: ", graph);
-        // Get the source and sink vertices for the current RDLT
-        const { source, sink } = utils.getSourceAndSinkVertices(graph);
+        const livenessViolations = [], weakenedPTViolations = [];
+        for(const rdlt of evsa) {
+            // Clear activity profiles array of the graph object
+            rdlt.activityProfiles = [];
+
+            console.log("input graph for the relaxed soundness check: ", rdlt);
+            // Get the source and sink vertices for the current RDLT
+            const { source, sink } = utils.getSourceAndSinkVertices(rdlt);
+                
+            if (!source || !sink) {
+                console.warn("Source or sink vertex not found in the graph.");
+                return false; // If either source or sink is missing, the graph is not easy sound
+            }
+
+            const activities = new Set();
+
+            // Undergo activity extraction to get all cases
+            for (let i = 0; i < 20; i++) {
+                const activityProfile = rdlt.extractActivityProfile(source.id, sink.id);
+
+                // Serialize the activities array for uniqueness
+                const serializedActivities = JSON.stringify(
+                    activityProfile.activities.map(slot => Array.from(slot).sort())
+                );
+
+                // Add the serialized activities to the set if unique
+                if (!activities.has(serializedActivities)) {
+                    activities.add(serializedActivities);
+                    console.log("Added unique activity profile:", activityProfile);
+                } else {
+                    console.log("Duplicate activity profile detected. Skipping...");
+                }
+            }
+
+            console.log("Unique activities:", activities);
+
+            // For every unique activity, check for proper termination and liveness
+            let activitiesArray = [];
+            for (const serializedActivity of activities) {
+                const reachabilityConfigurations = JSON.parse(serializedActivity);
+                const activity = new Activity(source, sink, reachabilityConfigurations);
+
+                activitiesArray.push(activity);
+            }
+            rdlt.activityProfile = new ActivityProfile(source, sink, activitiesArray);
+
+            // Check for weakened proper termination condition
+            const weakenedProperTermination = SoundnessCriteria.hasWeakenedProperTermination(rdlt.activityProfile);
             
-        if (!source || !sink) {
-            console.warn("Source or sink vertex not found in the graph.");
-            return false; // If either source or sink is missing, the graph is not easy sound
-        }
-
-        const activities = new Set();
-
-        // Undergo activity extraction to get all cases
-        for (let i = 0; i < 20; i++) {
-            const activityProfile = graph.extractActivityProfile(source.id, sink.id);
-
-            // Serialize the activities array for uniqueness
-            const serializedActivities = JSON.stringify(
-                activityProfile.activities.map(slot => Array.from(slot).sort())
-            );
-
-            // Add the serialized activities to the set if unique
-            if (!activities.has(serializedActivities)) {
-                activities.add(serializedActivities);
-                console.log("Added unique activity profile:", activityProfile);
-            } else {
-                console.log("Duplicate activity profile detected. Skipping...");
+            // Check for liveness
+            const liveness = SoundnessCriteria.hasLiveness(rdlt.activityProfile, rdlt.vertices);
+            
+            if (!(weakenedProperTermination.pass && liveness.pass)){
+                livenessViolations.push(...liveness.violations);
+                weakenedPTViolations.push(...weakenedProperTermination.violations);
             }
         }
 
-        console.log("Unique activities:", activities);
-
-        // For every unique activity, check for proper termination and liveness
-        let activitiesArray = [];
-        for (const serializedActivity of activities) {
-            const reachabilityConfigurations = JSON.parse(serializedActivity);
-            const activity = new Activity(source, sink, reachabilityConfigurations);
-
-            activitiesArray.push(activity);
-        }
-        graph.activityProfile = new ActivityProfile(source, sink, activitiesArray);
-
-        // Check for weakened proper termination condition
-        const weakenedProperTermination = SoundnessCriteria.hasWeakenedProperTermination(graph.activityProfile);
-        
-        // Check for liveness
-        const liveness = SoundnessCriteria.hasLiveness(graph.activityProfile, graph.vertices);
-        
-        if (weakenedProperTermination && liveness){
-            console.log("live and weakened proper");
-            return true;
+        if(weakenedPTViolations.length > 0 || livenessViolations.length > 0){
+            return {
+                pass: false, 
+                message: "Relaxed Soundness Check was inconclusive",
+                description: "The given RDLT did not satisfy relaxed soundness checks. Therefore more verification is needed.",
+                violations: {
+                    weakenedPTViolations,
+                    livenessViolations
+                },
+                criteria: [
+                    {   
+                        pass: !(weakenedPTViolations.length > 0),
+                        description: weakenedPTViolations.length > 0 
+                        ? "Weakened Proper Termination: Not Satisfied" 
+                        : "Weakened Proper Termination: Satisfied"
+                    },
+                    {   
+                        pass: !(livenessViolations.length > 0),
+                        description: livenessViolations.length > 0 
+                        ? "Liveness: Not Satisfied" 
+                        : "Liveness: Satisfied"
+                    }
+                ]
+            };
         }
         else{
-            console.log("NOT live and weakened proper");
-            return false;
+            return {
+                pass: true, 
+                message: "The model is Relaxed Sound",
+                description: "The given RDLT satisfied relaxed soundness checks. Therefore it is relaxed sound."
+            };
         }
     }
     

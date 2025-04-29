@@ -13,10 +13,7 @@ import { GraphOperations } from './utils/graph-operations.js';
 import { processR2 } from './utils/create_r2.mjs';
 import { utils } from './utils/rdlt-utils.mjs';
 
-
-function getInBridges(model) {
-    const arcMap = buildArcMap(model.arcs);
-    const vertexMap = buildVertexMap(model.components);
+function getInBridges(model, arcMap, vertexMap) {
     
     console.log("arcMap:", arcMap);
     console.log("vertexMap:", vertexMap);
@@ -51,9 +48,7 @@ function getInBridges(model) {
     return inBridges;
 }
 
-function getOutBridges(model) {
-    const arcMap = buildArcMap(model.arcs);
-    const vertexMap = buildVertexMap(model.components);
+function getOutBridges(model, arcMap, vertexMap) {
     
     const rbsMatrix = buildRBSMatrix(vertexMap, model.arcs);
     const outBridgesUIDs = new Set();
@@ -87,8 +82,11 @@ function getVertexFromID(rdlt, id) {
 }
 
 function mapGUIModelToSoundness(model, source, sink){
-    const inVertices = getInBridges(model);
-    const outVertices = getOutBridges(model);
+    const arcMap = buildArcMap(model.arcs);
+    const vertexMap = buildVertexMap(model.components);
+
+    const inVertices = getInBridges(model, arcMap, vertexMap);
+    const outVertices = getOutBridges(model, arcMap, vertexMap);
     
     console.log("model:", model);
     console.log("inVertices:", inVertices);
@@ -131,8 +129,11 @@ function mapGUIModelToSoundness(model, source, sink){
 export function verifySoundness(model, source, sink, soundnessNotion) {
     console.log({ model, source, sink, soundnessNotion });
     
-    const inVertices = getInBridges(model);
-    const outVertices = getOutBridges(model);
+    const arcMap = buildArcMap(model.arcs);
+    const vertexMap = buildVertexMap(model.components);
+
+    const inVertices = getInBridges(model, arcMap, vertexMap);
+    const outVertices = getOutBridges(model, arcMap, vertexMap);
     
     console.log("model:", model);
     console.log("inVertices:", inVertices);
@@ -169,7 +170,9 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
         combinedEvsa = [r1Graph];
     }
     
-    let soundnessPass, soundnessTitle, soundnessDescription;
+    let soundnessPass, soundnessTitle, soundnessDescription, soundnessCriteria;
+    let soundnessViolation = {arcs: [], vertices: []};
+    let soundnessViolationRemarks = {arcs: {}, vertices: {}};
     switch(soundnessNotion){
         case 'easy':
             const easyResult = Soundness.checkEasySound(rdltGraph, combinedEvsa);
@@ -187,17 +190,70 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
             soundnessPass = classicalResult.pass;
             soundnessTitle = classicalResult.message;
             soundnessDescription = classicalResult.description;
+            console.log("Classical soundness violations: ", classicalResult.violations);
+
+            classicalResult.violations.forEach(violation => {
+                const transformedArcMap = utils.transformArcMap(arcMap);
+                const arcIdentifiers = violation.arc.replace(/[()]/g, '').split(', '); // Extract identifiers (e.g., ["x6", "x9"])
+                const fromUID = Object.keys(vertexMap).find(key => vertexMap[key].identifier === arcIdentifiers[0]);
+                const toUID = Object.keys(vertexMap).find(key => vertexMap[key].identifier === arcIdentifiers[1]);
+
+                if (!fromUID || !toUID) {
+                    console.warn(`No UID found for arc: ${violation.arc}`);
+                    return;
+                }
+
+                const arcKey = `${fromUID}, ${toUID}`; // Transform to UID-based key
+                console.log("arcKey:", arcKey);
+                console.log("transformed arc map: ", transformedArcMap);
+
+                const matchingArcs = transformedArcMap[arcKey];
+
+                if (matchingArcs) {
+                    // If there are multiple matches, disambiguate using additional attributes
+                    const matchedArc = matchingArcs.find(arc =>
+                        (!violation['c-attribute'] || arc.C === violation['c-attribute']) &&
+                        (!violation['l-attribute'] || arc.L === violation['l-attribute'])
+                    );
+
+                    if (matchedArc) {
+                        console.log(`Mapped r-id: ${violation['r-id']} to UID: ${matchedArc.uid}`);
+                        const violationMessage = violation.violation || ""; // Fallback to an empty string if undefined
+
+                        // Check if the UID is already in soundnessViolation.arcs
+                        if (!soundnessViolation.arcs.includes(matchedArc.uid)) {
+                            soundnessViolation.arcs.push(matchedArc.uid);
+                        }
+
+                        // Check if the UID already exists in soundnessViolationRemarks.arcs
+                        if (soundnessViolationRemarks.arcs[matchedArc.uid]) {
+                            // Concatenate the new violation message
+                            soundnessViolationRemarks.arcs[matchedArc.uid] += `; ${violation.type}: ${violationMessage}`;
+                        } else {
+                            // Add a new entry
+                            soundnessViolationRemarks.arcs[matchedArc.uid] = `${violation.type}: ${violationMessage}`;
+                        }
+                    } else {
+                        console.warn(`No exact match found for arc: ${violation.arc}`);
+                    }
+                } else {
+                    console.warn(`No match found for arc: ${violation.arc}`);
+                }
+            });
+
+            console.log("Soundness violation arcs:", soundnessViolation.arcs);
+            console.log("Soundness violation remarks:", soundnessViolationRemarks.arcs);
             
             break;
         case 'relaxed':
             console.log("Relaxed Soundness Check");
             // Perform activity extraction to get all possible cases
-            const relaxedResult = Soundness.checkRelaxedSound(rdltGraph);
+            const relaxedResult = Soundness.checkRelaxedSound(rdltGraph, combinedEvsa);
 
-            //TODO placeholders
-            soundnessPass = true;
-            soundnessTitle = "Lorem Ipsum";
-            soundnessDescription = "Lorem ipsum";
+            soundnessPass = relaxedResult.pass;
+            soundnessTitle = relaxedResult.message;
+            soundnessDescription = relaxedResult.description;
+            soundnessCriteria = relaxedResult.criteria;
             
             break;
         case 'weak':
@@ -226,31 +282,19 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
                         title: soundnessTitle,
                         description: soundnessDescription
                     },
-                    criteria: [
-                        {
-                            pass: true,
-                            description: "JOIN-Safe: Not Satisfied."
-                        },
-                        {
-                            pass: false,
-                            description: "Loop-Safe NCAs: Satisfied."
-                        },
-                        {
-                            pass: true,
-                            description: "Safe CAs: Satisfied."
-                        }
-                    ],
+                    criteria: soundnessCriteria,
                     violating: {
-                        arcs: [ 14, 25, 26, 24 ],
-                        vertices: [ ]
+                        arcs: soundnessViolation.arcs,
+                        vertices: soundnessViolation.vertices
                     },
                     violatingRemarks: {
-                        arcs: {
-                            14: "Invalid Join Input: arc not in valid paths",
-                            25: "Disconnected Path: split arc not reaching join",
-                            26: "Disconnected Path: split arc not reaching join",
-                            24: "Disconnected Path: split arc not reaching join"
-                        }
+                        arcs: soundnessViolationRemarks.arcs,
+                        // arcs: {
+                        //     14: "Invalid Join Input: arc not in valid paths",
+                        //     25: "Disconnected Path: split arc not reaching join",
+                        //     26: "Disconnected Path: split arc not reaching join",
+                        //     24: "Disconnected Path: split arc not reaching join"
+                        // }
                     },
                 },
             }
@@ -258,166 +302,6 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
         
     };
 }
-
-function testActExtract(){
-    // Example Usage
-    const graph = new Graph();
-    
-    const x1 = new Vertex("x1", "BOUNDARY_OBJECT");
-    const y1 = new Vertex("y1", "CONTROLLER");
-    const x2 = new Vertex("x2", "ENTITY_OBJECT");
-    const y2 = new Vertex("y2", "CONTROLLER");
-    const y4 = new Vertex("y4", "CONTROLLER");
-    const y5 = new Vertex("y5", "CONTROLLER");
-    const y3 = new Vertex("y3", "BOUNDARY_OBJECT");
-    
-    graph.addVertex(x1);
-    graph.addVertex(x2);
-    graph.addVertex(y1);
-    graph.addVertex(y2);
-    graph.addVertex(y3);
-    graph.addVertex(y4);
-    graph.addVertex(y5);
-    
-    const e1 = new Edge(1, x1, y1, "a", 1);
-    const e2 = new Edge(2, x1, y2, "b", 1);
-    const e3 = new Edge(3, y1, x2, "", 2);
-    const e4 = new Edge(4, y2, x2, "m", 2);
-    const e5 = new Edge(5, x2, y4, "", 1);
-    const e6 = new Edge(6, x2, y5, "", 1);
-    const e7 = new Edge(7, y4, y5, "", 1);
-    const e8 = new Edge(8, y5, y3, "p", 1);
-    const e9 = new Edge(9, y2, y3, "d", 1);
-    
-    graph.addEdge(e1);
-    graph.addEdge(e2);
-    graph.addEdge(e3);
-    graph.addEdge(e4);
-    graph.addEdge(e5);
-    graph.addEdge(e6);
-    graph.addEdge(e7);
-    graph.addEdge(e8);
-    graph.addEdge(e9);
-    
-    const activityProfile = graph.extractActivityProfile("x1", "y3");
-    // console.log(activityProfile.activities);
-    console.log("Activities from x1 to x4:");
-    activityProfile.forEach(activity => {
-        console.log(activity.activities);
-    });
-}
-
-function testUtils(){
-    const graph = new Graph();
-    
-    const x1 = new Vertex("x1", "BOUNDARY_OBJECT");
-    const y1 = new Vertex("y1", "CONTROLLER");
-    const x2 = new Vertex("x2", "ENTITY_OBJECT");
-    const y2 = new Vertex("y2", "CONTROLLER");
-    const y4 = new Vertex("y4", "CONTROLLER");
-    const y5 = new Vertex("y5", "CONTROLLER");
-    const y3 = new Vertex("y3", "BOUNDARY_OBJECT");
-    
-    graph.addVertex(x1);
-    graph.addVertex(x2);
-    graph.addVertex(y1);
-    graph.addVertex(y2);
-    graph.addVertex(y3);
-    graph.addVertex(y4);
-    graph.addVertex(y5);
-    
-    const e1 = new Edge(1, x1, y1, "a", 1);
-    const e2 = new Edge(2, x1, y2, "b", 1);
-    const e3 = new Edge(3, y1, x2, "", 2);
-    const e4 = new Edge(4, y2, x2, "m", 2);
-    const e5 = new Edge(5, x2, y4, "", 1);
-    const e6 = new Edge(6, x2, y5, "", 1);
-    const e7 = new Edge(7, y4, y5, "", 1);
-    const e8 = new Edge(8, y5, y3, "p", 1);
-    const e9 = new Edge(9, y2, y3, "d", 1);
-    
-    graph.addEdge(e1);
-    graph.addEdge(e2);
-    graph.addEdge(e3);
-    graph.addEdge(e4);
-    graph.addEdge(e5);
-    graph.addEdge(e6);
-    graph.addEdge(e7);
-    graph.addEdge(e8);
-    graph.addEdge(e9);
-    
-    const activity1 = new Activity(x1, y3);
-    activity1.reachabilityConfigurations = [
-        new Set([[x1, y2]]),
-        new Set([[y2, x2]]),
-        new Set([[x2, y4], [x2, y5]]),
-        new Set([[y5, y3], [y2, y3]]),
-    ];
-    
-    graph.activityProfile.activities = [activity1];
-    graph.activityProfile.duration = 4; // Example duration
-    
-    const result = Soundness.isRelaxedSound(graph); // Check liveness
-    console.log(result)
-}
-
-function testContraction(){
-    // Example Usage
-    const graph = new Graph();
-    
-    const x1 = new Vertex("x1", "BOUNDARY_OBJECT");
-    const x3 = new Vertex("x3", "ENTITY_OBJECT");
-    const x4 = new Vertex("x4", "ENTITY_OBJECT");
-    const x5 = new Vertex("x5", "ENTITY_OBJECT");
-    const x6 = new Vertex("x6", "ENTITY_OBJECT");
-    const x7 = new Vertex("x7", "ENTITY_OBJECT");
-    const x8 = new Vertex("x8", "ENTITY_OBJECT");
-    const x9 = new Vertex("x9", "ENTITY_OBJECT");
-    
-    graph.addVertex(x1);
-    graph.addVertex(x3);
-    graph.addVertex(x4);
-    graph.addVertex(x5);
-    graph.addVertex(x6);
-    graph.addVertex(x7);
-    graph.addVertex(x8);
-    graph.addVertex(x9);
-    
-    const e1 = new Edge(1, x1, x3, "", 1);
-    const e2 = new Edge(2, x1, x5, "", 1);
-    const e3 = new Edge(3, x1, x6, "", 1);
-    const e4 = new Edge(4, x3, x4, "", 1);
-    const e5 = new Edge(5, x3, x4, "", 1);
-    const e6 = new Edge(6, x5, x9, "", 1);
-    const e7 = new Edge(7, x4, x9, "", 1);
-    const e8 = new Edge(8, x8, x9, "", 1);
-    const e9 = new Edge(9, x6, x8, "b", 1);
-    const e10 = new Edge(10, x8, x6, "", 1);
-    const e11 = new Edge(11, x6, x7, "", 1);
-    const e12 = new Edge(12, x7, x8, "a", 1);
-    
-    graph.addEdge(e1);
-    graph.addEdge(e2);
-    graph.addEdge(e3);
-    graph.addEdge(e4);
-    graph.addEdge(e5);
-    graph.addEdge(e6);
-    graph.addEdge(e7);
-    graph.addEdge(e8);
-    graph.addEdge(e9);
-    graph.addEdge(e10);
-    graph.addEdge(e11);
-    graph.addEdge(e12);
-    
-    console.log(GraphOperations.contractGraph(graph, x1));
-}
-// testContraction();
-
-//testActExtract();
-
-// testUtils();
-
-// demo();
 
 /**
 * Maps RDLT, R2, and R1 data to their respective Graph models.

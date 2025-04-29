@@ -198,7 +198,6 @@ export class Graph {
                 );
                 const previousState = stack.pop();
                 currentVertex = previousState.vertex;
-                currentTime = previousState.time;
                 continue;
             }
 
