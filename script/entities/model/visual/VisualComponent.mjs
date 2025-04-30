@@ -46,9 +46,9 @@ export default class VisualComponent {
         this.styles = styles || new ComponentStyles();
     }
 
-    copy() {
+    copy(newInstance = false) {
         const copied = new VisualComponent({
-            uid: this.uid,
+            uid: newInstance ? null : this.uid,
             identifier: this.identifier,
             label: this.label,
             type: this.type,
@@ -80,6 +80,14 @@ export default class VisualComponent {
             geometry: this.geometry.toJSON(),
             styles: this.styles.toJSON()
         };
+    }
+
+    get typeLabel() {
+        return {
+            entity: "Entity",
+            boundary: "Boundary",
+            controller: "Controller"
+        }[this.type];
     }
 
     static fromJSON(json) {

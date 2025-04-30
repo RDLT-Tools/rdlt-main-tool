@@ -70,6 +70,8 @@ export class ASProfilePanelManager {
                 reachableArcsCell.appendChild(buildArcTagElement(fromVertexIdentifier, toVertexIdentifier));
             }
 
+            profileRow.addEventListener("click", () => this.#simulationManager.setCurrentTimestep(timeStep));
+
             tableBody.appendChild(profileRow);
             this.#cache.profileRows[timeStep] = profileRow;
         }

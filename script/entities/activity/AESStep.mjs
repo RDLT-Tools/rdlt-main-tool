@@ -29,12 +29,12 @@ export class AESStep {
     explorableArcs;
 
     /**
-     * @typedef {"consequent" | "random" | "user" | "targeted" | "fallback"} AESStepTrigger 
+     * @typedef {"consequent" | "single" | "random" | "user" | "targeted-single" | "targeted-random" | "targeted-user" | "fallback"} AESStepTrigger 
      * @type {AESStepTrigger} */
     trigger;
 
     /**
-     * @typedef {"unconstrained" | "constrained"} AESStepStatus 
+     * @typedef {"unconstrained" | "constrained" | "targeted"} AESStepStatus 
      * @type {AESStepStatus}
     */
     status;
@@ -59,6 +59,9 @@ export class AESStep {
     }
 
     get actionLabel() {
+        if(this.action === "choosing" && this.status === "targeted")
+             return "Choosing from targeted...";
+
         return {
             "start": "Start",
             "choosing": "Choosing...",
@@ -77,7 +80,10 @@ export class AESStep {
         return {
             "random": "Random",
             "user": "User-chosen",
-            "targeted": "Targeted",
+            "targeted-random": "Random<br/>from Targeted",
+            "targeted-user": "User-chosen<br/>from Targeted",
+            "single": "Only arc",
+            "targeted-single": "Only targeted arc"
         }[this.trigger] || "";
     }
     

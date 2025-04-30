@@ -1,0 +1,84 @@
+<template data-tab-template-id="ai">
+    <div class="subworkspace tab-area ai-subworkspace">
+        <aside class="left-panels">
+            <section class="tab-buttons">
+                <div class="tab-button" data-tab-id="details">Details</div>
+            </section>
+            <main class="panel-tabs">
+                <div class="tab-area panel" data-tab-id="details" data-panel-id="details">
+                    <header><h2>Activity Details</h2></header>
+                    <br/>
+                    <main>
+                        <div class="collapsible">
+                            <header>Properties</header>
+                            <main>
+                                <div class="input-group">
+                                    <label>Activity Name</label>
+                                    <input name="name" placeholder="Set a name for the activity" class="full-width" name="C" />
+                                </div>
+                                <div class="input-group columns full-width">
+                                    <div>
+                                        <label>Source</label>
+                                        <div style="display: flex; gap: 6px;">
+                                            <select name="source" style="flex: 1"></select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label>Sink</label>
+                                        <div style="display: flex; gap: 6px;">
+                                            <select name="sink" style="flex: 1"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="section-action-buttons">
+                                    <button data-ai-action="save"><i class="fas fa-save"></i>&nbsp; Save Activity</button>
+                                </div>
+                            </main>
+                        </div>
+                    </main>
+                </div>
+            </main>
+        </aside>
+        <main class="ai-main">
+            <header>
+                <div>
+                    <h1>Create Activity</h1>
+                </div>
+                <div class="ai-status-view"></div>
+                <div class="ai-quick-controls">
+                    <button data-ai-action="prev" title="Go to previous timestep"><i class="fas fa-backward-step"></i></button>
+                    <button data-ai-action="next" title="Go to next timestep"><i class="fas fa-forward-step"></i></button>
+                </div>
+            </header>
+            <main>
+                <section class="drawing arcs-clickable">
+                    <svg></svg>
+                </section>
+            </main>
+        </main>
+        <aside class="right-panels">
+            <section class="tab-buttons">
+                <div class="tab-button" data-tab-id="profile">Activity Profile</div>
+            </section>
+            <main class="panel-tabs">
+                <div class="tab-area panel" data-tab-id="profile" data-panel-id="profile">
+                    <header><h2>Activity Profile</h2></header>
+                    <br>
+                    <main>
+                        <table class="row-clickable anchor-right">
+                            <thead><tr>
+                                <th>Timestep</th>
+                                <th>Traversed Arcs</th>
+                            </tr></thead>
+                            <tbody></tbody>
+                        </table>
+                        <div class="section-action-buttons">
+                            <button data-ai-action="add-timestep"><i class="fas fa-plus"></i>&nbsp; Add Timestep</button>
+                        </div>
+                    </main>
+                </div>
+            </main>
+        </aside>
+        
+    </div>
+</template>

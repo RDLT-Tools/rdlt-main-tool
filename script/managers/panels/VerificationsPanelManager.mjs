@@ -1,5 +1,6 @@
 import { verifyFreeChoiceness } from "../../services/free-choiceness.mjs";
 import { verifyWellHandledness } from "../../services/well-handledness.mjs";
+import { verifySoundness } from "../../services/soundness/soundness-service.mjs";
 import { Form } from "../../utils.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 
@@ -9,7 +10,6 @@ export default class VerificationsPanelManager {
 
   /** @type {HTMLDivElement} */
   #rootElement;
-
   /**
    * @type {{
    *  selectors: {
@@ -23,8 +23,8 @@ export default class VerificationsPanelManager {
    *      freeChoiceness: {
    *          root: HTMLDivElement,
    *          startButton: HTMLButtonElement,
-   *      },
-   * wellHandledness: {
+   *      }
+   *    wellHandledness: {
    *          root: HTMLDivElement,
    *          startButton: HTMLButtonElement,
    *      }
@@ -39,6 +39,7 @@ export default class VerificationsPanelManager {
     sections: {
       poi: {},
       freeChoiceness: {},
+      soundness: {},
       wellHandledness: {},
     },
   };
@@ -47,12 +48,13 @@ export default class VerificationsPanelManager {
    * @type {{
    *      poi: Form,
    *      freeChoiceness: Form,
-   *     wellHandledness: Form
+   *      wellHandledness: Form
    * }}
    */
   #forms = {
     poi: null,
     freeChoiceness: null,
+    soundness: null,
     wellHandledness: null,
   };
 
@@ -71,6 +73,7 @@ export default class VerificationsPanelManager {
     this.#initializePOISection();
     this.#initializeFreeChoicenessSection();
     this.#initializeWellHandlednessSection();
+    this.#initializeSoundnessSection();
   }
 
   #initializeForms() {
@@ -99,6 +102,17 @@ export default class VerificationsPanelManager {
       this.#forms.freeChoiceness.getFieldElement("sink"),
       this.#forms.wellHandledness.getFieldElement("sink")
     );
+
+    // Soundness form elements
+    this.#forms.soundness = new Form(
+      this.#views.sections.soundness.root
+    ).setFieldNames(["source", "sink", "notion"]);
+    this.#views.selectors.sources.push(
+      this.#forms.soundness.getFieldElement("source")
+    );
+    this.#views.selectors.sinks.push(
+      this.#forms.soundness.getFieldElement("sink")
+    );
   }
 
   #initializePOISection() {
@@ -115,10 +129,12 @@ export default class VerificationsPanelManager {
       const { source, sink } = this.#forms.poi.getValues();
       if (!source || !sink) return;
 
-      this.context.managers.workspace.showPOIs({
-        source: Number(source),
-        sink: Number(sink),
-      });
+      this.context.managers.workspace
+        .showPOIs({
+          source: Number(source),
+          sink: Number(sink),
+        })
+        .initialize();
     });
   }
 
@@ -140,6 +156,32 @@ export default class VerificationsPanelManager {
       const simpleModel = modelSnapshot.toSimpleModel();
 
       const result = verifyFreeChoiceness(simpleModel, source, sink, type);
+
+      this.context.managers.workspace.showVerificationResults(
+        result,
+        modelSnapshot
+      );
+    });
+  }
+
+  #initializeSoundnessSection() {
+    const sectionRoot = this.#rootElement.querySelector(
+      "[data-section-id='soundness']"
+    );
+    const sectionViews = this.#views.sections.soundness;
+
+    sectionViews.root = sectionRoot;
+    sectionViews.startButton = sectionRoot.querySelector(
+      "button[data-subaction='start']"
+    );
+    sectionViews.startButton.addEventListener("click", () => {
+      const { source, sink, notion } = this.#forms.soundness.getValues();
+      if (!source || !sink) return;
+
+      const modelSnapshot = this.context.managers.visualModel.makeCopy();
+      const simpleModel = modelSnapshot.toSimpleModel();
+
+      const result = verifySoundness(simpleModel, source, sink, notion);
 
       this.context.managers.workspace.showVerificationResults(
         result,

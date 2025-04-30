@@ -150,8 +150,8 @@ export function buildVertexTagElement(vertexIdentifier) {
 
 export function buildArcTagElement(fromIdentifier, toIdentifier) {
     return buildElement("div", { classname: "arc-tag" }, [
-        buildElement("div", {}, [ fromIdentifier ]),
-        buildElement("div", {}, [ toIdentifier ]),
+        buildElement("div", { classname: "from" }, [ fromIdentifier ]),
+        buildElement("div", { classname: "to" }, [ toIdentifier ]),
     ]);
 }
 
@@ -179,6 +179,34 @@ export function setHasExact(setA, ...elements) {
     }
 
     return true;
+}
+
+
+/**
+ * 
+ * @param {Set<number>} setA 
+ * @param {Set<number>} setB 
+ * @returns {Set<number>}
+ */
+export function getSetsIntersection(setA, setB) {
+    const intersection = new Set();
+
+    for(const element of setA) {
+        if(setB.has(element)) intersection.add(element);
+    }
+    
+    return intersection;
+}
+
+export function getSetsUnion(...sets) {
+    const union = new Set();
+    for(const set of sets) {
+        for(const element of set) {
+            union.add(element);
+        }
+    }
+
+    return union;
 }
 
 /**
@@ -565,4 +593,14 @@ export function ellipsize(str, maxLength) {
  */
 export function isVertexAnObject(vertex) {
     return [ "boundary", "entity" ].includes(vertex.type);
+}
+
+export async function instantiateTemplate(path) {
+    const response = await fetch(path);
+    const rawHTML = await response.text();
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(rawHTML, 'text/html');
+    const template = doc.querySelector("template");
+    return template.content.cloneNode(true).firstElementChild;
 }

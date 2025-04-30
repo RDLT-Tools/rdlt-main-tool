@@ -9,13 +9,14 @@ import PalettePanelManager from "../panels/PalettePanelManager.mjs";
 import PropertiesPanelManager from "../panels/PropertiesPanelManager.mjs";
 import TransformManager from "../modelling/TransformManager.mjs";
 import UserEventsManager from "../modelling/events/UserEventsManager.mjs";
-import WorkspaceManager from "../modelling/WorkspaceManager.mjs";
+import WorkspaceManager from "../workspace/WorkspaceManager.mjs";
 import ExportManager from "../file/export/ExportManager.mjs";
 import ExecutePanelManager from "../panels/ExecutePanelManager.mjs";
 import VisualRDLTModel from "../../entities/model/visual/VisualRDLTModel.mjs";
 import VerificationsPanelManager from "../panels/VerificationsPanelManager.mjs";
 import { ActivitiesManager } from "../activity/ActivitiesManager.mjs";
 import ImportManager from "../file/import/ImportManager.mjs";
+import ComponentsPanelManager from "../panels/ComponentsPanelManager.mjs";
 
 export default class ModelContext {
     
@@ -24,6 +25,7 @@ export default class ModelContext {
     
     /**
      * @typedef {{ 
+     *      components: ComponentsPanelManager,
      *      palette: PalettePanelManager, 
      *      properties: PropertiesPanelManager, 
      *      execute: ExecutePanelManager,
@@ -49,10 +51,12 @@ export default class ModelContext {
     */
     managers = {};
 
+    #visualModel;
+
 
     constructor(id, visualModel) {
+        this.#visualModel = visualModel;
         this.#id = id || this.#generateID();
-        this.#initialize(visualModel);
     }
 
     get id() { return this.#id; }
@@ -68,19 +72,18 @@ export default class ModelContext {
         return `${timestamp}${randomChars}`;
     }
 
-    #initialize(visualModel) {
-        this.#setupManagers(visualModel);
+    async initialize() {
+        await this.#setupManagers();
     }
 
     /**
      * 
      * @param {VisualRDLTModel} visualModel 
      */
-    #setupManagers(visualModel) {
+    async #setupManagers() {
         // Setup workspace manager and its views
-        
 
-        this.managers.visualModel = new VisualModelManager(this, visualModel);
+        this.managers.visualModel = new VisualModelManager(this, this.#visualModel);
         this.managers.model = new ModelManager(this);
         this.managers.modelling = new ModellingManager(this); 
         
@@ -94,12 +97,15 @@ export default class ModelContext {
         this.managers.activities = new ActivitiesManager(this);
 
         const workspaceManager = new WorkspaceManager(this);
+        await workspaceManager.initialize();
+        
         this.managers.workspace = workspaceManager;
         this.managers.userEvents = new UserEventsManager(this,
             { drawingSVG: workspaceManager.getDrawingSVG() });
         this.managers.drawing = new DrawingViewManager(this,
             { drawingSVG: workspaceManager.getDrawingSVG() });
         this.managers.panels = {
+            components: new ComponentsPanelManager(this, workspaceManager.getPanelRootElement("components")),
             palette: new PalettePanelManager(this, workspaceManager.getPanelRootElement("palette")),
             properties: new PropertiesPanelManager(this, workspaceManager.getPanelRootElement("properties")),
             execute: new ExecutePanelManager(this, workspaceManager.getPanelRootElement("execute")),

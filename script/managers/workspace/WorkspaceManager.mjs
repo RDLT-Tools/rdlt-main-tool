@@ -1,7 +1,11 @@
 import App from "../../App.mjs";
 import Activity from "../../entities/activity/Activity.mjs";
+import VisualRDLTModel from "../../entities/model/visual/VisualRDLTModel.mjs";
+import { instantiateTemplate } from "../../utils.mjs";
 import { AESimulationManager } from "../activity/extraction/AESimulationManager.mjs";
+import { ActivityInputManager } from "../activity/input/ActivityInputManager.mjs";
 import { ActivitySimulationManager } from "../activity/simulation/ActivitySimulationManager.mjs";
+import { TargetedArcSelectManager } from "../activity/targeted/TargetedArcSelectManager.mjs";
 import ImportManager from "../file/import/ImportManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import { POIManager } from "../poi/POIManager.mjs";
@@ -73,16 +77,19 @@ export default class WorkspaceManager {
    */
   constructor(context) {
     this.context = context;
-    this.#initializeView();
+  }
+
+  async initialize() {
+    await this.#initializeView();
     this.#setupSubworkspaceTabs();
     this.#setupMainModelTabs();
   }
 
-  #initializeView() {
-    const rootElementTemplate = document.querySelector(
-      `template[data-tab-template-id="model-context"]`
-    ).content;
-    const rootElement = rootElementTemplate.cloneNode(true).firstElementChild;
+  async #initializeView() {
+    const rootElement = await instantiateTemplate(
+      "./templates/model-context.html"
+    );
+
     this.#view.root = rootElement;
 
     this.#view.main = rootElement.querySelector(".main-view");
@@ -290,8 +297,8 @@ export default class WorkspaceManager {
       )
     );
 
-    this.tabs.left.selectTab("palette");
-    this.tabs.right.selectTab("verifications");
+    this.tabs.left.selectTab("components");
+    this.tabs.right.selectTab("execute");
   }
 
   setModellingEvent(event, isActive) {
@@ -307,13 +314,12 @@ export default class WorkspaceManager {
    * @param {string} id
    * @param {string} title
    * @param {string} templateID
-   * @returns {TabManager}
+   * @returns {Promise<TabManager>}
    */
-  #addTemplatedSubworkspace(id, title, templateID) {
-    const templateTabArea = this.#view.root.querySelector(
-      `template[data-tab-template-id='${templateID}']`
-    ).content;
-    const tabArea = templateTabArea.cloneNode(true).firstElementChild;
+  async #addTemplatedSubworkspace(id, title, templateID) {
+    const tabArea = await instantiateTemplate(
+      `./templates/subworkspaces/${templateID}.html`
+    );
     const tabManager = new TabManager(
       this.context,
       this.tabs.subworkspaces,
@@ -338,44 +344,60 @@ export default class WorkspaceManager {
     this.tabs.right.selectTab(panelID);
   }
 
-  addAESSubworkspace(aesID) {
-    return this.#addTemplatedSubworkspace(
+  async addAESSubworkspace(aesID) {
+    return await this.#addTemplatedSubworkspace(
       `aes-${aesID}`,
       "Activity Extraction",
       "aes"
     );
   }
 
-  addVerificationResultSubworkspace(verID, title) {
-    return this.#addTemplatedSubworkspace(`ver-${verID}`, title, "ver");
+  async addVerificationResultSubworkspace(verID, title) {
+    return await this.#addTemplatedSubworkspace(`ver-${verID}`, title, "ver");
   }
 
-  addVSSubworkspace(vsID, title) {
-    return this.#addTemplatedSubworkspace(`vs-${vsID}`, title, "vs");
+  async addVSSubworkspace(vsID, title) {
+    return await this.#addTemplatedSubworkspace(`vs-${vsID}`, title, "vs");
   }
 
-  addASSubworkspace(asID) {
-    return this.#addTemplatedSubworkspace(
+  async addASSubworkspace(asID) {
+    return await this.#addTemplatedSubworkspace(
       `as-${asID}`,
       "Activity Simulation",
       "as"
     );
   }
 
-  addPOISubworkspace(poiID) {
-    return this.#addTemplatedSubworkspace(
+  async addAISubworkspace(aiID) {
+    return await this.#addTemplatedSubworkspace(
+      `ai-${aiID}`,
+      "Create Activity",
+      "ai"
+    );
+  }
+
+  async addPOISubworkspace(poiID) {
+    return await this.#addTemplatedSubworkspace(
       `poi-${poiID}`,
       "Points of Interest",
       "poi"
     );
   }
 
-  /** @param {{ name, source, sink, mode }} configs */
-  startAESimulation(configs) {
+  async addTASSubworkspace(tasID) {
+    return await this.#addTemplatedSubworkspace(
+      `tas-${tasID}`,
+      "Select Targeted Arcs",
+      "tas"
+    );
+  }
+
+  /** @param {{ name, source, sink, mode, targetedArcs }} configs */
+  startAESimulation(configs, visualModel = null) {
     return new AESimulationManager(
       this.context,
       configs,
-      this.context.managers.visualModel.makeCopy()
+      visualModel || this.context.managers.visualModel.makeCopy()
     );
   }
 
@@ -411,5 +433,25 @@ export default class WorkspaceManager {
       configs,
       this.context.managers.visualModel.makeCopy()
     );
+  }
+
+  createdInputtedActivity() {
+    return new ActivityInputManager(
+      this.context,
+      this.context.managers.visualModel.makeCopy()
+    );
+  }
+
+  /**
+   * @param {VisualRDLTModel} visualModel
+   * @param {(arcs: Set<number>) => void} onArcsSelected
+   * @returns {Promise<Set<number>>}
+   */
+  startTargetedArcSelection(visualModel) {
+    return new Promise((resolve) => {
+      new TargetedArcSelectManager(this.context, visualModel, (arcs) =>
+        resolve(arcs)
+      );
+    });
   }
 }

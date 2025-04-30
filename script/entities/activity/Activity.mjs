@@ -12,6 +12,14 @@ export default class Activity {
      *      title: string,
      *      description: string
      * }} ActivityConclusion
+     * 
+     * @typedef {{ [vertexUID: number]: { 
+     *      T_reached: Set<number>, 
+     *      T_condition_satisfied: { 
+     *          arcUID: number,  
+     *          checkedTime: number
+     *      }[] 
+     * } }} TimelinessOfResponse
      */
 
     /** @type {string} */
@@ -35,16 +43,20 @@ export default class Activity {
     /** @type {ActivityProfile} */
     profile;
 
+    /** @type {TimelinessOfResponse} */
+    tor;
+
     /**
      * @param {{ 
      *     id: string, 
-    *      name: string, 
-    *      origin: ActivityOrigin, 
-    *      source: VertexUID, 
-    *      sink: VertexUID, 
-    *      conclusion: ActivityConclusion, 
-    *      profile: ActivityProfile 
-    * }} values 
+     *     name: string, 
+     *     origin: ActivityOrigin, 
+     *     source: VertexUID, 
+     *     sink: VertexUID, 
+     *     conclusion: ActivityConclusion, 
+     *     profile: ActivityProfile,
+     *     tor: TimelinessOfResponse
+     * }} values 
      */
     constructor(values) {
         this.id = values.id || generateUniqueID();
@@ -54,5 +66,6 @@ export default class Activity {
         this.sink = values.sink;
         this.conclusion = values.conclusion;
         this.profile = values.profile;
+        this.tor = values.tor;
     }
 }

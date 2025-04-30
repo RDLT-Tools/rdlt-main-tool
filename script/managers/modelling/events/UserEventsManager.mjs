@@ -50,6 +50,14 @@ export default class UserEventsManager {
             } else {
                 if(setHasExact(keys, "Control", "a")) {
                     modellingManager.onDrawingViewUserEvent("key-selectall");
+                } else if(setHasExact(keys, "Control", "c")) {
+                    modellingManager.onDrawingViewUserEvent("key-copy");
+                } else if(setHasExact(keys, "Control", "v")) {
+                    modellingManager.onDrawingViewUserEvent("key-paste");
+                } else if(setHasExact(keys, "Control", "d")) {
+                    modellingManager.onDrawingViewUserEvent("key-duplicate");
+                } else if(setHasExact(keys, "Control", "x")) {
+                    modellingManager.onDrawingViewUserEvent("key-cut");
                 }
             }
         });

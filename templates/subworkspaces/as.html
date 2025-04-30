@@ -1,0 +1,105 @@
+<template data-tab-template-id="as">
+    <div class="subworkspace tab-area as-subworkspace">
+        <aside class="left-panels">
+            <section class="tab-buttons">
+                <div class="tab-button" data-tab-id="details">Details</div>
+            </section>
+            <main class="panel-tabs">
+                <div class="tab-area panel" data-tab-id="details" data-panel-id="details">
+                    <header><h2>Activity Details</h2></header>
+                    <main>
+                        <div class="status-chip">
+                            <div class="status-title">Some title</div>
+                            <div class="status-description">Some description</div>
+                        </div>
+                        <div class="collapsible">
+                            <header>Properties</header>
+                            <main>
+                                <div class="input-group">
+                                    <label>Activity Name</label>
+                                    <div data-as-detail="name">Some Activity 1</div>
+                                </div>
+                                <div class="input-group columns full-width">
+                                    <div>
+                                        <label>Source</label>
+                                        <div data-as-detail="source">
+                                            <div class="vertex-display"></div>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label>Sink</label>
+                                        <div data-as-detail="sink">
+                                            <div class="vertex-display"></div>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label>Origin</label>
+                                        <span data-as-detail="origin">Simulated</span>
+                                    </div>
+                                </div>
+                            </main>
+                        </div>
+                    </main>
+                </div>
+            </main>
+        </aside>
+        <main class="as-main">
+            <header>
+                <div>
+                    <h1>Activity Simulation</h1>
+                </div>
+                <div class="as-status-view"></div>
+                <div class="as-quick-controls">
+                    <button data-as-action="prev"  title="Go to previous timestep"><i class="fas fa-backward-step"></i></button>
+                    <button data-as-action="next" title="Go to next timestep"><i class="fas fa-forward-step"></i></button>
+                </div>
+            </header>
+            <main>
+                <section class="drawing">
+                    <svg></svg>
+                </section>
+            </main>
+        </main>
+        <aside class="right-panels">
+            <section class="tab-buttons">
+                <div class="tab-button" data-tab-id="profile">Activity Profile</div>
+                <div class="tab-button" data-tab-id="tor">Timeliness of Response</div>
+            </section>
+            <main class="panel-tabs">
+                <div class="tab-area panel" data-tab-id="profile" data-panel-id="profile">
+                    <header><h2>Activity Profile</h2></header>
+                    <br>
+                    <main>
+                        <table class="row-clickable anchor-right">
+                            <thead><tr>
+                                <th>Timestep</th>
+                                <th>Traversed Arcs</th>
+                            </tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </main>
+                </div>
+                <div class="tab-area panel" data-tab-id="tor" data-panel-id="tor">
+                    <header><h2>Timeliness of Response</h2></header>
+                    <br>
+                    <div class="unavailable-message">This information is not available for this activity.</div>
+                    <main>
+                        <table class="anchor-right">
+                            <thead>
+                                <tr>
+                                    <th>POD Vertex</th>
+                                    <th>Time Reached</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </main>
+                </div>
+                
+            </main>
+        </aside>
+        
+    </div>
+</template>

@@ -1,0 +1,66 @@
+<template data-tab-template-id="ver">
+    <div class="subworkspace tab-area ver-subworkspace">
+        <main class="ver-main">
+            <header>
+                <div>
+                    <h1>Lorem Ipsum</h1>
+                </div>
+                <div></div>
+                <div class="ver-controls">
+                    <select><option>Main Model</option></select>
+                </div>
+            </header>
+            <main>
+                <section class="drawing">
+                </section>
+            </main>
+        </main>
+        <aside class="right-panels">
+            <section class="tab-buttons">
+                <div class="tab-button" data-tab-id="result">Result</div>
+            </section>
+            <main class="panel-tabs">
+                <div class="tab-area panel" data-tab-id="result" data-panel-id="result">
+                    <header>
+                        <h2>Result</h2>
+                    </header>
+                    <div class="status-chip">
+                        <div class="status-title">Some title</div>
+                        <div class="status-description">Some description</div>
+                    </div>
+                    <div class="collapsible" data-ver-section="criteria">
+                        <header>Criteria</header>
+                        <main>
+                            <table>
+                                <tbody></tbody>
+                            </table>
+                        </main>
+                    </div> 
+                    <div class="collapsible" data-ver-section="v-arcs">
+                        <header>Violating Arcs</header>
+                        <main>
+                            <table>
+                                <tbody></tbody>
+                            </table>
+                        </main>
+                    </div> 
+                    <div class="collapsible" data-ver-section="v-vertices">
+                        <header>Violating Vertices</header>
+                        <main>
+                            <table class="anchor-right">
+                                <tbody>
+                                    <tr>
+                                        <td><div class="vertex-tag">x1</div></td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class="vertex-tag">x2</div></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </main>
+                    </div>
+                </div>
+            </main>
+        </aside>
+    </div>
+</template>

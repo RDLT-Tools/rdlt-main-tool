@@ -7,6 +7,7 @@ import ComponentStyles from "../../entities/styling/ComponentStyles.mjs";
 import { isVertexAnObject } from "../../utils.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import { LocalSessionManager } from "../session/LocalSessionManager.mjs";
+import { ClipboardManager } from "../workspace/ClipboardManager.mjs";
 
 export default class ModellingManager {
     /** @type { ModelContext } */
@@ -236,6 +237,19 @@ export default class ModellingManager {
                     case "key-arrowright":
                         this.#moveSelectedRelative(relativeMoveOffset.x, 0);
                         break;
+                    case "key-copy":
+                        this.#copySelected();
+                        break;
+                    case "key-paste":
+                        this.#pasteFromClipboard();
+                        break;
+                    case "key-duplicate":
+                        this.#copySelected();
+                        this.#pasteFromClipboard();
+                        break;
+                    case "key-cut":
+                        this.#cutSelected();
+                        break;
                 }
             break;
         }
@@ -415,6 +429,7 @@ export default class ModellingManager {
 
     #refreshSelected() {
         this.context.managers.panels.properties.refreshSelected();
+        this.context.managers.panels.components.refreshSelected();
     }
 
     /**
@@ -475,10 +490,14 @@ export default class ModellingManager {
             this.#notifyModelStructureChangesListeners();
         }
 
-        if('identifier' in props && component.isRBSCenter) {
-            drawingManager.updateRBSCenterIdentifier(id, component.identifier);
-
-            this.#notifyModelStructureChangesListeners();
+        if('identifier' in props) {
+            
+            if(component.isRBSCenter) {
+                drawingManager.updateRBSCenterIdentifier(id, component.identifier);
+                this.#notifyModelStructureChangesListeners();
+            } else {
+                this.context.managers.panels.components.refreshVertexAndIncidentArcs(component);
+            }
         }
 
         this.#saveModel();
@@ -579,6 +598,8 @@ export default class ModellingManager {
             this.context.managers.drawing.updateMultipleRBSBounds(rbsBounds);   
         }
 
+        this.context.managers.panels.components.refreshArc(arc);
+
         this.#saveModel();
     }
 
@@ -662,6 +683,12 @@ export default class ModellingManager {
         this.#refreshSelected();
     }
 
+    selectSingleArc(id) {
+        this.#clearSelection();
+        this.#addArcToSelection(id);
+        this.#refreshSelected();
+    }
+
     selectAll() {
         this.#clearSelection();
 
@@ -735,6 +762,7 @@ export default class ModellingManager {
 
     #notifyModelStructureChangesListeners() {
         // Update dependent listeners
+        this.context.managers.panels.components.refreshComponentsList();
         this.context.managers.panels.execute.refreshModelValues();
         this.context.managers.panels.verifications.refreshModelValues();
 
@@ -794,6 +822,76 @@ export default class ModellingManager {
         }
 
         return { valid: true };
+    }
+
+    #cutSelected() {
+        this.#copySelected();
+        this.removeSelectedComponents(false);
+        this.removedSelectedArcs();
+    }
+
+    #copySelected() {
+        const objects = { vertices: [], arcs: [] };
+        for(const vertexUID of this.modellingStates.selected.components) {
+            objects.vertices.push(this.getComponentById(vertexUID).copy());
+        }
+
+        for(const arcUID of this.modellingStates.selected.arcs) {
+            objects.arcs.push(this.getArcById(arcUID).copy());
+        }
+
+
+        if(objects.vertices.length === 0 && objects.arcs.length === 0) return;
+
+        ClipboardManager.copy(objects);
+    }
+
+    #pasteFromClipboard() {
+        const { vertices, arcs } = ClipboardManager.get();
+
+        const copyOffset = { x: 20, y: 20 };
+        const copiedVertexUID = {};
+
+        
+        this.#clearSelection();
+
+        for(const { uid, type, identifier, label, isRBSCenter, geometry, styles } of vertices) {
+            const copiedGeometry = geometry.copy();
+            copiedGeometry.position.x += copyOffset.x;
+            copiedGeometry.position.y += copyOffset.y;
+
+            const copiedStyles = styles.copy();
+
+            const newComponent = this.addComponent(
+                type, { identifier, label, isRBSCenter },
+                copiedGeometry, copiedStyles
+            );
+
+            copiedVertexUID[uid] = newComponent.uid;
+            this.#addComponentToSelection(newComponent.uid);
+        }
+
+        for(const { C, L, fromVertexUID, toVertexUID, geometry, styles } of arcs) {
+            const copiedGeometry = geometry.copy();
+            for(const waypoint of copiedGeometry.waypoints) {
+                waypoint.x += copyOffset.x;
+                waypoint.y += copyOffset.y;
+            }
+
+            const copiedStyles = styles.copy();
+
+            const newArc = this.addArc(
+                copiedVertexUID[fromVertexUID] || fromVertexUID, 
+                copiedVertexUID[toVertexUID] || toVertexUID, 
+                { C, L },
+                copiedGeometry, copiedStyles
+            );
+            
+            this.#addArcToSelection(newArc.uid);
+        }
+
+        this.#refreshSelected();
+
     }
 
     #saveModel() {

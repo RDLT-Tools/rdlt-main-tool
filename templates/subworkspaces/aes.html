@@ -1,0 +1,125 @@
+<template data-tab-template-id="aes">
+    <div class="subworkspace tab-area aes-subworkspace">
+        <aside class="left-panels">
+            <section class="tab-buttons">
+                <div class="tab-button" data-tab-id="configs">Configurations</div>
+                <div class="tab-button" data-tab-id="steps">Steps</div>
+            </section>
+            <main class="panel-tabs">
+                <div class="tab-area panel" data-tab-id="configs" data-panel-id="configs">
+                    <div class="collapsible">
+                        <header>Properties</header>
+                        <main>
+                            <div class="input-group">
+                                <label>Activity Name</label>
+                                <input name="name" placeholder="Set a name for the activity" class="full-width" name="C" />
+                            </div>
+                            <div class="input-group columns full-width">
+                                <div style="flex: 1">
+                                    <label>Source</label>
+                                    <div data-aes-detail="source">
+                                        <div class="vertex-display"></div>
+                                        <span></span>
+                                    </div>
+                                </div>
+                                <div style="flex: 1">
+                                    <label>Sink</label>
+                                    <div data-aes-detail="sink">
+                                        <div class="vertex-display"></div>
+                                        <span></span>
+                                    </div>
+                                </div>
+                                <div style="flex: 2">
+                                    <label>Mode</label>
+                                    <span data-aes-detail="mode"></span>
+                                </div>
+                            </div>
+                            <div class="section-action-buttons">
+                                <button data-aes-action="save"><i class="fas fa-save"></i>&nbsp; Save Activity</button>
+                            </div>
+                        </main>
+                    </div>
+                </div>
+                <div class="tab-area panel" data-tab-id="steps" data-panel-id="steps">
+                    <header><h2>Activity Extraction Steps</h2></header>
+                    <main>
+                        <table class="row-clickable">
+                            <thead><tr>
+                                <th>#</th>
+                                <th>Action</th>
+                                <th>Component</th>
+                                <th>Remarks</th>
+                            </tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </main>
+                </div>
+            </main>
+        </aside>
+        <main class="aes-main">
+            <header>
+                <div>
+                    <h1>Live Activity Extraction</h1>
+                    via <b class="aes-mode-label">Pseudorandom Selection</b>
+                </div>
+                <div class="aes-status-view">
+                    <div class="aes-step-indicator"></div> 
+                    <span class="aes-step-label"></span>
+                    <div class="arc-tag"><div class="arc-tag-from">x1</div><div class="arc-tag-to">x2</div></div>
+                    <div class="vertex-tag">x1</div>
+                </div>
+                <div class="aes-status-view-choosing">
+                    <div class="aes-status-view-choosing-chip">
+                        <i class="fas fa-circle-info"></i>&nbsp;
+                        Please choose an arc to explore
+                    </div>
+                </div>
+                <div class="aes-quick-controls">
+                    <button data-aes-action="random" title="Randomly select arc"><i class="fas fa-shuffle"></i></button>
+                    <button data-aes-action="repeat" title="Reselect arc"><i class="fas fa-rotate-right"></i></button>
+                    <!-- <button data-aes-action="pause"><i class="fas fa-pause"></i></button> -->
+                    <button data-aes-action="prev" title="Go to previous step"><i class="fas fa-backward-step"></i></button>
+                    <button data-aes-action="next" title="Go to next step"><i class="fas fa-forward-step"></i></button>
+                </div>
+            </header>
+            <main>
+                <section class="drawing">
+                    <svg></svg>
+                </section>
+            </main>
+        </main>
+        <aside class="right-panels">
+            <section class="tab-buttons">
+                <div class="tab-button" data-tab-id="states">States</div>
+                <div class="tab-button" data-tab-id="profile">Activity Profile</div>
+            </section>
+            <main class="panel-tabs">
+                <div class="tab-area panel" data-tab-id="states" data-panel-id="states">
+                    <header>
+                        <h2>Current Arc States</h2>
+                    </header> 
+                    <table class="anchor-right">
+                        <thead><tr>
+                            <th>Arc</th>
+                            <th>Attributes</th>
+                            <th>T</th>
+                        </tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="tab-area panel" data-tab-id="profile" data-panel-id="profile">
+                    <header><h2>Activity Profile</h2></header>
+                    <main>
+                        <table class="anchor-right">
+                            <thead><tr>
+                                <th>Timestep</th>
+                                <th>Traversed Arcs</th>
+                            </tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </main>
+                </div>
+            </main>
+        </aside>
+    </div>
+</template>

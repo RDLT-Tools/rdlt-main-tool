@@ -26,7 +26,7 @@ export default class App {
     static async initialize() {
         App.#initializeStates();
         App.#initializeViews();
-        App.#initializeContexts();
+        await App.#initializeContexts();
     }
 
     static #initializeStates() {
@@ -49,6 +49,7 @@ export default class App {
             
             App.contexts = App.contexts.filter(context => context.id !== id);
             LocalSessionManager.removeModel(context);
+            LocalSessionManager.removeDrawingStates(context.id);
 
             if(App.contexts.length > 0) {
                 LocalSessionManager.saveContextIDs(App.contexts);
@@ -60,16 +61,18 @@ export default class App {
         GlobalKeyEventsManager.initialize();
     }
 
-    static #initializeContexts() {
+    static async #initializeContexts() {
         const contextsJSON = LocalSessionManager.loadAllContexts();
 
         if(contextsJSON.length > 0) {
             App.contexts = contextsJSON.map(c => ModelContext.fromJSON(c))
         } else {
-            App.contexts = [
-                new ModelContext()
-            ];
+            App.contexts = [];
+            App.addContext();
         }
+
+        // Load all contexts
+        await Promise.all(App.contexts.map(c => c.initialize()));
 
         for(const context of this.contexts) {
             App.#addContextTab(context);
@@ -92,8 +95,10 @@ export default class App {
      * @param {VisualRDLTModel} visualModel 
      * @returns 
      */
-    static addContext(visualModel) {
+    static async addContext(visualModel) {
         const context = new ModelContext(null, visualModel);
+        await context.initialize();
+        
         App.contexts.push(context);
         App.#addContextTab(context);
         LocalSessionManager.saveContextIDs(App.contexts);

@@ -115,22 +115,6 @@ header section.action-buttons {
   flex: 1;
 }
 
-.model-context > main > .subworkspace > main > .drawing {
-  flex: 1;
-}
-
-.model-context > main > .subworkspace > main .drawing {
-  position: relative;
-}
-
-.model-context > main > .subworkspace > main .drawing > svg {
-  height: 100%;
-  width: 100%;
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
 
 #tmp {
   display: none;
@@ -168,85 +152,6 @@ header section.action-buttons {
   -webkit-user-drag: none;
 }
 
-svg .highlight {
-  user-select: none;
-  pointer-events: none;
-}
-
-svg .component *:not(.component-circle) {
-  user-select: none;
-  pointer-events: none;
-}
-
-svg .component .component-circle {
-  user-select: none !important;
-  pointer-events: all !important;
-}
-
-svg .arc text {
-  pointer-events: none;
-}
-
-svg .arctracing-hover {
-  pointer-events: stroke !important;
-  transition: opacity 100ms ease;
-}
-
-.model-context > main[data-evt-ishighlighting] svg .arctracing-hover,
-.model-context > main[data-evt-ishighlighting] svg .component-hover,
-.model-context > main[data-evt-isarctracing] svg .arctracing-hover {
-  display: none;
-  pointer-events: none;
-}
-
-svg .component-hover {
-  transition: opacity 100ms ease;
-  opacity: 0;
-}
-
-svg .component-circle:hover ~ .component-hover {
-  opacity: 1;
-}
-
-svg .component:not([data-selected]) .component-selected {
-  display: none;
-}
-
-svg .arctracing-hover:not(:hover) {
-  opacity: 0;
-}
-
-svg .arc-hover,
-svg .arc-selected {
-  pointer-events: none;
-}
-
-svg .arc-trigger {
-  opacity: 0;
-}
-
-svg .arc-hover {
-  transition: opacity 100ms ease;
-  opacity: 0;
-}
-
-svg .arc-trigger:hover ~ .arc-hover {
-  opacity: 1 !important;
-}
-
-svg .arc:not([data-selected]) .arc-waypoints,
-svg .arc:not([data-selected]) .arc-selected {
-  display: none;
-}
-
-svg .arc-waypoint[data-nomove] {
-  stroke-opacity: 0.5;
-}
-
-svg .arc-waypoint:not([data-nomove]) {
-  cursor: pointer;
-  pointer-events: all !important;
-}
 
 .subworkspace > main > header {
   display: flex;
@@ -287,11 +192,6 @@ svg .arc-waypoint:not([data-nomove]) {
   box-shadow: none;
 }
 
-.aes-subworkspace .drawing {
-  height: 100%;
-  width: 100%;
-}
-
 
 .aes-subworkspace[data-aes-current-action="choosing"] .aes-status-view,
 .aes-subworkspace:not([data-aes-current-action="choosing"])
@@ -329,90 +229,6 @@ svg .arc-waypoint:not([data-nomove]) {
   background-color: #74d8e0;
 }
 
-.aes-subworkspace .component-circle {
-  transition: all 300ms ease;
-  fill-opacity: 1;
-  stroke-width: 15;
-  stroke: transparent;
-  opacity: 0.5;
-}
-
-.aes-subworkspace .arc-highlight {
-  transition: all 200ms ease;
-  stroke-width: 12;
-  stroke-linecap: round;
-  stroke: transparent;
-  opacity: 0.5;
-}
-
-.aes-subworkspace .arc-path,
-.aes-subworkspace text {
-  pointer-events: none;
-}
-
-.aes-subworkspace .arc-aes-clickable {
-  transition: all 200ms ease;
-  stroke-width: 24;
-  stroke-linecap: round;
-  stroke: transparent;
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-.aes-subworkspace .arc-aes-clickable:hover {
-  opacity: 1;
-}
-
-.aes-subworkspace .arc-aes-clickable:active {
-  opacity: 0.8;
-}
-
-[data-aes-current-action="start"] .component.active .component-circle {
-  stroke: #7eeb83;
-}
-[data-aes-current-action="explore"] .component.active .component-circle {
-  stroke: #e2d971;
-}
-[data-aes-current-action="check"] .component.active .component-circle {
-  stroke: #e153e6;
-}
-[data-aes-current-action="traverse"] .component.active .component-circle {
-  stroke: #3a81de;
-}
-[data-aes-current-action="backtrack"] .component.active .component-circle {
-  stroke: #aaaaaa;
-}
-[data-aes-current-action="end-fail"] .component.active .component-circle {
-  stroke: #ff5050;
-}
-[data-aes-current-action="end-sink"] .component.active .component-circle {
-  stroke: #74d8e0;
-}
-
-[data-aes-current-action="start"] .arc.active .arc-highlight {
-  stroke: #7eeb83;
-}
-[data-aes-current-action="explore"] .arc.active .arc-highlight {
-  stroke: #e2d971;
-}
-[data-aes-current-action="check"] .arc.active .arc-highlight {
-  stroke: #e153e6;
-}
-[data-aes-current-action="traverse"] .arc.active .arc-highlight {
-  stroke: #3a81de;
-}
-[data-aes-current-action="end-fail"] .arc.active .arc-highlight {
-  stroke: #ff5050;
-}
-[data-aes-current-action="end-sink"] .arc.active .arc-highlight {
-  stroke: #74d8e0;
-}
-
-[data-aes-current-action="choosing"] .arc.active .arc-aes-clickable {
-  stroke: #e2d971;
-  pointer-events: stroke;
-  cursor: pointer;
-}
 
 .aes-subworkspace .aes-status-view-choosing-chip {
   background-color: #e2d971;
@@ -447,35 +263,8 @@ svg .arc-waypoint:not([data-nomove]) {
   cursor: default;
 }
 
-.vs-subworkspace .drawing,
-.as-subworkspace .drawing,
-.ver-subworkspace .drawing,
-.poi-subworkspace .drawing {
-  height: 100%;
-  width: 100%;
-}
 
 
-.as-subworkspace .arc-highlight,
-.vs-subworkspace .arc-highlight {
-  transition: all 200ms ease;
-  stroke-width: 12;
-  stroke-linecap: round;
-  stroke: transparent;
-  opacity: 0.5;
-}
-
-.as-subworkspace .arc-highlight {
-  transition: all 200ms ease;
-  stroke-width: 12;
-  stroke-linecap: round;
-  stroke: transparent;
-  opacity: 0.5;
-}
-
-.as-subworkspace .arc.active .arc-highlight {
-  stroke: #3a81de;
-}
 
 .ver-subworkspace .criteria-row .fa-check {
   color: green;
@@ -485,95 +274,3 @@ svg .arc-waypoint:not([data-nomove]) {
   color: red;
 }
 
-.ver-subworkspace .drawing > svg:not(.active) {
-  display: none !important;
-}
-
-.ver-subworkspace .component-circle {
-  transition: all 300ms ease;
-  fill-opacity: 1;
-  stroke-width: 15;
-  stroke: transparent;
-  opacity: 0.5;
-}
-
-.ver-subworkspace .arc-highlight {
-  transition: all 200ms ease;
-  stroke-width: 12;
-  stroke-linecap: round;
-  stroke: transparent;
-  opacity: 0.5;
-}
-
-.ver-subworkspace .arc.active .arc-highlight {
-  stroke: #ff5050;
-}
-
-.ver-subworkspace .component.active .component-circle {
-  stroke: #ff5050;
-}
-
-.vs-subworkspace .arc.abstract .arc-bare {
-  opacity: 0.2;
-}
-
-
-.poi-subworkspace .component-circle {
-  transition: all 300ms ease;
-  fill-opacity: 1;
-  stroke-width: 15;
-  stroke: transparent;
-  opacity: 0.6;
-}
-
-
-.poi-subworkspace .arc-highlight {
-  transition: all 200ms ease;
-  stroke-width: 12;
-  stroke-linecap: round;
-  stroke: transparent;
-  opacity: 0.6;
-}
-
-.poi-subworkspace[data-active-poi="pod"] .component.active .component-circle {
-  stroke: #F58C46;
-}
-
-.poi-subworkspace[data-active-poi="pos"] .component.active .component-circle {
-  stroke: #3a81de;
-}
-
-.poi-subworkspace[data-active-poi="shared"] .arc.active .arc-highlight {
-  stroke: #909090;
-}
-
-
-.poi-subworkspace[data-active-poi="deadlocks"] .component.active .component-circle {
-  stroke: #ff5050;
-}
-
-
-.poi-subworkspace[data-active-poi="pore"] .component.active .component-circle,
-.poi-subworkspace[data-active-poi="pore"] .arc.active .arc-highlight {
-  stroke: #836FF3;
-}
-
-
-[data-tab-id="main-model"] .arc-highlight {
-  stroke-width: 12;
-  stroke-linecap: round;
-  stroke: transparent;
-  opacity: 0.3;
-}
-
-[data-tab-id="main-model"] .component-circle {
-  fill-opacity: 1;
-  stroke-width: 15;
-  stroke: transparent;
-  opacity: 0.3;
-}
-
-[data-tab-id="main-model"] .arc.active .arc-highlight,
-[data-tab-id="main-model"] .component.active .component-circle {
-  stroke: #ff5050;
-}

@@ -16,6 +16,7 @@ export default class ExecutePanelManager {
      *      root: HTMLDivElement,
      *      table: HTMLTableElement,
      *      importButton: HTMLButtonElement
+     *      addActivityButton: HTMLButtonElement
      *  },
      *  activityExtraction: {
      *      root: HTMLDivElement,
@@ -69,8 +70,10 @@ export default class ExecutePanelManager {
 
         activitiesSectionViews.root = activitiesSectionRoot;
         activitiesSectionViews.table = activitiesSectionRoot.querySelector("table");
+        activitiesSectionViews.addActivityButton = activitiesSectionRoot.querySelector("button[data-subaction='add-activity']");
         activitiesSectionViews.importButton = activitiesSectionRoot.querySelector("button[data-subaction='import']");
 
+        activitiesSectionViews.addActivityButton.addEventListener("click", () => this.context.managers.workspace.createdInputtedActivity());
         activitiesSectionViews.importButton.addEventListener("click", () => this.context.managers.activities.importActivity());
     }
 
@@ -82,26 +85,41 @@ export default class ExecutePanelManager {
         aeSectionViews.generateButton = aeSectionRoot.querySelector("button[data-subaction='generate']");
         aeSectionViews.simulateButton = aeSectionRoot.querySelector("button[data-subaction='simulate']");
 
-        aeSectionViews.generateButton.addEventListener("click", () => {
-            const { name, source, sink } = this.#forms.activityExtraction.getValues();
-            if(!name.trim() || !source || !sink) return;
+        aeSectionViews.generateButton.addEventListener("click", async () => {
+            const { name, source, sink, isTargeted, isMaximal } = this.#forms.activityExtraction.getValues();
+            if(!source || !sink) return;
+
+            let targetedArcs = new Set();
+            const visualModel = this.context.managers.visualModel.makeCopy();
+            
+            if(isTargeted) {
+                targetedArcs = await this.context.managers.workspace.startTargetedArcSelection(visualModel);
+            }
 
             this.context.managers.activities.generateActivity({ 
-                name, 
+                name: name?.trim() || "<Untitled Activity>", 
                 source: Number(source), 
-                sink: Number(sink) 
-            });
+                sink: Number(sink),
+                targetedArcs,
+                isMaximal
+            }, visualModel);
         });
 
-        aeSectionViews.simulateButton.addEventListener("click", () => {
-            const { name, source, sink, mode } = this.#forms.activityExtraction.getValues();
+        aeSectionViews.simulateButton.addEventListener("click", async () => {
+            const { name, source, sink, mode, isTargeted } = this.#forms.activityExtraction.getValues();
             if(!source || !sink || !mode) return;
+
+            let targetedArcs = new Set();
+            const visualModel = this.context.managers.visualModel.makeCopy();
+            
+            if(isTargeted) {
+                targetedArcs = await this.context.managers.workspace.startTargetedArcSelection(visualModel);
+            }
             
             const aesManager = this.context.managers.workspace.startAESimulation({
-                name, source: Number(source), sink: Number(sink), mode
-            });
-
-            aesManager.start();
+                name, source: Number(source), sink: Number(sink), mode,
+                targetedArcs
+            }, visualModel);
         });
     }
 
@@ -126,9 +144,14 @@ export default class ExecutePanelManager {
     }
 
     #initializeForms() {
+        // Activity Extraction
         this.#forms.activityExtraction = new Form(this.#views.activityExtraction.root)
-            .setFieldNames([ 'name', 'source', 'sink', 'mode' ]);
-
+            .setFieldNames([ 'name', 'source', 'sink', 'mode', 'isTargeted', 'isMaximal' ]);
+        this.#forms.activityExtraction.getFieldElement('mode').addEventListener("change", (event) => 
+            this.#views.activityExtraction.root.setAttribute("data-value-mode", event.target.value));
+        this.#forms.activityExtraction.getFieldElement('isMaximal').addEventListener("change", (event) => 
+            this.#views.activityExtraction.root.setAttribute("data-value-ismaximal", event.target.checked));
+ 
         this.#forms.vertexSimplification = new Form(this.#views.vertexSimplification.root)
             .setFieldNames([ 'rbs' ]);
     }

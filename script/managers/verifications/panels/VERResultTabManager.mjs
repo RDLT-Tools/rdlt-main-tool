@@ -73,7 +73,10 @@ export default class VERResultTabManager {
      *          violating: {
      *              arcs: number[],
      *              vertices: number[]
-     *          }
+     *          },
+     *          violatingRemarks: {
+     *              vertices: {[vertexUID: number]: string}
+     *          },
      *      },
      *      model: {
      *          vertices: number[],
@@ -82,7 +85,7 @@ export default class VERResultTabManager {
      * }} instance 
      */
     displayInstanceResult(instance) {
-        const { name, evaluation: { conclusion, criteria, violating } } = instance;
+        const { name, evaluation: { conclusion, criteria, violating, violatingRemarks } } = instance;
         
         // Setup conclusion chip
         if(conclusion.pass) {
@@ -124,6 +127,9 @@ export default class VERResultTabManager {
                 const row = buildElement("tr", {}, [
                     buildElement("td", {}, [
                         buildArcTagElement(...identifierPair)
+                    ]),
+                    buildElement("td", {}, [
+                        violatingRemarks?.arcs[arcUID] || ""
                     ])
                 ]);
 
@@ -146,6 +152,9 @@ export default class VERResultTabManager {
                 const row = buildElement("tr", {}, [
                     buildElement("td", {}, [
                         buildVertexTagElement(identifier)
+                    ]),
+                    buildElement("td", {}, [
+                        violatingRemarks?.vertices[vertexUID] || ""
                     ])
                 ]);
     

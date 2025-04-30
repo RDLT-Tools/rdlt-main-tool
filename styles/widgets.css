@@ -263,6 +263,15 @@ table td {
     padding: 6px 0;
 }
 
+table.extend-last-col td:last-child {
+    width: 100%;
+}
+
+table tr > td:not(:last-child),
+table tr > th:not(:last-child) {
+    padding-right: 8px;
+}
+
 table tr > td:first-child, table tr > th:first-child {
     padding-left: 8px;
 }
@@ -317,16 +326,24 @@ table.subtable tr {
     padding: 4px 4px;
     border-radius: 4px;
     cursor: pointer;
-    margin: 0 2px;
+    margin: 2px 2px;
 }
 
 .hidden {
     display: none;
 }
 
-.arc-tag {
+.arc-tag > div:first-child:after {
+    content: '';
+    height: 16px;
+    width: 16px;
+    margin: 0;
+    vertical-align: middle;
+    display: inline-block;
+    margin: 0 2px;
+    transform: translateY(-2px);
     background-image: url("../assets/icons/arc-tag-arrow.svg");
-    background-size: auto 40%;
+    background-size: 100% auto;
     background-repeat: no-repeat;
     background-position: center;
 }
@@ -334,10 +351,6 @@ table.subtable tr {
 .arc-tag > div {
     display: inline-block;
     vertical-align: middle;
-}
-
-.arc-tag > div:first-child {
-    margin-right: 20px;
 }
 
 .status-chip {

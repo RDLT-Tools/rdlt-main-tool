@@ -1,3 +1,4 @@
+import Activity from "../../../entities/activity/Activity.mjs";
 import { buildArcDisplayElement, buildArcTagElement, buildElement, buildVertexDisplayElement, buildVertexTagElement } from "../../../utils.mjs";
 import { POIManager } from "../POIManager.mjs";
 
@@ -25,10 +26,7 @@ export default class POIPanelManager {
      *   },
      *   shared: {
      *      section: HTMLDivElement,
-     *      table: HTMLTableElement,
-     *   },
-     *   tor: {
-     *      section: HTMLDivElement,
+     *      activitiesTable: HTMLTableElement,
      *      table: HTMLTableElement,
      *   },
      *   pore: {
@@ -42,7 +40,6 @@ export default class POIPanelManager {
         pos: { section: null, table: null },
         deadlocks: { section: null, table: null },
         shared: { section: null, table: null },
-        tor: { section: null, table: null },
         pore: { section: null, table: null },
     };
 
@@ -61,9 +58,8 @@ export default class POIPanelManager {
         this.#view.deadlocks.section = this.#rootElement.querySelector(`[data-poi-section="deadlocks"]`);
         this.#view.deadlocks.table = this.#rootElement.querySelector(`[data-poi-section="deadlocks"] table`);
         this.#view.shared.section = this.#rootElement.querySelector(`[data-poi-section="shared"]`);
-        this.#view.shared.table = this.#rootElement.querySelector(`[data-poi-section="shared"] table`);
-        this.#view.tor.section = this.#rootElement.querySelector(`[data-poi-section="tor"]`);
-        this.#view.tor.table = this.#rootElement.querySelector(`[data-poi-section="tor"] table`);
+        this.#view.shared.table = this.#rootElement.querySelector(`[data-poi-section="shared"] .sr-table`);
+        this.#view.shared.activitiesTable = this.#rootElement.querySelector(`[data-poi-section="shared"] .acts-table`);
         this.#view.pore.section = this.#rootElement.querySelector(`[data-poi-section="pore"]`);
         this.#view.pore.table = this.#rootElement.querySelector(`[data-poi-section="pore"] table`);
     }
@@ -117,11 +113,34 @@ export default class POIPanelManager {
     }
 
     /**
+     * @param {Activity[]} activities
+     */
+    setupSharedResourcesActivitiesDisplay(activities) {
+        // Setup activities table
+        const actsTableBody = this.#view.shared.activitiesTable.querySelector("tbody");
+        actsTableBody.innerHTML = "";
+
+        for(const activity of activities) {
+            const checkbox = buildElement("input", { type: "checkbox" });
+            checkbox.addEventListener("change", (event) => {
+                this.#parentManager.toggleSRSelectedActivity(activity.id, event.target.checked);
+            });
+
+            const activityRow = buildElement("tr", {}, [
+                buildElement("td", {}, [ checkbox ]),
+                buildElement("td", {}, [ activity.name || "<Untitled Activity>" ]),
+            ]);
+
+            actsTableBody.appendChild(activityRow);
+        }
+    }
+
+    /**
      * @param {{
      *      arcs: Set<number>
      * }} result 
      */
-    setupSharedResourcesDisplay(result) {
+    refreshSharedResourcesDisplay(result) {
         const tableBody = this.#view.shared.table.querySelector("tbody");
         tableBody.innerHTML = "";
 
@@ -162,76 +181,6 @@ export default class POIPanelManager {
             ]);
 
             tableBody.appendChild(row);
-        }
-    }
-
-    /**
-     * @param {{ 
-     *      vertexUID: number,
-     *      timeReached: number[],
-     *      parents: {
-     *          arcUID: number,
-     *          timeSatisfied: number[]
-     *      }[]
-     * }[]} result 
-     */
-    setupTORDisplay(result) {
-        const tableBody = this.#view.tor.table.querySelector("tbody");
-        tableBody.innerHTML = "";
-
-        for(const { vertexUID, timeReached, parents } of result) {
-            const vertex = this.#parentManager.getVertex(vertexUID);
-            if(!vertex) continue;
-
-            const row = buildElement("tr", {}, [
-                buildElement("td", {}, [
-                    buildVertexDisplayElement(vertex.type),
-                    buildVertexTagElement(vertex.identifier)
-                ])
-            ]);
-
-            
-            tableBody.appendChild(row);
-            
-            if(parents.length > 0) {
-                row.setAttribute("data-has-subtable", "");
-                
-
-                const subtableBody = buildElement("tbody");
-                const subtable = buildElement("table", { classname: "subtable anchor-right" }, [
-                    buildElement("thead", {}, [
-                        buildElement("tr", {}, [
-                            buildElement("th", {}, [ "Parents" ]),
-                            buildElement("th", { style: "text-align: center" }, [ "Condition" ]),
-                            buildElement("th", {}, [ "T-Statisfied" ]),
-                        ])
-                    ]),
-                    subtableBody
-                ]);
-
-                const subtableRow = buildElement("tr", { classname: "subtable-parent" }, [
-                    buildElement("td", { colspan: "100%" }, [ subtable ])
-                ]);
-
-                tableBody.appendChild(subtableRow);
-                
-                for(const { arcUID, timeSatisfied } of parents) {
-                    const arc = this.#parentManager.getArc(arcUID);
-                    if(!arc) continue;
-
-                    const subrow = buildElement("tr", {}, [
-                        buildElement("td", {}, [
-                            buildArcDisplayElement(),
-                            buildArcTagElement(...this.#parentManager.getArcIdentifierPair(arcUID))
-                        ]),
-                        buildElement("td", { style: "text-align: center" }, [ arc.C || "ϵ" ]),
-                        buildElement("td", {}, timeSatisfied.join(" "))
-                    ]);
-
-                    subtableBody.appendChild(subrow);
-                }
-            }
-
         }
     }
 

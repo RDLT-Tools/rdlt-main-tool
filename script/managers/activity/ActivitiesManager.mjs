@@ -1,6 +1,6 @@
 import Activity from "../../entities/activity/Activity.mjs";
 import { backtrack, checkArc, iterateAtVertex, traverseArc } from "../../services/aes.mjs";
-import { buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, pickRandomFromSet } from "../../utils.mjs";
+import { buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, findAllLoopingArcs, getSetsIntersection, pickRandomFromSet } from "../../utils.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 
 export class ActivitiesManager {
@@ -27,11 +27,15 @@ export class ActivitiesManager {
      *      name: string,
      *      source: ComponentID,
      *      sink: ComponentID,
-     *      mode: ActivityExtractionMode
+     *      mode: ActivityExtractionMode,
+     *      targetedArcs: Set<number>,
+     *      isMaximal: boolean
      * }} configs
+     * 
+     * @returns {Activity}
     */
-    generateActivity(configs) {
-        const modelSnapshot = this.context.managers.visualModel.makeCopy();
+    generateActivity(configs, visualModel = null, thenSave = true) {
+        const modelSnapshot = visualModel || this.context.managers.visualModel.makeCopy();
         const vertices = modelSnapshot.getAllComponents().map(v => v.simplify());
         const arcs = modelSnapshot.getAllArcs().map(a => a.simplify());
 
@@ -41,11 +45,13 @@ export class ActivitiesManager {
             arcs,
             arcMap: buildArcMap(arcs),
             arcsMatrix: buildArcsAdjacencyMatrix(arcs),
-            rbsMatrix: buildRBSMatrix(vertexMap, arcs)
+            rbsMatrix: buildRBSMatrix(vertexMap, arcs),
         };
         
+        const loopingArcs = findAllLoopingArcs(configs.source, new Set(), aeCache.arcsMatrix);
+
         const aeStates = {
-            T: {}, CTIndicator: {}, path: [ configs.source ], activityProfile: {}
+            T: {}, CTIndicator: {}, path: [ configs.source ], activityProfile: {}, tor: {}
         };
 
         
@@ -55,9 +61,11 @@ export class ActivitiesManager {
         while(true) {
             // Check explorable arcs from current vertex
             const explorableArcs = iterateAtVertex({ vertexUID: currentVertex }, aeStates, aeCache);
+            const explorableTargetedArcs = getSetsIntersection(explorableArcs, configs.targetedArcs);
+            const choosableArcs = explorableTargetedArcs.size > 0 ? explorableTargetedArcs : explorableArcs;
 
             // If no explorable arcs, try to backtrack (if unable, report as failure)
-            if(explorableArcs.size === 0) {
+            if(choosableArcs.size === 0) {
                 const backtrackedVertex = backtrack(null, aeStates, aeCache);
                 if(backtrackedVertex !== null) {
                     currentVertex = backtrackedVertex;
@@ -70,7 +78,17 @@ export class ActivitiesManager {
             }
 
             // Choose random arc
-            const chosenArc = pickRandomFromSet(explorableArcs);
+            let chosenArc;
+            if(configs.isMaximal) {
+                const choosableLoopingArcs = getSetsIntersection(choosableArcs, loopingArcs);
+                if(choosableLoopingArcs.size > 0) {
+                    chosenArc = pickRandomFromSet(choosableLoopingArcs);
+                } else {
+                    chosenArc = pickRandomFromSet(choosableArcs);
+                }
+            } else {
+                chosenArc = pickRandomFromSet(choosableArcs);
+            }
 
             // Perform check on choosen arc
             const isUnconstrained = checkArc({ arcUID: chosenArc }, aeStates, aeCache);
@@ -102,10 +120,15 @@ export class ActivitiesManager {
                     "The activity was able to reach the sink" :
                     "The activity failed to reach the sink"
             },
-            profile: aeStates.activityProfile
+            profile: aeStates.activityProfile,
+            tor: aeStates.tor
         });
 
-        this.addActivity(activity);
+        if(thenSave) {
+            this.addActivity(activity);
+        }
+
+        return activity;
     }
 
     /**
@@ -130,6 +153,10 @@ export class ActivitiesManager {
     deleteActivity(activityID) {
         this.#activities = this.#activities.filter(a => a.id !== activityID);
         this.#refreshActivitiesList();
+    }
+
+    getAllActivities() {
+        return [...this.#activities];
     }
 
     #refreshActivitiesList() {

@@ -1,5 +1,5 @@
 import VisualRDLTModel from "../../entities/model/visual/VisualRDLTModel.mjs";
-import { getPODs, getPOSs } from "../../services/poi.mjs";
+import { getPODs, getPOSs, getSharedResources } from "../../services/poi.mjs";
 import { buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, generateUniqueID, pickRandomFromSet } from "../../utils.mjs";
 import { BaseModelDrawingManager } from "../drawing/BaseModelDrawingManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
@@ -37,6 +37,11 @@ export class POIManager {
     /** @type {{ [poiItemID: string]: { vertices: Set<number>, arcs: Set<number> } }} */
     #highlightComponents = {};
 
+    #states = {
+        activePOI: null,
+        sharedResourceActivities: new Set()
+    };
+
 
     /**
      * @param {ModelContext} context
@@ -46,15 +51,10 @@ export class POIManager {
         this.id = generateUniqueID();
         this.configs = configs;
         this.#modelSnapshot = visualModelSnapshot;
-
-        console.log(this.configs);
-
-        this.#initialize();
-        this.#start();
     }
 
-    #initialize() {
-        const subworkspaceTabManager = this.context.managers.workspace.addPOISubworkspace(this.id);
+    async initialize() {
+        const subworkspaceTabManager = await this.context.managers.workspace.addPOISubworkspace(this.id);
         const rootElement = subworkspaceTabManager.tabAreaElement;
         
         this.#drawingManager = new BaseModelDrawingManager(rootElement.querySelector(".drawing > svg"), "poi");
@@ -63,6 +63,8 @@ export class POIManager {
         this.#panels = {
             poi: new POIPanelManager(this, rootElement.querySelector(`[data-panel-id="poi"]`))
         };
+
+        this.#start();
 
     }
 
@@ -109,11 +111,13 @@ export class POIManager {
         }
 
         // Shared Resources
+        const activities = this.context.managers.activities.getAllActivities();
         const sharedResourcesResult = {
             arcs: new Set([ 3 ])
         };
 
-        this.#panels.poi.setupSharedResourcesDisplay(sharedResourcesResult);
+        this.#panels.poi.setupSharedResourcesActivitiesDisplay(activities);
+        this.#panels.poi.refreshSharedResourcesDisplay(sharedResourcesResult);
 
         this.#highlightComponents["shared"] = {
             arcs: sharedResourcesResult.arcs
@@ -131,37 +135,9 @@ export class POIManager {
             vertices: deadlocksResult.vertices
         }
 
-
-        // TOR
-        const torResult = [
-            {
-                vertexUID: 1,
-                timeReached: [ 1 ],
-                parents: [
-                    { arcUID: 3, timeSatisfied: [ 2 ] },
-                ]
-            },
-            {
-                vertexUID: 4,
-                timeReached: [ 1, 2 ],
-                parents: [
-                    { arcUID: 3, timeSatisfied: [ 3 ] },
-                    { arcUID: 4, timeSatisfied: [ 4, 5 ] },
-                ]
-            },
-            {
-                vertexUID: 3,
-                timeReached: [ 1, 2 ],
-                parents: []
-            },
-        ];
-
-        this.#panels.poi.setupTORDisplay(torResult);
-
-
         // PORe
         const poreResult = [
-            { vertexUID: 4, arcs: new Set([ 3 ]) }
+            // { vertexUID: 4, arcs: new Set([ 3 ]) }
         ];
 
         this.#panels.poi.setupPOReDisplay(poreResult);
@@ -181,14 +157,45 @@ export class POIManager {
      * @param {POIItemID} id 
      */
     setActivePOI(id) {
+        this.#states.activePOI = id;
         this.#subworkspaceManager.setActivePOI(id);
+        this.#refreshComponentHighlights();
+    }
+    
+    #refreshComponentHighlights() {
+        const id = this.#states.activePOI;
         this.#drawingManager.clearHighlights();
-
+    
         const highlightComponents = this.#highlightComponents[id];
         if(!highlightComponents) return;
-
+    
         highlightComponents.vertices?.forEach(vuid => this.#drawingManager.highlightVertex(vuid));
         highlightComponents.arcs?.forEach(auid => this.#drawingManager.highlightArc(auid));
+    }
+    
+    toggleSRSelectedActivity(activityID, isSelected) {
+        if(isSelected) {
+            this.#states.sharedResourceActivities.add(activityID);
+        } else {
+            this.#states.sharedResourceActivities.delete(activityID);
+        }
+
+        this.#refreshSharedResourcesResult();
+    }
+
+    #refreshSharedResourcesResult() {
+        const allActivities = this.context.managers.activities.getAllActivities();
+        const selectedActivities = allActivities.filter(a => this.#states.sharedResourceActivities.has(a.id));
+        const profiles = selectedActivities.map(a => a.profile);
+        
+        const sharedResources = getSharedResources(profiles);
+
+        this.#panels.poi.refreshSharedResourcesDisplay({ arcs: sharedResources });
+        this.#highlightComponents["shared"] = {
+            arcs: sharedResources
+        };
+
+        this.#refreshComponentHighlights();
     }
 
     getVertex(vertexID) {

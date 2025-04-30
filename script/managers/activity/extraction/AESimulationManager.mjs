@@ -2,7 +2,7 @@ import Activity from "../../../entities/activity/Activity.mjs";
 import { AESStep } from "../../../entities/activity/AESStep.mjs";
 import VisualRDLTModel from "../../../entities/model/visual/VisualRDLTModel.mjs";
 import { backtrack, checkArc, iterateAtVertex, traverseArc } from "../../../services/aes.mjs";
-import { buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, generateUniqueID, pickRandomFromSet } from "../../../utils.mjs";
+import { buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, generateUniqueID, getSetsIntersection, pickRandomFromSet } from "../../../utils.mjs";
 import ModelContext from "../../model/ModelContext.mjs";
 import { AESDrawingManager } from "./AESDrawingManager.mjs";
 import { AESSubworkspaceManager } from "./AESSubworkspaceManager.mjs";
@@ -25,7 +25,8 @@ export class AESimulationManager {
      *      name: string,
      *      source: ComponentID,
      *      sink: ComponentID,
-     *      mode: ActivityExtractionMode
+     *      mode: ActivityExtractionMode,
+     *      targetedArcs: Set<number>
      * }} 
     */
     configs;
@@ -51,7 +52,7 @@ export class AESimulationManager {
 
 
     /** 
-     * @typedef {{ path, T, CTIndicator, activityProfile }} AESStatesValues
+     * @typedef {{ path, T, CTIndicator, activityProfile, tor }} AESStatesValues
      * @type {{
      *  currentStepIndex: number,
      *  steps: AESStep[],
@@ -101,8 +102,8 @@ export class AESimulationManager {
         this.#initialize();
     }
 
-    #initialize() {
-        const subworkspaceTabManager = this.context.managers.workspace.addAESSubworkspace(this.id);
+    async #initialize() {
+        const subworkspaceTabManager = await this.context.managers.workspace.addAESSubworkspace(this.id);
         const rootElement = subworkspaceTabManager.tabAreaElement;
         this.#drawingManager = new AESDrawingManager(this, rootElement.querySelector(".drawing > svg"));
         this.#subworkspaceManager = new AESSubworkspaceManager(this, rootElement);
@@ -123,20 +124,24 @@ export class AESimulationManager {
         this.#drawingManager.setupComponents(
             this.#modelSnapshot.getAllComponents(), 
             this.#modelSnapshot.getAllArcs());
+        
+        this.#drawingManager.highlightTargetedArcs(this.configs.targetedArcs);
 
         
         this.#subworkspaceManager.setup(this.configs);
+
+        this.#start();
     }
 
     
-    start() {
+    #start() {
         const startVertexUID = this.configs.source;
         this.#states.steps = [
             new AESStep({ action: "start", previousVertex: startVertexUID, currentVertex: startVertexUID }),
         ];
 
         const initialAEStates = {
-            T: {}, CTIndicator: {}, path: [ startVertexUID ], activityProfile: {}
+            T: {}, CTIndicator: {}, path: [ startVertexUID ], activityProfile: {}, tor: {}
         };
 
         this.#states.aeStates.checkpoints[0] = structuredClone(initialAEStates);
@@ -190,19 +195,8 @@ export class AESimulationManager {
         } else if([ "start", "traverse", "backtrack" ].includes(previousStep.action) || (previousStep.action === "check" && previousStep.status === "constrained")) {
             const currentVertex = previousStep.currentVertex;
 
-            const explorableArcs = iterateAtVertex({ vertexUID: currentVertex }, aeStates, aeCache);
-
-            if(explorableArcs.size > 0) {
-                switch(mode) {
-                    case "user":
-                        nextStep = new AESStep({ action: "choosing", explorableArcs, currentVertex });
-                    break;
-                    case "pseudorandom":
-                        const chosenArc = pickRandomFromSet(explorableArcs);
-                        nextStep = new AESStep({ action: "explore", trigger: "random", currentVertex, currentArc: chosenArc });
-                    break;
-                }
-            } else {
+            nextStep = this.#getStepWhenChoosing(currentVertex, aeStates);
+            if(!nextStep) {
                 const backtrackedVertex = backtrack(null, aeStates, aeCache);
                 if(backtrackedVertex !== null) {
                     nextStep = new AESStep({ action: "backtrack", currentVertex: backtrackedVertex });
@@ -236,12 +230,58 @@ export class AESimulationManager {
         this.setCurrentStepIndex(nextStepIndex);
     }
 
+    #getStepWhenChoosing(currentVertex, aeStates, exceptArc = null) {
+        const mode = this.configs.mode;
+        const explorableArcs = iterateAtVertex({ vertexUID: currentVertex }, aeStates, this.#cache.aeCache);
+        const explorableTargetedArcs = getSetsIntersection(explorableArcs, this.configs.targetedArcs);
+        const choosableArcs = explorableTargetedArcs.size > 0 ? explorableTargetedArcs : explorableArcs;
+
+        if(choosableArcs.size === 0) return null;
+
+        const areArcsTargeted = explorableTargetedArcs.size > 0;
+
+        
+        if(choosableArcs.size === 1) {
+            // If only 1 choosable arc, automatically select such arc
+            return new AESStep({ 
+                action: "explore", 
+                trigger: areArcsTargeted ? "targeted-single" : "single",
+                currentVertex, 
+                currentArc: [...choosableArcs][0] 
+            });
+        } else if(mode === "user") {
+            return new AESStep({ 
+                action: "choosing", 
+                explorableArcs: choosableArcs, 
+                status: areArcsTargeted ? "targeted" : null,
+                currentVertex,
+            });
+        } else if(mode === "pseudorandom") {
+            if(exceptArc && choosableArcs.has(exceptArc) && choosableArcs.size > 1) {
+                choosableArcs.delete(exceptArc);
+            }
+
+            const chosenArc = pickRandomFromSet(choosableArcs);
+            return new AESStep({ 
+                action: "explore", 
+                trigger: areArcsTargeted ? "targeted-random" : "random", 
+                currentVertex,
+                currentArc: chosenArc 
+            });
+        }
+    }
+
     chooseArc(arcUID, trigger = "user") {
         const currentStep = this.#getCurrentStep();
         if(currentStep.action !== "choosing") return;
         if(!currentStep.explorableArcs.has(arcUID)) return;
 
-        const nextStep = new AESStep({ action: "explore", trigger, currentVertex: currentStep.currentVertex, currentArc: arcUID });
+        const nextStep = new AESStep({ 
+            action: "explore", 
+            trigger: currentStep.status === "targeted" ? `targeted-${trigger}` : trigger, 
+            currentVertex: currentStep.currentVertex, currentArc: arcUID 
+        });
+        
         this.#states.steps[this.#states.currentStepIndex] = nextStep;
         this.refreshStepsList();
         this.setCurrentStepIndex(this.#states.currentStepIndex);
@@ -260,24 +300,10 @@ export class AESimulationManager {
         const currentStep = this.#states.steps[currentStepIndex];
         if(currentStep.action !== "explore") return;
 
-        const mode = this.configs.mode;
-        let newStep = null;
-        
         const aeStates = this.getStatesAtStepIndex(currentStepIndex-1);
-        const aeCache = this.#cache.aeCache;
         const currentVertex = currentStep.currentVertex;
-        const explorableArcs = iterateAtVertex({ vertexUID: currentVertex }, aeStates, aeCache);
 
-        if(mode === "user") {
-            newStep = new AESStep({ action: "choosing", explorableArcs, currentVertex });
-        } else if(mode === "pseudorandom") {
-            const filteredExplorableArcs = new Set(explorableArcs);
-            if(filteredExplorableArcs.size > 1) filteredExplorableArcs.delete(currentStep.currentArc);
-
-            const chosenArc = pickRandomFromSet(filteredExplorableArcs);
-            newStep = new AESStep({ action: "explore", trigger: "random", currentVertex, currentArc: chosenArc });
-        }
-
+        const newStep = this.#getStepWhenChoosing(currentVertex, aeStates, currentStep.currentArc);
         if(!newStep) return;
 
         this.#states.steps[currentStepIndex] = newStep;
@@ -392,8 +418,10 @@ export class AESimulationManager {
         const result = this.#getCurrentStep().action;
         const pass = result === "end-sink";
 
+        const states = this.getStatesAtStepIndex(this.#states.currentStepIndex);
         const activity = new Activity({
-            name, source: this.configs.source,
+            name: name.trim() || "<Untitled Activity>", 
+            source: this.configs.source,
             sink: this.configs.sink,
             origin: "aes",
             conclusion: {
@@ -404,7 +432,8 @@ export class AESimulationManager {
                     "The activity was able to reach the sink" :
                     "The activity failed to reach the sink"
             },
-            profile: this.getStatesAtStepIndex(this.#states.currentStepIndex).activityProfile
+            profile: states.activityProfile,
+            tor: states.tor
         });
 
         this.context.managers.activities.addActivity(activity);

@@ -1,0 +1,95 @@
+<template data-tab-template-id="poi">
+    <div class="subworkspace tab-area poi-subworkspace" data-active-poi="tor">
+        <main class="poi-main">
+            <header>
+                <div>
+                    <h1>Points of Interest</h1>
+                </div>
+                <div></div>
+                <div class="poi-controls">
+                    <select>
+                        <option value="pod">Points of Delays (PODs)</option>
+                        <option value="pos">Points of Synching (POSs)</option>
+                        <option value="pore">Points of Reoptimization</option>
+                        <option value="deadlocks">Deadlock Points</option>
+                        <option value="shared">Shared Resources</option>
+                    </select>
+                </div>
+            </header>
+            <main>
+                <section class="drawing"><svg></svg></section>
+            </main>
+        </main>
+        <aside class="right-panels">
+            <section class="tab-buttons">
+                <div class="tab-button" data-tab-id="poi">POIs</div>
+            </section>
+            <main class="panel-tabs">
+                <div class="tab-area panel" data-tab-id="poi" data-panel-id="poi">
+                    <header>
+                        <h2>Points of Interest</h2>
+                    </header>
+                    <br>
+                    <div class="collapsible" data-poi-section="pod">
+                        <header>Points of Delays (PODs)</header>
+                        <main>
+                            <table>
+                                <tbody></tbody>
+                            </table>
+                        </main>
+                    </div>
+                    <div class="collapsible" data-poi-section="pos">
+                        <header>Points of Synching (POSs)</header>
+                        <main>
+                            <table>
+                                <tbody></tbody>
+                            </table>
+                        </main>
+                    </div>
+                    <div data-poi-section="shared">
+                        <div class="collapsible">
+                            <header>Selected Activities</header>
+                            <main>
+                                <table class="acts-table extend-last-col">
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" />
+                                            </td>
+                                            <td>Hello worldssssssssss</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                            </main>
+                        </div>
+                        <div class="collapsible">
+                            <header>Shared Resources</header>
+                            <main>
+                                <table class="sr-table">
+                                    <tbody></tbody>
+                                </table>
+                            </main>
+                        </div>
+                    </div>
+                    <div class="collapsible" data-poi-section="deadlocks">
+                        <header>Deadlock Points</header>
+                        <main>
+                            <table>
+                                <tbody></tbody>
+                            </table>
+                        </main>
+                    </div>
+                    <div class="collapsible" data-poi-section="pore">
+                        <header>Points of Reoptimization</header>
+                        <main>
+                            <table>
+                                <tbody></tbody>
+                            </table>
+                        </main>
+                    </div> 
+                </div>
+            </main>
+        </aside>
+    </div>
+</template>
