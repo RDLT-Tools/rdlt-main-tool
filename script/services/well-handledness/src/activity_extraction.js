@@ -45,7 +45,7 @@ export function modifiedActivityExtraction(RDLT, source, sink) {
   function selectAlternativeArc(alternatives) {
     if (alternatives.length === 0) return null;
     const cycleArcs = new Set();
-    RDLT.cycleList.forEach((cycle) => {
+    RDLT.cycle_list.forEach((cycle) => {
       cycle.arcs.forEach((arc) => cycleArcs.add(arc));
     });
     const prioritized = alternatives.map((arc) => ({
