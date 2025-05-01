@@ -1,4 +1,4 @@
-import { Graph } from '../models/graph.js';
+import { Graph } from '../models/Graph.js';
 import { SoundnessCriteria } from './soundness-criteria.js';
 import { GraphOperations } from './graph-operations.js';
 import { utils } from './rdlt-utils.mjs';
