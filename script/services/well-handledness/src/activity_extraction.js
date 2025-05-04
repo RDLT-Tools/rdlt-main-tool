@@ -1,89 +1,117 @@
 export function modifiedActivityExtraction(RDLT, source, sink) {
-  // Initialize data structures using Maps to handle object keys
-  // const activityProfile = new Map();
   const activityProfile = {};
-  const traversalTimes = new Map();
+  const traversalTimes = new Map(); // Using Map for traversalTimes
   let currentVertex = source;
   let reachesSink = false;
   const problematicVertices = new Set();
   let currentTime = 1;
-  const checkedTimes = new Map();
+  const checkedTimes = new Map(); // Changed to Map for checkedTimes
+  const parallelQueue = [];
 
-  // Helper functions
-  function isUnconstrainedArc(currentArc) {
-    if (
-      currentArc.end.join_type === "AND" ||
-      currentArc.end.join_type === "MIX"
-    ) {
+  function isUnconstrainedArc(current, checkedTimes, currentTime) {
+    if (current.end.join_type === "AND" || "MIX") {
       const candidateArcs = RDLT.arcs.filter(
-        (arc) => arc.end === currentArc.end && arc.start !== currentArc.start
+        (arc) => arc.end === current.end && arc.start !== current.start
       );
       for (const arc of candidateArcs) {
-        if (
-          arc.c_attr !== "0" &&
-          currentArc.c_attr !== arc.c_attr &&
-          !checkedTimes.has(arc)
-        ) {
-          return false;
+        if (arc.c_attr !== "0") {
+          if (current.c_attr !== arc.c_attr && !checkedTimes.has(arc)) {
+            // Changed to Map.has()
+            return false;
+          }
         }
       }
     }
     return true;
   }
 
-  function selectNextArc(vertex) {
-    const candidates = RDLT.arcs.filter((arc) => arc.start === vertex);
-    return candidates.length > 0 ? candidates[0] : null;
+  function selectNextArc(currentVertex, arcs) {
+    const candidateArcs = arcs.filter((arc) => arc.start === currentVertex);
+
+    const cycleArcs = new Set();
+    for (const cycle of RDLT.cycle_list) {
+      for (const arc of cycle.arcs) {
+        cycleArcs.add(arc);
+      }
+    }
+
+    const prioritized = [];
+    for (const arc of candidateArcs) {
+      const priority = cycleArcs.has(arc) ? 1 : 0;
+      prioritized.push({ priority, arc });
+    }
+
+    const maxPriority = Math.max(...prioritized.map((item) => item.priority));
+    const topChoices = prioritized
+      .filter((item) => item.priority === maxPriority)
+      .map((item) => item.arc);
+
+    return topChoices.length > 0
+      ? topChoices[Math.floor(Math.random() * topChoices.length)]
+      : null;
+
+    // return candidateArcs.length > 0 ? candidateArcs[0] : null;
   }
 
-  function getAlternativeArcs(currentArc) {
-    return RDLT.arcs.filter(
+  function getAlternativeOutgoingArcs(currentArc, arcs) {
+    return arcs.filter(
       (arc) => arc.start === currentArc.start && arc.end !== currentArc.end
     );
   }
 
   function selectAlternativeArc(alternatives) {
-    if (alternatives.length === 0) return null;
+    if (alternatives.length === 0) {
+      return null;
+    }
+
     const cycleArcs = new Set();
-    RDLT.cycle_list.forEach((cycle) => {
-      cycle.arcs.forEach((arc) => cycleArcs.add(arc));
-    });
-    const prioritized = alternatives.map((arc) => ({
-      priority: cycleArcs.has(arc) ? 1 : 0,
-      arc: arc,
-    }));
-    const maxPriority = Math.max(...prioritized.map((p) => p.priority));
+    for (const cycle of RDLT.cycle_list) {
+      for (const arc of cycle.arcs) {
+        cycleArcs.add(arc);
+      }
+    }
+
+    const prioritized = [];
+    for (const arc of alternatives) {
+      const priority = cycleArcs.has(arc) ? 1 : 0;
+      prioritized.push({ priority, arc });
+    }
+
+    const maxPriority = Math.max(...prioritized.map((item) => item.priority));
     const topChoices = prioritized
-      .filter((p) => p.priority === maxPriority)
-      .map((p) => p.arc);
+      .filter((item) => item.priority === maxPriority)
+      .map((item) => item.arc);
+
     return topChoices[Math.floor(Math.random() * topChoices.length)];
   }
 
-  function backtrack(sourceArc, currentArc) {
+  function backtrack(source, currentArc, traversalTimes, currentTime) {
     for (const arc of RDLT.arcs) {
       if (arc.end === currentArc.start) {
-        if (!traversalTimes.has(arc)) return arc;
-        const alternatives = getAlternativeArcs(arc);
-        for (const alt of alternatives) {
-          if (
-            !traversalTimes.has(alt) ||
-            traversalTimes.get(alt).length < alt.l_attr
-          ) {
-            return alt;
+        if (!traversalTimes.has(arc)) {
+          return arc;
+        } else {
+          const alternatives = getAlternativeOutgoingArcs(arc, RDLT.arcs);
+          for (const alternative of alternatives) {
+            if (
+              !traversalTimes.has(alternative) ||
+              traversalTimes.get(alternative).length < alternative.l_attr
+            ) {
+              return alternative;
+            }
           }
-        }
-        if (arc.start !== sourceArc) {
-          return backtrack(sourceArc, arc);
+          if (arc.start !== source) {
+            return backtrack(source, arc, traversalTimes, currentTime);
+          }
         }
       }
     }
     return null;
   }
 
-  // Main processing loop
-  let nextArc = selectNextArc(currentVertex);
-  while (currentVertex !== sink) {
-    if (!nextArc) {
+  let nextArc = selectNextArc(currentVertex, RDLT.arcs);
+  while (currentVertex !== sink || parallelQueue.length > 0) {
+    if (nextArc === null) {
       problematicVertices.add(currentVertex);
       break;
     }
@@ -92,82 +120,107 @@ export function modifiedActivityExtraction(RDLT, source, sink) {
       !traversalTimes.has(nextArc) ||
       traversalTimes.get(nextArc).length < nextArc.l_attr
     ) {
-      if (isUnconstrainedArc(nextArc)) {
-        // Process valid arc
-        const joinArcs = Array.from(checkedTimes.keys()).filter(
-          (arc) => arc.end === nextArc.end && arc.start !== nextArc.start
-        );
-
-        let maxTime = currentTime;
-        if (joinArcs.length > 0) {
-          const joinTimes = joinArcs.map((arc) =>
-            Math.max(...checkedTimes.get(arc))
-          );
-          maxTime = Math.max(currentTime, ...joinTimes);
+      if (isUnconstrainedArc(nextArc, checkedTimes, currentTime)) {
+        // Get join arcs from checkedTimes Map
+        const joinArcs = [];
+        for (const [arc, times] of checkedTimes) {
+          if (arc.end === nextArc.end && arc.start !== nextArc.start) {
+            joinArcs.push({ arc, times });
+          }
         }
 
-        // Update data structures
-        [nextArc, ...joinArcs].forEach((arc) => {
+        const maxTime =
+          joinArcs.length > 0
+            ? Math.max(
+                currentTime,
+                ...joinArcs.map(({ times }) => Math.max(...times))
+              )
+            : currentTime;
+
+        // Process join arcs
+        for (const { arc, times } of joinArcs) {
           if (!traversalTimes.has(arc)) traversalTimes.set(arc, []);
           traversalTimes.get(arc).push(maxTime);
-
-          if (!activityProfile[maxTime]) {
-            activityProfile[maxTime] = new Set();
-          }
+          if (!activityProfile[maxTime]) activityProfile[maxTime] = new Set();
           activityProfile[maxTime].add(arc.id);
-        });
+          checkedTimes.delete(arc); // Changed to Map.delete()
+        }
 
-        joinArcs.forEach((arc) => checkedTimes.delete(arc));
+        // Process nextArc
+        if (!traversalTimes.has(nextArc)) traversalTimes.set(nextArc, []);
+        traversalTimes.get(nextArc).push(maxTime);
+        if (!activityProfile[maxTime]) activityProfile[maxTime] = new Set();
+        activityProfile[maxTime].add(nextArc.id);
+
         currentTime = Math.max(...traversalTimes.get(nextArc)) + 1;
         currentVertex = nextArc.end;
-        nextArc = selectNextArc(currentVertex);
+        nextArc = selectNextArc(currentVertex, RDLT.arcs);
       } else {
-        // Handle constrained arc
+        // Handle constrained arc case
         if (!checkedTimes.has(nextArc)) checkedTimes.set(nextArc, []);
         checkedTimes.get(nextArc).push(currentTime);
 
         if (checkedTimes.get(nextArc).length > nextArc.l_attr) {
           problematicVertices.add(currentVertex);
-          console.error("DEADLOCK DETECTED");
+          console.log("DEADLOCK DETECTED");
           break;
         }
 
-        nextArc = backtrack(source, nextArc);
-        if (!nextArc) {
-          console.error("DEADLOCK DETECTED");
+        nextArc = backtrack(source, nextArc, traversalTimes, currentTime);
+
+        if (nextArc === null) {
+          console.log("DEADLOCK DETECTED");
           break;
+        } else {
+          currentVertex = nextArc.start;
         }
-        currentVertex = nextArc.start;
+
+        // Calculate prevTime using Map iteration
+        let prevTime = 0;
+        for (const [arc, times] of traversalTimes) {
+          if (arc.end === nextArc.start) {
+            prevTime = Math.max(prevTime, times[times.length - 1] || 0);
+          }
+        }
+
+        currentTime = prevTime + 1;
       }
     } else {
-      // Handle arc capacity full
-      const alternatives = getAlternativeArcs(nextArc);
-      nextArc = selectAlternativeArc(alternatives);
-      if (!nextArc) {
+      const alternatives = getAlternativeOutgoingArcs(nextArc, RDLT.arcs);
+      if (alternatives.length === 0) {
         problematicVertices.add(currentVertex);
         break;
+      } else {
+        nextArc = selectAlternativeArc(alternatives);
+        currentVertex = nextArc.start;
       }
-      currentVertex = nextArc.start;
     }
   }
 
-  // Final checks and cleanup
-  reachesSink = currentVertex === sink;
-  if (reachesSink) {
-    console.log("Reached sink vertex");
+  if (currentVertex === sink) {
+    reachesSink = true;
+    console.log("Reached sink vertex: ", reachesSink);
   } else {
-    console.error(`Stopped at vertex: ${currentVertex.identifier}`);
+    console.log(
+      `Did not reach sink vertex due to error encountered in vertex: ${currentVertex.name}`
+    );
   }
 
-  // Deduplicate traversal times
-  traversalTimes.forEach((times, arc) => {
-    traversalTimes.set(arc, [...new Set(times)]);
-  });
+  // Convert Maps to objects for return (optional)
+  const traversalTimesObj = {};
+  for (const [arc, times] of traversalTimes) {
+    traversalTimesObj[arc.id] = [...new Set(times)];
+  }
+
+  const checkedTimesObj = {};
+  for (const [arc, times] of checkedTimes) {
+    checkedTimesObj[arc.id] = times;
+  }
 
   return {
-    activityProfile: activityProfile,
+    activityProfile,
     problematicVertices: Array.from(problematicVertices),
-    traversalTimes: Array.from(traversalTimes.entries()),
-    reachesSink,
+    traversalTimes: traversalTimesObj,
+    checkedTimes: checkedTimesObj,
   };
 }

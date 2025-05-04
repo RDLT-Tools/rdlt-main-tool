@@ -67,7 +67,6 @@ export class VerificationsResultManager {
    * @param {ModelContext} context
    * @param {VerificationResultData} result
    * @param {*} visualModelSnapshot
-   * @param {*} activityProfile
    */
   constructor(context, result, visualModelSnapshot, activityProfile = null) {
     this.context = context;
@@ -79,9 +78,9 @@ export class VerificationsResultManager {
     this.#initialize();
   }
 
-  #initialize() {
+  async #initialize() {
     const subworkspaceTabManager =
-      this.context.managers.workspace.addVerificationResultSubworkspace(
+      await this.context.managers.workspace.addVerificationResultSubworkspace(
         this.id,
         this.result.title
       );
@@ -173,8 +172,6 @@ export class VerificationsResultManager {
     // Update result tab
     this.#panels.result.displayInstanceResult(instance);
   }
-
-  //Added to create listener for simulation button
   handleSimulateMAE() {
     // const currentInstance = this.result.instances[this.#currentInstanceIndex];
     console.log("Simulate MAE:", this.activityProfile);

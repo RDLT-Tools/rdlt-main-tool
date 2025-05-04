@@ -23,7 +23,7 @@ export default class VerificationsPanelManager {
    *      freeChoiceness: {
    *          root: HTMLDivElement,
    *          startButton: HTMLButtonElement,
-   *      }
+   *      },
    *    wellHandledness: {
    *          root: HTMLDivElement,
    *          startButton: HTMLButtonElement,
@@ -39,8 +39,8 @@ export default class VerificationsPanelManager {
     sections: {
       poi: {},
       freeChoiceness: {},
-      soundness: {},
       wellHandledness: {},
+      soundness: {},
     },
   };
 
@@ -48,7 +48,7 @@ export default class VerificationsPanelManager {
    * @type {{
    *      poi: Form,
    *      freeChoiceness: Form,
-   *      wellHandledness: Form
+   *      wellHandledness: Form,
    * }}
    */
   #forms = {
