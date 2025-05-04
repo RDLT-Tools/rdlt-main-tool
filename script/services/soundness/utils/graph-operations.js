@@ -1,4 +1,4 @@
-import { Graph } from '../models/graph.js';
+import { Graph } from '../models/Graph.js';
 import { Vertex } from '../models/Vertex.js';
 import { VertexType } from '../models/VertexType.js';
 import { Edge } from '../models/Edge.js';
