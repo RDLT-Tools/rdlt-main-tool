@@ -172,8 +172,54 @@ export class VerificationsResultManager {
     // Update result tab
     this.#panels.result.displayInstanceResult(instance);
   }
-  handleSimulateMAE() {
-    // const currentInstance = this.result.instances[this.#currentInstanceIndex];
+  handleSimulateMAE(view) {
+    view.modal.style.display = "block";
+    const body = view.modal.querySelector(".modal-body");
+    body.innerHTML = ""; // Clear previous content
+
+    for (const key in this.activityProfile) {
+      const valueSet = this.activityProfile[key];
+      // Create a container div to hold the arcTag
+      const wrapper = document.createElement("div");
+      wrapper.style.display = "block"; // Force block display
+
+      const timeStep = document.createElement("label");
+      timeStep.style.display = "inline-block"; // Make label inline
+      timeStep.innerText = `S(${key}): `;
+
+      wrapper.appendChild(timeStep); // Append timeStep to the wrapper
+      for (const value of valueSet) {
+        const arc = this.#modelSnapshot.getArc(value);
+        if (!arc) return ["", ""];
+
+        const fromVertex = this.getVertexIdentifier(arc.fromVertexUID);
+        const toVertex = this.getVertexIdentifier(arc.toVertexUID);
+
+        const arcTag = document.createElement("div");
+        arcTag.className = "arc-tag";
+        arcTag.style.display = "inline-block"; // Set display to inline-block
+
+        const from = document.createElement("div");
+        from.className = "arc-tag-from";
+        from.textContent = fromVertex;
+
+        const to = document.createElement("div");
+        to.className = "arc-tag-to";
+        to.textContent = toVertex;
+
+        arcTag.appendChild(from);
+        arcTag.appendChild(to);
+
+        wrapper.appendChild(arcTag); // Place arcTag inside the wrapper
+        body.appendChild(wrapper);
+      }
+    }
+
+    // Simulate MAE logic here
     console.log("Simulate MAE:", this.activityProfile);
+  }
+
+  closeSimulateMAE(view) {
+    view.modal.style.display = "none";
   }
 }

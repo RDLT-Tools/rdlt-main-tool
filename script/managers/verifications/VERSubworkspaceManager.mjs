@@ -72,8 +72,23 @@ export class VERSubworkspaceManager {
     this.#view.simulateButton = this.#rootAreaElement.querySelector(
       'button[data-subaction="simulate-mae"]'
     );
+    this.#view.modal = this.#rootAreaElement.querySelector(".modal");
+
+    // Get the <span> element that closes the modal
+    this.#view.exit = this.#rootAreaElement.querySelector(".close");
+
+    this.#view.close = this.#rootAreaElement.querySelector(".close-modal");
+
     this.#view.simulateButton.addEventListener("click", () => {
-      this.#verManager.handleSimulateMAE();
+      this.#verManager.handleSimulateMAE(this.#view);
+    });
+
+    this.#view.exit.addEventListener("click", () => {
+      this.#verManager.closeSimulateMAE(this.#view);
+    });
+
+    this.#view.close.addEventListener("click", () => {
+      this.#verManager.closeSimulateMAE(this.#view);
     });
 
     // Initialize header
