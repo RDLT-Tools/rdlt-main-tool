@@ -341,6 +341,22 @@ export function getIncomingArcs(vertexUID, arcsMatrix) {
 /**
  * @param {number} vertexUID 
  * @param {ArcsAdjacencyMatrix} arcsMatrix 
+ * @returns {boolean}
+ */
+export function vertexHasIncomingArcs(vertexUID, arcsMatrix) {
+    for(const fromVertexUID in arcsMatrix) {
+        const incomingArcs = arcsMatrix[fromVertexUID][vertexUID];
+        if(incomingArcs && incomingArcs.size > 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * @param {number} vertexUID 
+ * @param {ArcsAdjacencyMatrix} arcsMatrix 
  * @returns {Set<ArcUID>}
  */
 export function getOutgoingArcs(vertexUID, arcsMatrix) {
@@ -406,8 +422,10 @@ export function isEpsilon(arc) {
  * 
  * @returns {VertexUID[][]}
  */
-export function findAllRBSPaths(startVertexUID, endVertexUID, visitedArcs, cache) {
+export function findAllRBSPaths(startVertexUID, endVertexUID, visitedVertices, visitedArcs, cache) {
     if(!visitedArcs) visitedArcs = new Set();
+    if(!visitedVertices) visitedVertices = new Set();
+
     const { vertexMap, arcMap, arcsMatrix, rbsMatrix } = cache;
     
     const arcPaths = [];
@@ -416,20 +434,24 @@ export function findAllRBSPaths(startVertexUID, endVertexUID, visitedArcs, cache
 
     const outgoingArcs = getOutgoingArcs(startVertexUID, arcsMatrix);
     for(const arcUID of outgoingArcs) {
-        if(visitedArcs.has(arcUID)) continue;
         const arc = arcMap[arcUID];
-
         if(arc.toVertexUID === endVertexUID) {
             arcPaths.push([ arcUID ]);
             continue;
         }
+
+        if(visitedArcs.has(arcUID)) continue;
+        if(visitedVertices.has(arc.toVertexUID)) continue;
 
         if(rbsMatrix[arc.toVertexUID] !== rbsCenterUID) continue;
 
         const _visitedArcs = new Set(visitedArcs);
         _visitedArcs.add(arcUID);
 
-        const nextArcPaths = findAllRBSPaths(arc.toVertexUID, endVertexUID, _visitedArcs, cache);
+        const _visitedVertices = new Set(visitedVertices);
+        _visitedVertices.add(arc.fromVertexUID);
+
+        const nextArcPaths = findAllRBSPaths(arc.toVertexUID, endVertexUID, _visitedVertices, _visitedArcs, cache);
         for(const arcPath of nextArcPaths) {
             arcPaths.push([ arcUID, ...arcPath ]);
         }
@@ -571,6 +593,67 @@ export function findAllLoopingArcs(currentVertexUID, visitedVertices, arcsMatrix
     }
 
     return loopingArcs;
+}
+
+
+/**
+ * 
+ * @param {VertexUID} currentVertexUID 
+ * @param {Set<VertexUID>} visitedVertices 
+ * @param {ArcMap} arcMap 
+ * @param {ArcsAdjacencyMatrix} arcsMatrix 
+ */
+export function findAllVertexCycles(currentVertexUID, vertexPath, arcsMatrix) {
+    const vertexCycles = [];
+
+    const nextVertices = getNextVertices(currentVertexUID, arcsMatrix);
+    vertexPath.push(currentVertexUID);
+
+    for(const vertexUID of nextVertices) {
+        if(vertexUID === currentVertexUID) continue; // ignore self-loops
+
+        if(vertexPath.includes(vertexUID)) { 
+            // Found cycle (with looping arc/s)
+            const vertexCycle = [...vertexPath.slice(vertexPath.lastIndexOf(vertexUID)), vertexUID];
+            vertexCycles.push(vertexCycle);
+            continue;
+        }
+
+        const nextCycles = findAllVertexCycles(vertexUID, [...vertexPath], arcsMatrix);
+        for(const vertexCycle of nextCycles) {
+            vertexCycles.push(vertexCycle);
+        }
+    }
+
+    return vertexCycles;
+}
+
+export function findAllArcCycles(sourceVertexUID, arcsMatrix) {
+    const vertexCycles = findAllVertexCycles(sourceVertexUID, [], arcsMatrix);
+    const arcCycles = [];
+
+    for(const vertexCycle of vertexCycles) {
+        let arcCyclePartials = [ [] ];
+
+        for(let i = 0; i < vertexCycle.length - 1; i++) {
+            const fromVertexUID = vertexCycle[i];
+            const toVertexUID = vertexCycle[i+1];
+            const arcs = arcsMatrix[fromVertexUID][toVertexUID];
+
+            const tmpArcCyclePartials = [];
+            for(const arcCyclePartial of arcCyclePartials) {
+                for(const arcUID of arcs) {
+                    tmpArcCyclePartials.push([...arcCyclePartial, arcUID]);
+                }
+            }
+
+            arcCyclePartials = tmpArcCyclePartials;
+        }
+
+        arcCycles.push(...arcCyclePartials);
+    }
+
+    return arcCycles;
 }
 
 
