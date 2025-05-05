@@ -6,6 +6,7 @@ import { AESimulationManager } from "../activity/extraction/AESimulationManager.
 import { ActivityInputManager } from "../activity/input/ActivityInputManager.mjs";
 import { ActivitySimulationManager } from "../activity/simulation/ActivitySimulationManager.mjs";
 import { TargetedArcSelectManager } from "../activity/targeted/TargetedArcSelectManager.mjs";
+import { RDLT2PNManager } from "../convert/RDLT2PNManager.mjs";
 import ImportManager from "../file/import/ImportManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import { POIManager } from "../poi/POIManager.mjs";
@@ -234,7 +235,7 @@ export default class WorkspaceManager {
             rightPanelsTabAreaContainer.querySelector(".tab-area[data-tab-id='verifications']")
         ));
         
-        this.tabs.left.selectTab("components");
+        this.tabs.left.selectTab("palette");
         this.tabs.right.selectTab("execute");
 
     }
@@ -302,6 +303,10 @@ export default class WorkspaceManager {
         return await this.#addTemplatedSubworkspace(`tas-${tasID}`, "Select Targeted Arcs", "tas");
     }
 
+    async addRDLT2PNSubworkspace(rdlt2pnID) {
+        return await this.#addTemplatedSubworkspace(`rdlt2pn-${rdlt2pnID}`, "Convert to Petri Net", "rdlt2pn");
+    }
+
     /** @param {{ name, source, sink, mode, targetedArcs }} configs */
     startAESimulation(configs, visualModel = null) {
         return new AESimulationManager(this.context, configs, 
@@ -347,5 +352,9 @@ export default class WorkspaceManager {
         return new Promise(resolve => {
             new TargetedArcSelectManager(this.context, visualModel, (arcs) => resolve(arcs));
         });
+    }
+
+    startConvertToPetriNet() {
+        return new RDLT2PNManager(this.context, this.context.managers.visualModel.makeCopy());
     }
 }

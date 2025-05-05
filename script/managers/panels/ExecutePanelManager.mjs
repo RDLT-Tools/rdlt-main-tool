@@ -27,13 +27,18 @@ export default class ExecutePanelManager {
      *      root: HTMLDivElement,
     *       generateLevel1Button: HTMLButtonElement,
     *       generateLevel2Button: HTMLButtonElement,
+     *  },
+     *  convert: {
+     *      root: HTMLDivElement,
+     *      convertToPNButton: HTMLButtonElement
      *  }
      * }}
      */
     #views = {
         activities: {},
         activityExtraction: {},
-        vertexSimplification: {}
+        vertexSimplification: {},
+        convert: {}
     };
 
     /**
@@ -62,6 +67,7 @@ export default class ExecutePanelManager {
         this.#initializeActivitiesSection();
         this.#initializeAESection();
         this.#initializeVSSection();
+        this.#initializeConvertSection();
     }
 
     #initializeActivitiesSection() {
@@ -140,6 +146,18 @@ export default class ExecutePanelManager {
             if(!rbs) return;
 
             this.context.managers.workspace.startVertexSimplification(2, Number(rbs));
+        });
+    }
+
+    #initializeConvertSection() {
+        const convertSectionRoot = this.#rootElement.querySelector("[data-section-id='convert']");
+        const convertSectionViews = this.#views.convert;
+
+        convertSectionViews.root = convertSectionRoot;
+        convertSectionViews.convertToPNButton = convertSectionRoot.querySelector("button[data-subaction='convert-to-pn']");
+
+        convertSectionViews.convertToPNButton.addEventListener("click", () => {
+            this.context.managers.workspace.startConvertToPetriNet();
         });
     }
 
