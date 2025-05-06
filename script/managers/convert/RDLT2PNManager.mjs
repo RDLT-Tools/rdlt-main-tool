@@ -31,32 +31,26 @@ export class RDLT2PNManager {
         
         const simpleModel = this.#modelSnapshot.toSimpleModel();
         const iframe = rootElement.querySelector("iframe");
-        
+        const jsonInput = {
+            vertices: simpleModel.components.map(vertex => ({
+                // id: vertex.uid.toString(),
+                id: vertex.identifier,
+                type: vertex.type.charAt(0),
+                label: '',
+                M: vertex.isRBSCenter? 1 : 0,
+            })),
+            edges: simpleModel.arcs.map(edge => ({
+                from: simpleModel.components.filter(v => v.uid === edge.fromVertexUID)[0].identifier,
+                to: simpleModel.components.filter(v => v.uid === edge.toVertexUID)[0].identifier,
+                C: edge.C === ''? 'ϵ':edge.C,
+                L: edge.L,
+            }))
+        }
+
         iframe.addEventListener("load", () => {
-            iframe.contentWindow.renderConversion(
-                {
-                    vertices: [
-                      { id: "x1", type: "b", label: "", M: 0 },
-                      { id: "y1", type: "c", label: "", M: 0 },
-                      { id: "y2", type: "c", label: "", M: 0 },
-                      { id: "y3", type: "c", label: "", M: 0 },
-                      { id: "x2", type: "e", label: "", M: 1 },
-                      { id: "y4", type: "c", label: "", M: 0 },
-                      { id: "y5", type: "c", label: "", M: 0 }
-                    ],
-                    edges: [
-                      { from: "x1", to: "y1", C: "a", L: 1 },
-                      { from: "x1", to: "y2", C: "b", L: 1 },
-                      { from: "y2", to: "y3", C: "d", L: 1 },
-                      { from: "y1", to: "x2", C: "ϵ", L: 2 },
-                      { from: "y2", to: "x2", C: "send m", L: 2 },
-                      { from: "x2", to: "y5", C: "ϵ", L: 1 },
-                      { from: "x2", to: "y4", C: "ϵ", L: 1 },
-                      { from: "y4", to: "y5", C: "ϵ", L: 1 },
-                      { from: "y5", to: "y3", C: "send n, p", L: 1 }
-                    ]
-                }
-            ); 
+            console.log(simpleModel);
+            console.log(jsonInput);
+            iframe.contentWindow.renderConversion(jsonInput); 
         });
     }
 }
