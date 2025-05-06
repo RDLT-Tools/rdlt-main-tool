@@ -299,7 +299,7 @@ function verifyPCN(verticesList, arcsList, source, sink) {
   const evaluation = {
     conclusion: {
       pass: false,
-      title: "The model is Free-choice",
+      title: "The model is NOT Free-choice",
       description:
         "No sibling sets were found where at least one vertex is a POD.",
     },
@@ -311,7 +311,7 @@ function verifyPCN(verticesList, arcsList, source, sink) {
 
   if (siblingGroups.length > 0) {
     evaluation.conclusion.pass = true;
-    evaluation.conclusion.title = "The model is t₀-step PCN Free-choice";
+    evaluation.conclusion.title = "The model is Free-choice";
     evaluation.conclusion.description =
       "Sibling groups with at least one POD were found in the model.";
 
