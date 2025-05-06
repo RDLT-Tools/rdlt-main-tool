@@ -1,0 +1,274 @@
+body { font-family: sans-serif; padding: 20px; }
+textarea { width: 100%; height: 150px; }
+pre { 
+  background: #f4f4f4; 
+  padding: 10px; 
+  margin: 5px;
+  white-space: pre-wrap;       /* CSS3 browsers */
+  white-space: -moz-pre-wrap;  /* Firefox */
+  white-space: -o-pre-wrap;    /* Opera */
+  word-wrap: break-word;       /* IE and modern browsers */
+}
+/* .section { margin-bottom: 1rem; } */
+button { margin: 5px 0; }
+#reportSection {
+  gap: 0.1rem;             /* spacing between header and body */
+  padding: 0.5rem;
+}
+
+/* 1. Turn the wrapper into a 3-column flex container */
+.report-panels {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;           /* space between panels */
+}
+
+/* 2. Make each panel share the width equally */
+.report-panels > .report-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.5rem;
+  max-height: 300px;   /* optional scroll constraint */
+  /* overflow-y: auto; */
+}
+
+/* 3. (Optional) Tidy up the <details> inside */
+.report-panel details {
+  margin-bottom: 0.1rem;
+}
+/* .report-panel details summary {
+  cursor: pointer;
+  font-weight: bold;
+} */
+.report-panel details[open] summary {
+  color: #0074D9;
+}
+
+/* ─── make sure the export menu floats above everything ─── */
+.export-container {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 100;
+}
+
+/* likewise, the menu itself */
+.export-menu {
+  z-index: 101;
+  
+  /* ensure clicks go to the buttons, not get blocked by the parent */
+  pointer-events: auto;
+}
+
+/* ─── let clicks pass through the blank parts of the D3 canvas ─── */
+#d3graph {
+  /* your existing rules… */
+  pointer-events: none;
+}
+
+/* ─── but let anything inside d3graph that needs clicks still receive them ─── */
+#d3graph svg,
+#d3graph svg * {
+  pointer-events: all;
+}
+
+/* the hidden panel */
+.export-menu {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  overflow: hidden;
+  
+  /* start fully collapsed */
+  max-height: 0;
+  transition: max-height 0.3s ease;
+
+  border: none;
+}
+
+/* when .open is on the container, open it up */
+.export-container.open .export-menu {
+  /* big enough to show all buttons (adjust if you add more items) */
+  max-height: 200px;
+  border: 1px solid #ccc;
+}
+
+/* Optional: style the buttons inside */
+.export-menu button {
+  display: block;
+  width: 100%;
+  padding: 0.5em 1em;
+  border: none;
+  background: none;
+  text-align: left;
+}
+.export-menu button:hover {
+  background: #f0f0f0;
+  cursor: pointer;
+}
+
+/* ──────────── new graph container & title ──────────── */
+.graph-container {
+  position: relative;
+  width: 100%;
+  height: 400px;             /* match desired graph height */
+  border: 1px solid #ccc;
+}
+
+.graph-title {
+  margin: 0;
+  padding: 0.5rem;
+  font-size: 1.25rem;
+  background: #f9f9f9;
+  border-bottom: 1px solid #ddd;
+}
+
+/* ──────────── overlayed simulation controls ──────────── */
+/* position Simulation controls immediately to the left of Export */
+.simulation-controls {
+  position: absolute;
+  top: 0.5rem;
+  /* adjust this value to be (export-width + gap) */
+  right: 5.5rem;
+  display: flex;
+  /* gap: 0.5rem; */
+  /* background: rgba(255,255,255,0.8); */
+  /* padding: 0.25rem; */
+  border-radius: 0.25rem;
+  z-index: 99;
+}
+
+.simulation-controls button {
+  padding: 0.1rem 0.3rem;
+  font-size: 0.9rem;
+}
+
+/* ──────────── the actual D3 canvas ──────────── */
+#d3graph {
+  position: absolute;
+  top: 2.5rem;               /* leaves space for .graph-title */
+  left: 0;
+  width: 100%;
+  height: calc(100% - 2.5rem);
+  overflow: hidden;
+}
+
+details[open] summary {
+  color: #0074D9;
+}
+
+.report-header,
+.report-body {
+  margin-top: 1rem;
+}
+
+/* ─── subtitle under the main title ─── */
+.sim-subtitle {
+  position: absolute;
+  top: 1rem;            
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.9rem;
+  color: #555;
+  z-index: 20;
+}
+
+/* ─── position Logs panel bottom-left ─── */
+.log-panel {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.5rem;
+  width: 300px;
+  max-height: 180px;
+  overflow-y: auto;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  padding: 0.5rem;
+  font-family: monospace;
+  font-size: 0.83rem;
+  z-index: 50;
+}
+
+/* tweak details/summary inside logs */
+.log-panel details summary {
+  cursor: pointer;
+  font-weight: bold;
+  margin: 0.4rem 0;
+  color: #333;
+}
+/* .log-panel details[open] summary {
+  color: #0074D9;
+} */
+.log-panel pre {
+  margin: 0.2rem 0 0.8rem;
+  padding: 0.4rem;
+  background: #f7f7f7;
+  border: 1px solid #eee;
+  overflow-x: auto;
+  font-size: 0.6rem;
+}
+
+/* The “run” button in summary */
+.firing-seq > summary > button {
+  background: #0074D9;
+  color: white;
+  border: none;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.seq-content {
+  font-size: 0.6rem;
+}
+
+/* Nesting styles */
+.sub-items {
+  padding-left: 1rem;
+  margin-top: 0.3rem;
+  font-size: 0.55rem;
+}
+
+#firingSequencesOutput,
+#structReportOutput,
+#behaveReportOutput{
+  font-size: 0.65rem;
+  max-height: 250px;
+  overflow-y: auto;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  margin-bottom: 1rem;
+  background: #fafafa;
+}
+
+.sub-items details {
+  margin-bottom: 0.3rem;
+}
+
+/* Final conclusion styling */
+.final-conclusion {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #eef7ff;
+  border-left: 4px solid #0074D9;
+}
+
+/* Tweak the details-summary look in all panels */
+details summary {
+  cursor: pointer;
+  font-weight: bold;
+  margin: 0.2rem 0;
+}
+
+details[open] summary {
+  color: #0074D9;
+}

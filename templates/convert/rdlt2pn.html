@@ -1,5 +1,71 @@
+<!DOCTYPE html>
 <html>
-    <body>
-        <p>Petri Net Lorem Ipsum</p>
-    </body>
+<head>
+  <meta charset="UTF-8">
+  <title>RDLT to Petri Net Converter</title>
+  <script src="https://d3js.org/d3.v7.js"></script>
+  <script src="https://unpkg.com/@hpcc-js/wasm@2.16.1/dist/graphviz.umd.js"></script>
+  <script src="https://unpkg.com/d3-graphviz@5/build/d3-graphviz.js"></script>
+  <link rel="stylesheet" href="../../styles/convert/rdlt2pn/rdlt2pn.css">
+</head>
+<body>
+  <pre id="dotOutput" style="display: none;"></pre>
+  <div id="outputSection" class="section">
+    <div id="actionSection">
+      <button id="inputRDLT">Input RDLT</button>
+      <button id="outputPN">Output PN</button>
+      <button class="simulateBtn" simulation="conversion">Simulate Conversion Process</button>
+      <button class="simulateBtn" simulation="firingsequence">Simulate and Analyze</button>    
+    </div>
+    <div id="graphContainer" class="graph-container">
+      <h3 id="graphTitle" class="graph-title">[Your Graph Title Here]</h3>
+      <div id="simSubtitle" class="sim-subtitle" style="display:none;">Step 0 of 0</div>
+      <div id="simulationControls" class="simulation-controls" style="display:none;">
+        <button id="resetSimBtn">Reset</button>
+        <button id="prevBtn">Prev</button>
+        <button id="nextBtn">Next</button>
+        <button id="endSimBtn">End</button>
+        <button id="toggleLogBtn">Logs</button>
+      </div>
+      <div class="export-container">
+        <button id="exportBtn" type="button">Export ▼</button>
+        <div id="exportSection" class="export-menu">
+          <button class="exportOptBtn" data-format="svg">SVG</button>
+          <button class="exportOptBtn" data-format="png">PNG</button>
+          <button class="exportOptBtn" data-format="dot">DOT</button>
+        </div>
+      </div>  
+      <div id="d3graph" class="graph"></div>
+      <div id="logSection" class="log-panel" style="display:none;">
+        <details open>
+          <summary>Simulation Logs</summary>
+          <pre id="simulationLog"></pre>
+        </details>
+      </div>
+    </div>
+  </div>
+  <div id="reportSection" style="display:none;">
+    <div class="report-panels">
+      <div class="report-panel firing-panel">
+        <details open>
+          <summary>Simulated Firing Sequences</summary>
+          <div id="firingSequencesOutput"></div>
+        </details>
+      </div>
+      <div class="report-panel struct-panel">
+        <details open>
+          <summary>Structural Analysis Report</summary>
+          <div id="structReportOutput"></div>
+        </details>
+      </div>
+      <div class="report-panel behave-panel">
+        <details open>
+          <summary>Behavioral Analysis Report</summary>
+          <div id="behaveReportOutput"></div>
+        </details>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/script/services/convert/rdlt2pn/rdlt2pn.mjs"></script>
+</body>
 </html>
