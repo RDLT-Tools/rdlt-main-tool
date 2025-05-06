@@ -335,6 +335,36 @@
                                             </div>
                                         </main>
                                     </div>
+                                    <div class="collapsible" data-section-id="wh">
+                                        <header>Well Handledness</header>
+                                        <main>
+                                            <div class="section-description">
+                                                Verify the input RDLT whether it is well-handled or otherwise.
+                                            </div>
+                                            <div class="input-group columns full-width">
+                                                <div>
+                                                    <label>Source</label>
+                                                    <div style="display: flex; gap: 6px;">
+                                                        <select name="source" style="flex: 1"></select>
+                                                        <button><i class="fas fa-hand"></i></button>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label>Sink</label>
+                                                    <div style="display: flex; gap: 6px;">
+                                                        <select name="sink" style="flex: 1"></select>
+                                                        <button><i class="fas fa-hand"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <!-- <select name="type">
+                                                    <option value="SDPCS">Σ-distinct PCS</option>
+                                                </select> -->
+                                                <button data-subaction="start">Start</button>
+                                            </div>
+                                        </main>
+                                    </div>
                                     <div class="collapsible" data-section-id="soundness">
                                         <header>Soundness</header>
                                         <main>
@@ -515,6 +545,25 @@
                                     <section class="drawing">
                                     </section>
                                 </main>
+
+                                <div id="myModal" class="modal">
+
+                                    <!-- Modal content -->
+                                   <div class="modal-content">
+                                       <div class="modal-header">
+                                       <span class="close">&times;</span>
+                                       <h2>Modal Header</h2>
+                                       </div>
+                                       <div class="modal-body">
+                                       <p>Some text in the Modal Body</p>
+                                       <p>Some other text...</p>
+                                       </div>
+                                       <div class="modal-footer">
+                                       <h3>Modal Footer</h3>
+                                       </div>
+                                   </div> 
+                               
+                               </div>
                             </main>
                             <aside class="right-panels">
                                 <section class="tab-buttons">
@@ -560,6 +609,8 @@
                                                 </table>
                                             </main>
                                         </div>
+                                        <button data-subaction="simulate-mae">Simulate</button>
+                                        
                                     </div>
                                 </main>
                             </aside>
