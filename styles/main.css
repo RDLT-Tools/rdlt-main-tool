@@ -274,3 +274,11 @@ header section.action-buttons {
   color: red;
 }
 
+
+.rdlt2pn-subworkspace iframe {
+  height: 100%;
+  width: 100%;
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
