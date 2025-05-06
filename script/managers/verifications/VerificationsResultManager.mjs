@@ -1,3 +1,4 @@
+import Activity from "../../entities/activity/Activity.mjs";
 import VisualRDLTModel from "../../entities/model/visual/VisualRDLTModel.mjs";
 import { generateUniqueID, pickRandomFromSet } from "../../utils.mjs";
 import { BaseModelDrawingManager } from "../drawing/BaseModelDrawingManager.mjs";
@@ -173,6 +174,14 @@ export class VerificationsResultManager {
     this.#panels.result.displayInstanceResult(instance);
   }
   handleSimulateMAE(view) {
+    this.context.managers.workspace.startActivitySimulation(new Activity({
+      name: "Activity from Well-Handledness",
+      origin: "direct",
+      profile: this.activityProfile
+    }));
+
+    return;
+
     view.modal.style.display = "block";
     const body = view.modal.querySelector(".modal-body");
     body.innerHTML = ""; // Clear previous content

@@ -49,13 +49,13 @@ export class ASDetailsPanelManager {
         const sink = this.#simulationManager.getVertex(activity.sink);
 
         nameView.innerHTML = activity.name;
-        sourceTextView.innerHTML = source.identifier;
-        sinkTextView.innerHTML = sink.identifier;
+        sourceTextView.innerHTML = source?.identifier || "";
+        sinkTextView.innerHTML = sink?.identifier || "";
         originView.innerHTML = {
             ae: "Generated", aes: "Simulated", direct: "Direct Input", import: "From File"
         }[activity.origin] || "-";
 
-        sourceVertexDisplay.setAttribute("data-vertex-type", source.type);
-        sinkVertexDisplay.setAttribute("data-vertex-type", sink.type);     
+        sourceVertexDisplay.setAttribute("data-vertex-type", source?.type);
+        sinkVertexDisplay.setAttribute("data-vertex-type", sink?.type);     
     }
 }

@@ -72,6 +72,8 @@ export class VERSubworkspaceManager {
     this.#view.simulateButton = this.#rootAreaElement.querySelector(
       'button[data-subaction="simulate-mae"]'
     );
+    if(!this.#verManager.activityProfile) this.#view.simulateButton.classList.add("hidden");
+
     this.#view.modal = this.#rootAreaElement.querySelector(".modal");
 
     // Get the <span> element that closes the modal
