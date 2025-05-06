@@ -321,10 +321,13 @@ export default class WorkspaceManager {
         );
     }
 
-    showVerificationResults(result, visualModel) {
-        return new VerificationsResultManager(this.context, result,
-            visualModel
-        );
+    showVerificationResults(result, visualModel, activityProfile = null) {
+      return new VerificationsResultManager(
+        this.context,
+        result,
+        visualModel,
+        activityProfile
+      );
     }
 
     /**
