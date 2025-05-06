@@ -31,9 +31,26 @@ export class RDLT2PNManager {
         
         const simpleModel = this.#modelSnapshot.toSimpleModel();
         const iframe = rootElement.querySelector("iframe");
-        
+        const jsonInput = {
+            vertices: simpleModel.components.map(vertex => ({
+                // id: vertex.uid.toString(),
+                id: vertex.identifier,
+                type: vertex.type.charAt(0),
+                label: '',
+                M: vertex.isRBSCenter? 1 : 0,
+            })),
+            edges: simpleModel.arcs.map(edge => ({
+                from: simpleModel.components.filter(v => v.uid === edge.fromVertexUID)[0].identifier,
+                to: simpleModel.components.filter(v => v.uid === edge.toVertexUID)[0].identifier,
+                C: edge.C === ''? 'ϵ':edge.C,
+                L: edge.L,
+            }))
+        }
+
         iframe.addEventListener("load", () => {
-            // TODO: Setup PN conversion here (use `simpleModel`)
+            console.log(simpleModel);
+            console.log(jsonInput);
+            iframe.contentWindow.renderConversion(jsonInput); 
         });
     }
 }
