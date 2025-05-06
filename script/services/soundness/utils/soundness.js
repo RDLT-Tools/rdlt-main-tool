@@ -426,7 +426,7 @@ export class Soundness {
         console.log("Testing joins in RBS...");
         const check = TestJoins.checkSimilarTargetVertexAndUpdate(matrixInput.R1, matrixInput.R2);
 
-        let safeCA_loopSafeNCA;
+        let safeCA_loopSafeNCA = true; // Flag to indicate if the RDLT is safe and loop-safe
         if(check){
             console.log("All are OR-JOINs, using only R1 data.");
             
@@ -444,7 +444,24 @@ export class Soundness {
             console.log("-".repeat(60));
             
             // Print result for L-safeness
-            safeCA_loopSafeNCA = false;
+            if(!pass){
+                safeCA_loopSafeNCA = false;
+            }
+        }
+        else{
+            console.log("RDLT contains other JOINs. Evaluating both R1 and R2");
+            
+            const matrixInstance = new Matrix([R1, R2], cycleListR1);
+            
+            // Perform matrix operations to determine L-safeness
+            let l_safe_vector, matrix;
+            ({ pass, matrix } = matrixInstance.evaluateSafeLoopSafe());
+                        
+            console.log(`Matrix evaluation result: (R1 only): ${l_safe_vector === true ? 'RDLT is L-Safe' : 'RDLT is not L-Safe'}`);
+            // Print result for L-safeness
+            if(!pass){
+                safeCA_loopSafeNCA = false;
+            }
         }
 
         let deadlockResolving, alldeadlockResolving = true;
