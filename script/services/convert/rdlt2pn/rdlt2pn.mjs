@@ -28,7 +28,7 @@ var dotIndex = -1;
 const renderConversion = function(jsonInput){
   const { data, warnings, error } = convert(jsonInput);
   if(error) {
-    console.error('Parsing failed:', error);
+    console.error('Conversion failed:', error);
     alert(`Error: ${error}`);
   } else {
     console.log('Conversion succeeded:', data);

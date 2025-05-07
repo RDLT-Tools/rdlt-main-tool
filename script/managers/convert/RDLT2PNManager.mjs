@@ -33,10 +33,9 @@ export class RDLT2PNManager {
         const iframe = rootElement.querySelector("iframe");
         const jsonInput = {
             vertices: simpleModel.components.map(vertex => ({
-                // id: vertex.uid.toString(),
                 id: vertex.identifier,
                 type: vertex.type.charAt(0),
-                label: '',
+                label: vertex.label,
                 M: vertex.isRBSCenter? 1 : 0,
             })),
             edges: simpleModel.arcs.map(edge => ({
@@ -48,8 +47,8 @@ export class RDLT2PNManager {
         }
 
         iframe.addEventListener("load", () => {
-            console.log(simpleModel);
-            console.log(jsonInput);
+            console.log('SimpleModel:',simpleModel);
+            console.log('MappedModel:',jsonInput);
             iframe.contentWindow.renderConversion(jsonInput); 
         });
     }
