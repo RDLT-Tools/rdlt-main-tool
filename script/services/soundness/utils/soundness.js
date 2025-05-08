@@ -626,6 +626,20 @@ export class Soundness {
             pass,
             message,
             description,
+            criteria:[
+                {   
+                    pass: safeCA_loopSafeNCA,
+                    description: "Safe CA and Loop-Safe NCA"
+                },
+                {   
+                    pass: alldeadlockResolving,
+                    description: "Deadlock-Resolving"
+                },
+                {   
+                    pass: weakenedJoinSafe,
+                    description: "Weakened JOIN-Safe L-Values"
+                }
+            ],
             violations
         };
     }

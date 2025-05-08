@@ -297,6 +297,7 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
             soundnessPass = weakResult.pass;
             soundnessTitle = weakResult.message;
             soundnessDescription = weakResult.description;
+            soundnessCriteria = weakResult.criteria;
 
             if (weakResult.violations) {
                 const vertexMap = buildVertexMap(model.components);
