@@ -137,15 +137,15 @@ export default class ExecutePanelManager {
         vsSectionViews.generateLevel1Button = vsSectionRoot.querySelector("button[data-subaction='vs-generate-1']");
         vsSectionViews.generateLevel2Button = vsSectionRoot.querySelector("button[data-subaction='vs-generate-2']");
 
-        vsSectionViews.generateLevel1Button.addEventListener("click", () => {
-            this.context.managers.workspace.startVertexSimplification(1);
+        vsSectionViews.generateLevel1Button.addEventListener("click", async () => {
+            await this.context.managers.workspace.startVertexSimplification(1);
         });
 
-        vsSectionViews.generateLevel2Button.addEventListener("click", () => {
+        vsSectionViews.generateLevel2Button.addEventListener("click", async () => {
             const { rbs } = this.#forms.vertexSimplification.getValues();
             if(!rbs) return;
 
-            this.context.managers.workspace.startVertexSimplification(2, Number(rbs));
+            await this.context.managers.workspace.startVertexSimplification(2, Number(rbs));
         });
     }
 

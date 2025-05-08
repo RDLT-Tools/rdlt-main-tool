@@ -1,6 +1,7 @@
 import VisualRDLTModel from "../../entities/model/visual/VisualRDLTModel.mjs";
 import { getPODs, getPOSs, getSharedResources } from "../../services/poi.mjs";
-import { buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, generateUniqueID, pickRandomFromSet } from "../../utils.mjs";
+import { getDeadlockPoints } from "../../services/soundness/soundness-service.mjs";
+import { buildArcMap, buildArcsAdjacencyMatrix, buildRBSMatrix, buildVertexMap, findAllLoopingArcs, generateUniqueID, getIncidentArcs, getSetsIntersection, pickRandomFromSet } from "../../utils.mjs";
 import { BaseModelDrawingManager } from "../drawing/BaseModelDrawingManager.mjs";
 import ModelContext from "../model/ModelContext.mjs";
 import POIPanelManager from "./panels/POIPanelManager.mjs";
@@ -86,6 +87,8 @@ export class POIManager {
             rbsMatrix: buildRBSMatrix(vertexMap, arcs)
         };
 
+        const simpleModel = this.#modelSnapshot.toSimpleModel();
+
 
         // POD
         const podResult = {
@@ -126,7 +129,7 @@ export class POIManager {
 
         // Deadlocks
         const deadlocksResult = {
-            vertices: new Set([ 3 ])
+            vertices: new Set(getDeadlockPoints(simpleModel, this.configs.source, this.configs.sink))
         };
 
         this.#panels.poi.setupDeadlocksDisplay(deadlocksResult);
@@ -136,9 +139,14 @@ export class POIManager {
         }
 
         // PORe
-        const poreResult = [
-            // { vertexUID: 4, arcs: new Set([ 3 ]) }
-        ];
+        const loopingArcs = findAllLoopingArcs(
+            this.configs.source, 
+            new Set(), cache.arcsMatrix
+        );
+
+        const poreResult = [...deadlocksResult.vertices].map(vertexUID => ({
+            vertexUID, arcs: getSetsIntersection(getIncidentArcs(vertexUID, cache.arcsMatrix), loopingArcs)
+        }));
 
         this.#panels.poi.setupPOReDisplay(poreResult);
 

@@ -249,6 +249,14 @@ export default class WorkspaceManager {
         }
     }
 
+    setModelIsValid(modelIsValid) {
+        if(modelIsValid) {
+            this.#view.root.classList.remove("invalid");
+        } else {
+            this.#view.root.classList.add("invalid");
+        }
+    }
+
     /**
      * @param {string} id 
      * @param {string} title 
@@ -332,10 +340,13 @@ export default class WorkspaceManager {
 
     /**
      * @param {1 | 2} level 
-     * @returns {VertexSimplificationManager}
+     * @returns {Promise<VertexSimplificationManager>}
      */
-    startVertexSimplification(level, rbsCenterUID = null) {
-        return new VertexSimplificationManager(this.context, level, rbsCenterUID);
+    async startVertexSimplification(level, rbsCenterUID = null) {
+        const vsManager = new VertexSimplificationManager(this.context, level, rbsCenterUID);
+        await vsManager.start();
+
+        return vsManager;
     }
 
     showPOIs(configs) {

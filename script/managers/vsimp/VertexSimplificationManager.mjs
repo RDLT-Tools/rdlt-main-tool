@@ -44,11 +44,9 @@ export class VertexSimplificationManager {
         this.#rbsCenterUID = rbsCenterUID;
 
         this.id = generateUniqueID();
-
-        this.#initialize();
     }
 
-    async #initialize() {
+    async start() {
         const subworkspaceTabManager = await this.context.managers.workspace.addVSSubworkspace(this.id, "Vertex Simplification");
         const rootElement = subworkspaceTabManager.tabAreaElement;
         

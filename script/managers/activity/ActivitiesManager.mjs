@@ -40,16 +40,15 @@ export class ActivitiesManager {
         const arcs = modelSnapshot.getAllArcs().map(a => a.simplify());
 
         const vertexMap = buildVertexMap(vertices);
+        const arcMap = buildArcMap(arcs);
         const aeCache = {
             vertexMap,
             arcs,
-            arcMap: buildArcMap(arcs),
+            arcMap,
             arcsMatrix: buildArcsAdjacencyMatrix(arcs),
             rbsMatrix: buildRBSMatrix(vertexMap, arcs),
         };
         
-        const loopingArcs = findAllLoopingArcs(configs.source, new Set(), aeCache.arcsMatrix);
-
         const aeStates = {
             T: {}, CTIndicator: {}, path: [ configs.source ], activityProfile: {}, tor: {}
         };
@@ -57,6 +56,8 @@ export class ActivitiesManager {
         
         let currentVertex = configs.source;
         let conclusion = "";
+
+        const reachedVertices = new Set([ configs.source ]);
 
         while(true) {
             // Check explorable arcs from current vertex
@@ -78,15 +79,12 @@ export class ActivitiesManager {
             }
 
             // Choose random arc
-            let chosenArc;
+            let chosenArc = null;
             if(configs.isMaximal) {
-                const choosableLoopingArcs = getSetsIntersection(choosableArcs, loopingArcs);
-                if(choosableLoopingArcs.size > 0) {
-                    chosenArc = pickRandomFromSet(choosableLoopingArcs);
-                } else {
-                    chosenArc = pickRandomFromSet(choosableArcs);
-                }
-            } else {
+                chosenArc = [...choosableArcs].find(arcUID => reachedVertices.has(arcMap[arcUID].toVertexUID));
+            }
+
+            if(!chosenArc) {
                 chosenArc = pickRandomFromSet(choosableArcs);
             }
 
@@ -96,6 +94,7 @@ export class ActivitiesManager {
             // If unconstrained, traverse arc
             if(isUnconstrained) {
                 currentVertex = traverseArc({ arcUID: chosenArc }, aeStates, aeCache);
+                reachedVertices.add(currentVertex);
 
                 // If sink reached, report as done
                 if(currentVertex === configs.sink) {

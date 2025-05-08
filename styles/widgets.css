@@ -408,3 +408,18 @@ table.subtable tr {
     background-image: url(../assets/icons/arc.svg);
     background-size: 18px auto;
 }
+
+
+.invalid .requires-valid-model {
+    opacity: 0.4;
+    box-shadow: none;
+    pointer-events: none;
+}
+
+.drawing > svg {
+    box-sizing: border-box;
+}
+
+.invalid .drawing > svg {
+    border: rgba(255, 0, 0, 0.2) 7px solid;
+}

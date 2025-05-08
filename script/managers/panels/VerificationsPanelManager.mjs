@@ -125,11 +125,11 @@ export default class VerificationsPanelManager {
     sectionViews.startButton = sectionRoot.querySelector(
       "button[data-subaction='start']"
     );
-    sectionViews.startButton.addEventListener("click", () => {
+    sectionViews.startButton.addEventListener("click", async () => {
       const { source, sink } = this.#forms.poi.getValues();
       if (!source || !sink) return;
 
-      this.context.managers.workspace
+      await this.context.managers.workspace
         .showPOIs({
           source: Number(source),
           sink: Number(sink),

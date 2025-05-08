@@ -776,15 +776,25 @@ export default class ModellingManager {
         const arcs = this.context.managers.visualModel.getAllArcs();
         const vertices = this.context.managers.visualModel.getAllComponents();
 
+        let modelIsValid = true;
+
         for(const arc of arcs) {
             const { valid, error } = this.validateArc(arc);
-            if(!valid) drawingManager.highlightArc(arc.uid);
+            if(!valid) {
+                drawingManager.highlightArc(arc.uid);
+                modelIsValid = false;
+            }
         }
 
         for(const vertex of vertices) {
             const { valid, error } = this.validateVertex(vertex);
-            if(!valid) drawingManager.highlightVertex(vertex.uid);
+            if(!valid) {
+                drawingManager.highlightVertex(vertex.uid);
+                modelIsValid = false;
+            }
         }
+
+        this.context.managers.workspace.setModelIsValid(modelIsValid);
     }
 
     /**

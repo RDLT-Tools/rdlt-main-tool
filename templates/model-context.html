@@ -259,7 +259,7 @@
                                         <tbody></tbody>
                                     </table>
                                     <div class="action-buttons">
-                                        <button data-subaction="add-activity"><i class="fas fa-plus"></i>&nbsp; Add Activity</button>
+                                        <button data-subaction="add-activity" class="requires-valid-model"><i class="fas fa-plus"></i>&nbsp; Add Activity</button>
                                         <button data-subaction="import"><i class="fas fa-file-lines"></i>&nbsp; Import Activity</button>
                                     </div>
                                 </main>
@@ -299,8 +299,8 @@
                                         <input type="checkbox" name="isMaximal"> <label>Maximal Activity</label>
                                     </div>
                                     <div class="section-action-buttons">
-                                        <button data-subaction="generate">Generate</button>
-                                        <button data-subaction="simulate"><i class="fas fa-play"></i> &nbsp;Simulate</button>
+                                        <button data-subaction="generate" class="requires-valid-model">Generate</button>
+                                        <button data-subaction="simulate" class="requires-valid-model"><i class="fas fa-play"></i> &nbsp;Simulate</button>
                                     </div>
                                 </main>
                             </div>
@@ -311,7 +311,7 @@
                                         <tbody>
                                             <tr>
                                                 <td>Level 1</td>
-                                                <td><button data-subaction="vs-generate-1"><i class="fas fa-eye"></i> Generate</button></td>
+                                                <td><button data-subaction="vs-generate-1" class="requires-valid-model"><i class="fas fa-eye"></i> Generate</button></td>
                                             </tr>
                                             <tr>
                                                 <td>Level 2</td>
@@ -319,7 +319,7 @@
                                                     <select name="rbs">
                                                         <option>x1</option>
                                                     </select>
-                                                    <button data-subaction="vs-generate-2"><i class="fas fa-eye"></i> Generate</button>
+                                                    <button data-subaction="vs-generate-2" class="requires-valid-model"><i class="fas fa-eye"></i> Generate</button>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -332,7 +332,7 @@
                                     <tbody>
                                         <tr>
                                             <td>to <b>Petri Net</b></td>
-                                            <td><button data-subaction="convert-to-pn">Convert</button></td>
+                                            <td><button data-subaction="convert-to-pn" class="requires-valid-model">Convert</button></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -363,7 +363,7 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <button data-subaction="start"><i class="fas fa-magnifying-glass"></i>&nbsp; Start</button>
+                                            <button data-subaction="start" class="requires-valid-model"><i class="fas fa-magnifying-glass"></i>&nbsp; Start</button>
                                         </div>
                                     </div>
                                 </main>
@@ -394,7 +394,7 @@
                                         <select name="type">
                                             <option value="SDPCS">Σ-distinct PCS</option>
                                         </select>
-                                        <button data-subaction="start">Start</button>
+                                        <button data-subaction="start" class="requires-valid-model">Start</button>
                                     </div>
                                 </main>
                             </div>
@@ -432,7 +432,7 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <button data-subaction="start">Start</button>
+                                        <button data-subaction="start" class="requires-valid-model">Start</button>
                                     </div>
                                 </main>
                             </div>
@@ -462,7 +462,7 @@
                                         <!-- <select name="type">
                                             <option value="SDPCS">Σ-distinct PCS</option>
                                         </select> -->
-                                        <button data-subaction="start">Start</button>
+                                        <button data-subaction="start" class="requires-valid-model">Start</button>
                                     </div>
                                 </main>
                             </div>
