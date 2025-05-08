@@ -416,10 +416,20 @@ table.subtable tr {
     pointer-events: none;
 }
 
-.drawing > svg {
+.drawing::after {
+    content: ' ';
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    /* z-index: -1; */
+    pointer-events: none;
+    transition: opacity 100ms ease;
     box-sizing: border-box;
+    
+    opacity: 0;
+    border: rgba(255, 0, 0, 0.2) 7px solid;
 }
 
-.invalid .drawing > svg {
-    border: rgba(255, 0, 0, 0.2) 7px solid;
+.invalid .drawing::after {
+    opacity: 1;
 }
