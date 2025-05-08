@@ -250,7 +250,6 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
             
             break;
         case 'relaxed':
-            console.log("Relaxed Soundness Check");
             // Perform activity extraction to get all possible cases
             const relaxedResult = Soundness.checkRelaxedSound(rdltGraph, combinedEvsa);
 
@@ -277,9 +276,6 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
                 }
             }
             
-            console.log("soundness violation vertices: ", soundnessViolation.vertices);
-            console.log("soundness violation remarks vertices: ", soundnessViolationRemarks.vertices);
-            
             break;
         case 'weak':
             const matrixInput = {
@@ -293,6 +289,80 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
             soundnessPass = weakResult.pass;
             soundnessTitle = weakResult.message;
             soundnessDescription = weakResult.description;
+
+            if(weakResult.violations){
+                const vertexMap = buildVertexMap(model.components);
+
+                weakResult.violations.forEach(violation => {
+                    if(violation.type === "asoy-edge"){
+                        const transformedArcMap = utils.transformArcMap(arcMap);
+                        const arcIdentifiers = violation.id.replace(/[()]/g, '').split(', '); // Extract identifiers (e.g., ["x6", "x9"])
+                        const fromUID = Object.keys(vertexMap).find(key => vertexMap[key].identifier === arcIdentifiers[0]);
+                        const toUID = Object.keys(vertexMap).find(key => vertexMap[key].identifier === arcIdentifiers[1]);
+        
+                        if (!fromUID || !toUID) {
+                            console.warn(`No UID found for arc: ${violation.arc}`);
+                            return;
+                        }
+        
+                        const arcKey = `${fromUID}, ${toUID}`; // Transform to UID-based key
+                        console.log("arcKey:", arcKey);
+                        console.log("transformed arc map: ", transformedArcMap);
+        
+                        const matchingArcs = transformedArcMap[arcKey];
+        
+                        if (matchingArcs) {
+                            // If there are multiple matches, disambiguate using additional attributes
+                            const matchedArc = matchingArcs.find(arc =>
+                                (!violation['c-attribute'] || arc.C === violation['c-attribute']) &&
+                                (!violation['l-attribute'] || arc.L === violation['l-attribute'])
+                            );
+        
+                            if (matchedArc) {
+                                console.log(`Mapped r-id: ${violation['r-id']} to UID: ${matchedArc.uid}`);
+                                const violationMessage = violation.violation || ""; // Fallback to an empty string if undefined
+        
+                                // Check if the UID is already in soundnessViolation.arcs
+                                if (!soundnessViolation.arcs.includes(matchedArc.uid)) {
+                                    soundnessViolation.arcs.push(matchedArc.uid);
+                                }
+        
+                                // Check if the UID already exists in soundnessViolationRemarks.arcs
+                                if (soundnessViolationRemarks.arcs[matchedArc.uid]) {
+                                    // Concatenate the new violation message
+                                    soundnessViolationRemarks.arcs[matchedArc.uid] += `; ${violation.message}`;
+                                } else {
+                                    // Add a new entry
+                                    soundnessViolationRemarks.arcs[matchedArc.uid] = `${violation.message}`;
+                                }
+                            } else {
+                                console.warn(`No exact match found for arc: ${violation.arc}`);
+                            }
+                        } else {
+                            console.warn(`No match found for arc: ${violation.arc}`);
+                        }   
+                    }
+                    else if(violation.type === "vertex"){
+                        const mappedVertex = mapVerticesToUIDs([violation], vertexMap);
+                        const uid = mappedVertex.map(vertex => vertex.uid).filter(uid => uid !== null); // Filter out null UIDs if necessary
+                        
+                        // Check if the UID is already in soundnessViolation.arcs
+                        if (!soundnessViolation.vertices.includes(...uid)) {
+                            soundnessViolation.vertices.push(...uid);
+                        }
+
+                        // Check if the UID already exists in soundnessViolationRemarks.arcs
+                        if (soundnessViolationRemarks.vertices[uid]) {
+                            // Concatenate the new violation message
+                            soundnessViolationRemarks.vertices[uid] += `; ${violation.message}`;
+                        } else {
+                            // Add a new entry
+                            soundnessViolationRemarks.vertices[uid] = `${violation.message}`;
+                        }
+                    }
+
+                });
+            }
             break;
     }
     

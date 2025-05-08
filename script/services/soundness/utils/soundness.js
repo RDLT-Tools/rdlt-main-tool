@@ -412,96 +412,192 @@ export class Soundness {
     * - `violations` (optional): if the RDLT failed weak soundness check, this field contains an array of violation details
     */
     static checkWeakSound(graph, evsa, matrixInput) {
-        const violations = [];
+        const violations = []; // Store violation details, messages, and types
 
         // Pre-processing for Asoy's matrix operations
         const cycleR1 = new Cycle(matrixInput.R1); // Cycle detection for R1
-        
-        //Evaluate the cycle; will populate Cycle_List
-        cycleR1.evaluateCycle();
-        
+        cycleR1.evaluateCycle(); // Evaluate the cycle
         const cycleListR1 = cycleR1.cycleList; // Get the cycle list for R1
-        
+
         // Evaluate JOIN conditions and determine the appropriate matrix operations
         console.log("Testing joins in RBS...");
         const check = TestJoins.checkSimilarTargetVertexAndUpdate(matrixInput.R1, matrixInput.R2);
 
-        let safeCA_loopSafeNCA = true; // Flag to indicate if the RDLT is safe and loop-safe
-        if(check){
+        // Check for safe CA and loop-safe NCA
+        let safeCA_loopSafeNCA = true, matrixViolations = [];
+        if (check) {
             console.log("All are OR-JOINs, using only R1 data.");
-            
-            // Convert to matrix representation of Asoy
             const matrixInstance = new Matrix(matrixInput.R1, cycleListR1);
-            
-            let pass, matrix;
-            // Perform matrix evaluation to determine L-safeness
-            ({ pass, matrix } = matrixInstance.evaluateSafeLoopSafe());
-            
-            console.log(`Matrix evaluation result: (R1 only): ${pass === true ? 'NCAs are loop-safe and CAs are safe' : 'NCAs are not loop-safe or CAs are not safe'}`);
-            console.log(`Generated Matrix`);
-            console.log("|  Arc  |   |x|   |y|  |l|  |c||eRU||cv| |op|  |cycle| |loop||out| |safe|");
-            matrixInstance.printMatrix();
-            console.log("-".repeat(60));
-            
-            // Print result for L-safeness
-            if(!pass){
+            const { pass } = matrixInstance.evaluateSafeLoopSafe();
+            if (!pass){
                 safeCA_loopSafeNCA = false;
+                matrixViolations = matrixInstance.getSafeLoopSafeViolations();  
             }
-        }
-        else{
+        } else {
             console.log("RDLT contains other JOINs. Evaluating both R1 and R2");
+            const matrixInstance = new Matrix([matrixInput.R1, matrixInput.R2], cycleListR1);
+            const { pass } = matrixInstance.evaluateSafeLoopSafe();
             
-            const matrixInstance = new Matrix([R1, R2], cycleListR1);
-            
-            // Perform matrix operations to determine L-safeness
-            let l_safe_vector, matrix;
-            ({ pass, matrix } = matrixInstance.evaluateSafeLoopSafe());
-                        
-            console.log(`Matrix evaluation result: (R1 only): ${l_safe_vector === true ? 'RDLT is L-Safe' : 'RDLT is not L-Safe'}`);
-            // Print result for L-safeness
-            if(!pass){
+            if (!pass){
                 safeCA_loopSafeNCA = false;
-            }
+                matrixViolations = matrixInstance.getSafeLoopSafeViolations();   
+            } 
         }
 
-        let deadlockResolving, alldeadlockResolving = true;
-        for(const rdlt of evsa){
-            // Get the source and sink vertices for the current RDLT
+        if (matrixViolations.length > 0) {
+            console.log("Formatting matrix violations...");
+            matrixViolations.forEach(violation => {
+                violations.push({
+                    id: violation.arc, // Map the "arc" field to the "id"
+                    message: violation.type, // Map the "type" field to the "message"
+                    type: "asoy-edge"
+                });
+            });
+        }
+
+        // Checking for deadlock resolving
+        let alldeadlockResolving = true, weakenedJoinSafe = true;
+        let deadlockPoints = [], reachedVertices = [];
+        for (const rdlt of evsa) {
             const { source, sink } = utils.getSourceAndSinkVertices(rdlt);
-            
             if (!source || !sink) {
                 console.warn("Source or sink vertex not found in the graph.");
-                return false; // If either source or sink is missing, the graph is not easy sound
+                return false;
             }
 
-            // console.log(`Source: ${source.id}, Sink: ${sink.id}`); // Debug: Log source and sink
-
-            const {deadlockPoints, reachedVertices} = GraphOperations.gatherDeadlockPoints(rdlt, source);
-            
-            // console.log("Deadlock points: ", deadlockPoints);
-
-            // Check for deadlock resolving
-            deadlockResolving = SoundnessCriteria.isDeadlockResolving(rdlt, deadlockPoints, reachedVertices, sink);
-            console.log("Deadlock resolving result: ", deadlockResolving);
-            if(!deadlockResolving.pass){
+            ({ deadlockPoints, reachedVertices } = GraphOperations.gatherDeadlockPoints(rdlt, source));
+            const deadlockResolving = SoundnessCriteria.isDeadlockResolving(rdlt, deadlockPoints, reachedVertices, sink);
+            if (!deadlockResolving.pass) {
                 alldeadlockResolving = false;
-                violations.push([...deadlockResolving.violations]);
+                deadlockResolving.violations.forEach(violation => {
+                    violations.push({
+                        id: violation.id,
+                        message: "Parent of the deadlock point does not have a contraction path to the sink",
+                        type: "vertex"
+                    });
+                });
+            }
+
+            // Checking for Weakened JOIN-Safe L values
+            console.log("Checking weakened join l-safe for deadlock points: ", deadlockPoints);
+            for (const deadlock of deadlockPoints) {
+                const incomingArcs = rdlt.edges.filter(edge => edge.to.id === deadlock.id);
+                if (incomingArcs.length !== 2) {
+                    weakenedJoinSafe = false;
+                    violations.push({
+                        id: deadlock.id,
+                        message: "Deadlock point does not have exactly two incoming arcs.",
+                        type: "vertex"
+                    });
+                    continue;
+                }
+
+                const joinVertex1 = incomingArcs[0].from;
+                const joinVertex2 = incomingArcs[1].from;
+
+                // Criterion 1: Shared split origin
+                const splitOrigin = GraphOperations.findUniqueSplitOrigin(rdlt, joinVertex1, joinVertex2, deadlock);
+                if (splitOrigin === null) {
+                    weakenedJoinSafe = false;
+                    violations.push({
+                        id: deadlock.id,
+                        message: "No shared split origin found for the deadlock point.",
+                        type: "vertex"
+                    });
+                    continue;
+                }
+
+                const pathU = GraphOperations.findSimplePath(rdlt, splitOrigin, joinVertex1);
+                if (!pathU) {
+                    weakenedJoinSafe = false;
+                    violations.push({
+                        id: joinVertex1.id,
+                        message: "No unique simple path found from split origin to join vertex",
+                        type: "vertex"
+                    });
+                    continue;
+                }
+                pathU.push(deadlock);
+
+                const pathV = GraphOperations.findSimplePath(rdlt, splitOrigin, joinVertex2);
+                if (!pathV) {
+                    weakenedJoinSafe = false;
+                    violations.push({
+                        id: joinVertex2.id,
+                        message: "No unique simple path found from split origin to join vertex",
+                        type: "vertex"
+                    });
+                    continue;
+                }
+                pathV.push(deadlock);
+
+                // Criterion 2: No Unrelated Processes
+                if (!GraphOperations.noInterruptions(rdlt, pathU) || !GraphOperations.noInterruptions(rdlt, pathV)) {
+                    weakenedJoinSafe = false;
+                    violations.push({
+                        id: deadlock.id,
+                        message: "Unrelated processes detected on one or both paths.",
+                        type: "vertex"
+                    });
+                    continue;
+                }
+
+                // Criterion 3: No branching out
+                if (!GraphOperations.noBranchingOut(rdlt, pathU) || !GraphOperations.noBranchingOut(rdlt, pathV)) {
+                    weakenedJoinSafe = false;
+                    violations.push({
+                        id: deadlock.id,
+                        message: "Branching out detected on one or both paths.",
+                        type: "vertex"
+                    });
+                    continue;
+                }
+
+                // Criterion 5: Duplicate Values
+                if (incomingArcs[0].constraint !== "" && incomingArcs[1].constraint !== "" && incomingArcs[0].constraint !== incomingArcs[1].constraint) {
+                    weakenedJoinSafe = false;
+                    violations.push({
+                        id: incomingArcs[0].id,
+                        message: "Duplicate constraint values not satisfied.",
+                        type: "edge"
+                    }, {
+                        id: incomingArcs[1].id,
+                        message: "Duplicate constraint values not satisfied.",
+                        type: "edge"
+                    });
+                    continue;
+                }
+
+                // Criterion 6: AND-Join L-Value Match
+                if (incomingArcs[0].constraint !== "" && incomingArcs[1].constraint !== "") {
+                    if (incomingArcs[0].maxTraversals !== incomingArcs[1].maxTraversals) {
+                        weakenedJoinSafe = false;
+                        violations.push({
+                            id: incomingArcs[0].id,
+                            message: "L-values for AND-Join do not match.",
+                            type: "edge"
+                        }, {
+                            id: incomingArcs[1].id,
+                            message: "L-values for AND-Join do not match.",
+                            type: "edge"
+                        });
+                        continue;
+                    }
+                }
             }
         }
 
         let pass, message, description;
-        // Format outputs
-        if( alldeadlockResolving && safeCA_loopSafeNCA){
+        if (alldeadlockResolving && safeCA_loopSafeNCA && weakenedJoinSafe) {
             pass = true;
             message = "The model is Weak Sound";
             description = "The given RDLT passed deadlock-tolerance checks. Therefore it is Weak Sound.";
-        }
-        else{
+        } else {
             pass = false;
-            message = "Weak sound verification is inconclusive",
-            description = "The given RDLT is did not pass deadlock-tolerance checks. Therefore more verification is needed."
+            message = "Weak sound verification is inconclusive";
+            description = "The given RDLT did not pass deadlock-tolerance checks. Therefore more verification is needed.";
         }
-
+        console.log("Violations: ", violations);
         return {
             pass,
             message,
