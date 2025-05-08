@@ -182,7 +182,7 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
 
             soundnessViolation.vertices = mappedViolations.map(violation => violation.uid);
             for(const violation of mappedViolations) {
-                soundnessViolationRemarks.vertices[violation.uid] = "Vertex cannot be used for contraction";
+                soundnessViolationRemarks.vertices[violation.uid] = `Vertex cannot be used for contraction (${violation.level})`;
             }
 
             break;
@@ -226,6 +226,9 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
                             console.log(`Mapped r-id: ${violation['r-id']} to UID: ${matchedArc.uid}`);
                             const violationMessage = violation.violation || ""; // Fallback to an empty string if undefined
     
+                            // Determine if the violation was found in L1 or L2 based on the r-id
+                            const level = violation['r-id'].startsWith("R1") ? "L1" : "L2";
+    
                             // Check if the UID is already in soundnessViolation.arcs
                             if (!soundnessViolation.arcs.includes(matchedArc.uid)) {
                                 soundnessViolation.arcs.push(matchedArc.uid);
@@ -233,11 +236,11 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
     
                             // Check if the UID already exists in soundnessViolationRemarks.arcs
                             if (soundnessViolationRemarks.arcs[matchedArc.uid]) {
-                                // Concatenate the new violation message
-                                soundnessViolationRemarks.arcs[matchedArc.uid] += `; ${violation.type}: ${violationMessage}`;
+                                // Concatenate the new violation message with the level
+                                soundnessViolationRemarks.arcs[matchedArc.uid] += `; ${violation.type} (${level}): ${violationMessage}`;
                             } else {
-                                // Add a new entry
-                                soundnessViolationRemarks.arcs[matchedArc.uid] = `${violation.type}: ${violationMessage}`;
+                                // Add a new entry with the level
+                                soundnessViolationRemarks.arcs[matchedArc.uid] = `${violation.type} (${level}): ${violationMessage}`;
                             }
                         } else {
                             console.warn(`No exact match found for arc: ${violation.arc}`);
@@ -253,7 +256,7 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
             // Perform activity extraction to get all possible cases
             const relaxedResult = Soundness.checkRelaxedSound(rdltGraph, combinedEvsa);
 
-            // console.log("Violations: ", relaxedResult.violations);
+            console.log("Violations: ", relaxedResult.violations);
             
             // Format output
             soundnessPass = relaxedResult.pass;
@@ -269,10 +272,10 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
                 soundnessViolation.vertices = mappedLivenessViolations.map(violation => violation.uid);
 
                 for(const violation of mappedWeakenedPTViolations) {
-                    soundnessViolationRemarks.vertices[violation.uid] = "Fails Proper Termination";
+                    soundnessViolationRemarks.vertices[violation.uid] = `Fails Proper Termination (${violation.level})`;
                 }
                 for(const violation of mappedLivenessViolations) {
-                    soundnessViolationRemarks.vertices[violation.uid] = "Vertex is not used in any activity";
+                    soundnessViolationRemarks.vertices[violation.uid] = `Vertex is not used in any activity (${violation.level})`;
                 }
             }
             
@@ -329,10 +332,10 @@ export function verifySoundness(model, source, sink, soundnessNotion) {
         
                                 // Check if the UID already exists in soundnessViolationRemarks.arcs
                                 if (soundnessViolationRemarks.arcs[matchedArc.uid]) {
-                                    // Concatenate the new violation message
+                                    // Concatenate the new violation message with the level
                                     soundnessViolationRemarks.arcs[matchedArc.uid] += `; ${violation.message}`;
                                 } else {
-                                    // Add a new entry
+                                    // Add a new entry with the level
                                     soundnessViolationRemarks.arcs[matchedArc.uid] = `${violation.message}`;
                                 }
                             } else {

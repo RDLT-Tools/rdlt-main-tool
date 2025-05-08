@@ -22,6 +22,7 @@ export class Soundness {
     static checkRelaxedSound(graph, evsa) {
 
         const livenessViolations = [], weakenedPTViolations = [];
+        let level = 1; // Initialize level for the EVSA
         for(const rdlt of evsa) {
             // Clear activity profiles array of the graph object
             rdlt.activityProfiles = [];
@@ -73,10 +74,25 @@ export class Soundness {
             // Check for liveness
             const liveness = SoundnessCriteria.hasLiveness(rdlt.activityProfile, rdlt.vertices);
             
-            if (!(weakenedProperTermination.pass && liveness.pass)){
-                livenessViolations.push(...liveness.violations);
-                weakenedPTViolations.push(...weakenedProperTermination.violations);
+            if (!(weakenedProperTermination.pass && liveness.pass)) {
+                // Add level information to liveness violations
+                liveness.violations.forEach(violation => {
+                    livenessViolations.push({
+                        ...violation,
+                        level: `L${level}` // Add the level information
+                    });
+                });
+
+                // Add level information to weakened proper termination violations
+                weakenedProperTermination.violations.forEach(violation => {
+                    weakenedPTViolations.push({
+                        ...violation,
+                        level: `L${level}` // Add the level information
+                    });
+                });
             }
+
+            level++;
         }
 
         if(weakenedPTViolations.length > 0 || livenessViolations.length > 0){
@@ -316,6 +332,7 @@ export class Soundness {
     static checkEasySound(graph, evsa) {
         console.log("received evsa", evsa); // Debug: Check the received evsa
 
+        let level = 1;
         for (const rdlt of evsa) {
             // Get the source and sink vertices for the current RDLT
             const { source, sink } = utils.getSourceAndSinkVertices(rdlt);
@@ -338,19 +355,18 @@ export class Soundness {
 
             // Check if the contracted RDLT has a contraction path from the source to the sink
             for (const vertex of contractedRDLT.vertices) {
-                // Split the vertex ID by the underscore to get the merged vertex components (if there are any)
                 const mergedVertexIds = vertex.id.split('_');
 
                 // Add all reachable vertices to the set
-                if(mergedVertexIds.includes(source.id)){
+                if (mergedVertexIds.includes(source.id)) {
                     mergedVertexIds.forEach(id => reachableVertices.add(id));
                 }
 
                 // Check if both the source and sink IDs are present in the merged vertex components
                 if (mergedVertexIds.includes(source.id) && mergedVertexIds.includes(sink.id)) {
-                    console.log(`There is a contraction path from ${source.id} to ${sink.id} in the contracted RDLT.`); // Debug: Path found
-                    rdltClear = true; // Set the flag to true if a path is found
-                    break; // Exit the loop if a path is found
+                    console.log(`There is a contraction path from ${source.id} to ${sink.id} in the contracted RDLT.`);
+                    rdltClear = true;
+                    break;
                 }
             }
 
@@ -369,15 +385,18 @@ export class Soundness {
                     description: "There was no contraction path from the source to the sink. Therefore, further verification is needed to verify easy soundness.",
                     violations: blockingVertices.map(vertex => ({
                         id: vertex.id,
+                        level: `L${level}` // Append level to the message
                     })),
                     criteria: [
-                        {   
-                            pass: false, 
-                            description: "Contraction Path From Source to Sink: Not Satisfied" 
+                        {
+                            pass: false,
+                            description: "Contraction Path From Source to Sink: Not Satisfied"
                         }
                     ]
-                }; // If no contraction path is found in the RDLT, return false
+                };
             }
+
+            level++; // Increment the level for the next EVSA
         }
 
         return {
@@ -447,9 +466,13 @@ export class Soundness {
         if (matrixViolations.length > 0) {
             console.log("Formatting matrix violations...");
             matrixViolations.forEach(violation => {
+                // Determine the level based on the r-id
+                const level = violation['r-id'].startsWith("R1") ? "L1" : "L2";
+
+                // Append the level to the message
                 violations.push({
                     id: violation.arc, // Map the "arc" field to the "id"
-                    message: violation.type, // Map the "type" field to the "message"
+                    message: `${violation.type} (${level})`, // Append the level to the type
                     type: "asoy-edge"
                 });
             });
@@ -457,7 +480,7 @@ export class Soundness {
 
         // Checking for deadlock resolving
         let alldeadlockResolving = true, weakenedJoinSafe = true;
-        let deadlockPoints = [], reachedVertices = [];
+        let deadlockPoints = [], reachedVertices = [], level = 1;
         for (const rdlt of evsa) {
             const { source, sink } = utils.getSourceAndSinkVertices(rdlt);
             if (!source || !sink) {
@@ -472,7 +495,7 @@ export class Soundness {
                 deadlockResolving.violations.forEach(violation => {
                     violations.push({
                         id: violation.id,
-                        message: "Parent of the deadlock point does not have a contraction path to the sink",
+                        message: `${violation.message} (L${level})`, // Append level to the message
                         type: "vertex"
                     });
                 });
@@ -486,7 +509,7 @@ export class Soundness {
                     weakenedJoinSafe = false;
                     violations.push({
                         id: deadlock.id,
-                        message: "Deadlock point does not have exactly two incoming arcs.",
+                        message: `Deadlock point does not have exactly two incoming arcs. (L${level})`, // Append level
                         type: "vertex"
                     });
                     continue;
@@ -501,7 +524,7 @@ export class Soundness {
                     weakenedJoinSafe = false;
                     violations.push({
                         id: deadlock.id,
-                        message: "No shared split origin found for the deadlock point.",
+                        message: `No shared split origin found for the deadlock point. (L${level})`, // Append level
                         type: "vertex"
                     });
                     continue;
@@ -512,7 +535,7 @@ export class Soundness {
                     weakenedJoinSafe = false;
                     violations.push({
                         id: joinVertex1.id,
-                        message: "No unique simple path found from split origin to join vertex",
+                        message: `No unique simple path found from split origin to join vertex. (L${level})`, // Append level
                         type: "vertex"
                     });
                     continue;
@@ -524,7 +547,7 @@ export class Soundness {
                     weakenedJoinSafe = false;
                     violations.push({
                         id: joinVertex2.id,
-                        message: "No unique simple path found from split origin to join vertex",
+                        message: `No unique simple path found from split origin to join vertex. (L${level})`, // Append level
                         type: "vertex"
                     });
                     continue;
@@ -536,7 +559,7 @@ export class Soundness {
                     weakenedJoinSafe = false;
                     violations.push({
                         id: deadlock.id,
-                        message: "Unrelated processes detected on one or both paths.",
+                        message: `Unrelated processes detected on one or both paths. (L${level})`, // Append level
                         type: "vertex"
                     });
                     continue;
@@ -547,7 +570,7 @@ export class Soundness {
                     weakenedJoinSafe = false;
                     violations.push({
                         id: deadlock.id,
-                        message: "Branching out detected on one or both paths.",
+                        message: `Branching out detected on one or both paths. (L${level})`, // Append level
                         type: "vertex"
                     });
                     continue;
@@ -558,11 +581,11 @@ export class Soundness {
                     weakenedJoinSafe = false;
                     violations.push({
                         id: incomingArcs[0].id,
-                        message: "Duplicate constraint values not satisfied.",
+                        message: `Duplicate constraint values not satisfied. (L${level})`, // Append level
                         type: "edge"
                     }, {
                         id: incomingArcs[1].id,
-                        message: "Duplicate constraint values not satisfied.",
+                        message: `Duplicate constraint values not satisfied. (L${level})`, // Append level
                         type: "edge"
                     });
                     continue;
@@ -574,17 +597,18 @@ export class Soundness {
                         weakenedJoinSafe = false;
                         violations.push({
                             id: incomingArcs[0].id,
-                            message: "L-values for AND-Join do not match.",
+                            message: `L-values for AND-Join do not match. (L${level})`, // Append level
                             type: "edge"
                         }, {
                             id: incomingArcs[1].id,
-                            message: "L-values for AND-Join do not match.",
+                            message: `L-values for AND-Join do not match. (L${level})`, // Append level
                             type: "edge"
                         });
                         continue;
                     }
                 }
             }
+            level++;
         }
 
         let pass, message, description;
