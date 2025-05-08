@@ -1,4 +1,4 @@
-import { processRDLT, verify } from "./Well-handledness/src/Main.js";
+import { processRDLT, verify } from "./well-handledness/src/Main.js";
 
 /**
  *
