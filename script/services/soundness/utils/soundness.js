@@ -579,12 +579,13 @@ export class Soundness {
                 // Criterion 5: Duplicate Values
                 if (incomingArcs[0].constraint !== "" && incomingArcs[1].constraint !== "" && incomingArcs[0].constraint !== incomingArcs[1].constraint) {
                     weakenedJoinSafe = false;
+                    console.log("incoming arcs: ", incomingArcs[0], incomingArcs[1]);
                     violations.push({
-                        id: incomingArcs[0].id,
+                        id: `${incomingArcs[0].from.id}, ${incomingArcs[0].to.id}`,
                         message: `Duplicate constraint values not satisfied. (L${level})`, // Append level
                         type: "edge"
                     }, {
-                        id: incomingArcs[1].id,
+                        id: `${incomingArcs[1].from.id}, ${incomingArcs[1].to.id}`,
                         message: `Duplicate constraint values not satisfied. (L${level})`, // Append level
                         type: "edge"
                     });
