@@ -21,7 +21,7 @@ export class Soundness {
     */
     static checkRelaxedSound(graph, evsa) {
 
-        const livenessViolations = [], weakenedPTViolations = [];
+        const livenessViolations = [], weakenedPTViolations = [], criteria = [];;
         let level = 1; // Initialize level for the EVSA
         for(const rdlt of evsa) {
             // Clear activity profiles array of the graph object
@@ -90,6 +90,20 @@ export class Soundness {
                         level: `L${level}` // Add the level information
                     });
                 });
+
+                criteria.push({
+                    pass: weakenedProperTermination.pass,
+                    description: weakenedProperTermination.pass ? 
+                    `Weakened Proper Termination (L${level}): Satisfied` :
+                    `Weakened Proper Termination (L${level}): Not Satisfied`
+                });
+
+                criteria.push({
+                    pass: liveness.pass,
+                    description: liveness.pass ? 
+                    `Liveness (L${level}): Satisfied` :
+                    `Liveness (L${level}): Not Satisfied`
+                });
             }
 
             level++;
@@ -108,15 +122,16 @@ export class Soundness {
                     {   
                         pass: !(weakenedPTViolations.length > 0),
                         description: weakenedPTViolations.length > 0 
-                        ? "Weakened Proper Termination: Not Satisfied" 
-                        : "Weakened Proper Termination: Satisfied"
+                        ? "Weakened Proper Termination (R): Not Satisfied" 
+                        : "Weakened Proper Termination (R): Satisfied"
                     },
                     {   
                         pass: !(livenessViolations.length > 0),
                         description: livenessViolations.length > 0 
-                        ? "Liveness: Not Satisfied" 
-                        : "Liveness: Satisfied"
-                    }
+                        ? "Liveness (R): Not Satisfied" 
+                        : "Liveness (R): Satisfied"
+                    },
+                    ...criteria
                 ]
             };
         }
@@ -128,12 +143,13 @@ export class Soundness {
                 criteria:[
                     {   
                         pass: true,
-                        description: "Weakened Proper Termination: Satisfied"
+                        description: "Weakened Proper Termination (R): Satisfied"
                     },
                     {   
                         pass: true,
-                        description: "Liveness: Satisfied"
-                    }
+                        description: "Liveness (R): Satisfied"
+                    },
+                    ...criteria
                 ]
             };
         }
@@ -198,15 +214,27 @@ export class Soundness {
                     criteria: [
                         {   
                             pass: true,
-                            description: "JOIN-Safeness: Satisfied"
+                            description: "JOIN-Safeness (R): Satisfied"
                         },
                         {   
                             pass: true,
-                            description: "LOOP-Safeness: Satisfied" 
+                            description: "LOOP-Safeness (R): Satisfied" 
                         },
                         {   
                             pass: true,
-                            description: "Safeness: Satisfied" 
+                            description: "Safeness (R): Satisfied" 
+                        },
+                        {   
+                            pass: true,
+                            description: "JOIN-Safeness (L1): Satisfied"
+                        },
+                        {   
+                            pass: true,
+                            description: "LOOP-Safeness (L1): Satisfied" 
+                        },
+                        {   
+                            pass: true,
+                            description: "Safeness (L1): Satisfied" 
                         }
                     ]
                 };
@@ -225,20 +253,38 @@ export class Soundness {
                         {   
                             pass: matrixInstance.checkIfAllPositive("join"),
                             description: matrixInstance.checkIfAllPositive("join") 
-                            ? "JOIN-Safeness: Satisfied" 
-                            : "JOIN-Safeness: Not Satisfied"
+                            ? "JOIN-Safeness (R): Satisfied" 
+                            : "JOIN-Safeness (R): Not Satisfied"
                         },
                         {   
                             pass: matrixInstance.checkIfAllPositive("loop"),
                             description: matrixInstance.checkIfAllPositive("loop")
-                            ? "LOOP-Safeness: Satisfied" 
-                            : "LOOP-Safeness: Not Satisfied"
+                            ? "LOOP-Safeness (R): Satisfied" 
+                            : "LOOP-Safeness (R): Not Satisfied"
                         },
                         {   
                             pass: matrixInstance.checkIfAllPositive("safe"),
                             description: matrixInstance.checkIfAllPositive("safe")
-                            ? "Safeness: Satisfied" 
-                            : "Safeness: Not Satisfied"
+                            ? "Safeness (R): Satisfied" 
+                            : "Safeness (R): Not Satisfied"
+                        },
+                        {   
+                            pass: matrixInstance.checkIfAllPositive("join"),
+                            description: matrixInstance.checkIfAllPositive("join") 
+                            ? "JOIN-Safeness (L1): Satisfied" 
+                            : "JOIN-Safeness (L1): Not Satisfied"
+                        },
+                        {   
+                            pass: matrixInstance.checkIfAllPositive("loop"),
+                            description: matrixInstance.checkIfAllPositive("loop")
+                            ? "LOOP-Safeness (L1): Satisfied" 
+                            : "LOOP-Safeness (L1): Not Satisfied"
+                        },
+                        {   
+                            pass: matrixInstance.checkIfAllPositive("safe"),
+                            description: matrixInstance.checkIfAllPositive("safe")
+                            ? "Safeness (L1): Satisfied" 
+                            : "Safeness (L1): Not Satisfied"
                         }
                     ]
                 };
@@ -253,7 +299,7 @@ export class Soundness {
             let l_safe_vector, matrix;
             ({ l_safe_vector, matrix } = matrixInstance.evaluateLSafeness());
                         
-            console.log(`Matrix evaluation result: (R1 only): ${l_safe_vector === true ? 'RDLT is L-Safe' : 'RDLT is not L-Safe'}`);
+            console.log(`Matrix evaluation result: (R1 and R2): ${l_safe_vector === true ? 'RDLT is L-Safe' : 'RDLT is not L-Safe'}`);
             
             if(l_safe_vector){
                 console.log("RDLT is CLASSICAL SOUND");
@@ -264,15 +310,27 @@ export class Soundness {
                     criteria: [
                         {   
                             pass: true,
-                            description: "JOIN-Safeness: Satisfied"
+                            description: "JOIN-Safeness (R): Satisfied"
                         },
                         {   
                             pass: true,
-                            description: "LOOP-Safeness: Satisfied" 
+                            description: "LOOP-Safeness (R): Satisfied" 
                         },
                         {   
                             pass: true,
-                            description: "Safeness: Satisfied" 
+                            description: "Safeness (R): Satisfied" 
+                        },
+                        {   
+                            pass: true,
+                            description: "JOIN-Safeness (L1 & L2): Satisfied"
+                        },
+                        {   
+                            pass: true,
+                            description: "LOOP-Safeness (L1 & L2): Satisfied" 
+                        },
+                        {   
+                            pass: true,
+                            description: "Safeness (L1 & L2): Satisfied" 
                         }
                     ]
                 };
@@ -291,20 +349,32 @@ export class Soundness {
                         {   
                             pass: matrixInstance.checkIfAllPositive("join"),
                             description: matrixInstance.checkIfAllPositive("join") 
-                            ? "JOIN-Safeness: Satisfied" 
-                            : "JOIN-Safeness: Not Satisfied"
+                            ? "JOIN-Safeness (R): Satisfied" 
+                            : "JOIN-Safeness (R): Not Satisfied"
                         },
                         {   
                             pass: matrixInstance.checkIfAllPositive("loop"),
                             description: matrixInstance.checkIfAllPositive("loop")
-                            ? "LOOP-Safeness: Satisfied" 
-                            : "LOOP-Safeness: Not Satisfied"
+                            ? "LOOP-Safeness (R): Satisfied" 
+                            : "LOOP-Safeness (R): Not Satisfied"
                         },
                         {   
                             pass: matrixInstance.checkIfAllPositive("safe"),
                             description: matrixInstance.checkIfAllPositive("safe")
-                            ? "Safeness: Satisfied" 
-                            : "Safeness: Not Satisfied"
+                            ? "Safeness (R): Satisfied" 
+                            : "Safeness (R): Not Satisfied"
+                        },
+                        {   
+                            pass: true,
+                            description: "JOIN-Safeness (L1 & L2): Satisfied"
+                        },
+                        {   
+                            pass: true,
+                            description: "LOOP-Safeness (L1 & L2): Satisfied" 
+                        },
+                        {   
+                            pass: true,
+                            description: "Safeness (L1 & L2): Satisfied" 
                         }
                     ]
                 };
@@ -333,6 +403,7 @@ export class Soundness {
         console.log("received evsa", evsa); // Debug: Check the received evsa
 
         let level = 1;
+        const criteria = [], violations = []; // Store criteria details per level
         for (const rdlt of evsa) {
             // Get the source and sink vertices for the current RDLT
             const { source, sink } = utils.getSourceAndSinkVertices(rdlt);
@@ -379,38 +450,56 @@ export class Soundness {
 
             // If no contraction path is found, return the blocking vertices as violations
             if (!rdltClear) {
-                return {
+                violations.push(...blockingVertices.map(vertex => ({
+                    id: vertex.id,
+                    level: `L${level}` // Append level to the message
+                })));
+
+                criteria.push({
                     pass: false,
-                    message: "Easy Soundness Check was inconclusive",
-                    description: "There was no contraction path from the source to the sink. Therefore, further verification is needed to verify easy soundness.",
-                    violations: blockingVertices.map(vertex => ({
-                        id: vertex.id,
-                        level: `L${level}` // Append level to the message
-                    })),
-                    criteria: [
-                        {
-                            pass: false,
-                            description: "Contraction Path From Source to Sink: Not Satisfied"
-                        }
-                    ]
-                };
+                    description: `Contraction Path From Source to Sink (L${level}): Not Satisfied`
+                });
+            }
+            else{
+                criteria.push({
+                    pass: true,
+                    description: `Contraction Path From Source to Sink (L${level}): Satisfied`
+                });
             }
 
             level++; // Increment the level for the next EVSA
         }
 
-        return {
-            pass: true,
-            message: "The model is Easy Sound",
-            description: "A contraction path from the source to the sink was found. Therefore, the given RDLT is easy sound.",
-            violations: [],
-            criteria: [
-                {   
-                    pass: true, 
-                    description: "Contraction Path From Source to Sink: Satisfied" 
-                }
-            ]
-        }; // Return true if all RDLTs have a contraction path
+        if(violations.length > 0){
+            return {
+                pass: false,
+                message: "Easy Soundness Check was inconclusive",
+                description: "There was no contraction path from the source to the sink. Therefore, further verification is needed to verify easy soundness.",
+                violations,
+                criteria: [
+                    {
+                        pass: false, 
+                        description: "Contraction Path From Source to Sink (R): Satisfied" 
+                    },
+                    ...criteria
+                ]
+            }; // Return true if all RDLTs have a contraction path
+        }
+        else{
+            return {
+                pass: true,
+                message: "The model is Easy Sound",
+                description: "A contraction path from the source to the sink was found. Therefore, the given RDLT is easy sound.",
+                violations: [],
+                criteria: [
+                    {   
+                        pass: true, 
+                        description: "Contraction Path From Source to Sink (R): Satisfied" 
+                    },
+                    ...criteria
+                ]
+            }; // Return true if all RDLTs have a contraction path
+        }
     }
     
     /** 
@@ -432,6 +521,7 @@ export class Soundness {
     */
     static checkWeakSound(graph, evsa, matrixInput) {
         const violations = []; // Store violation details, messages, and types
+        const criteria = []; // Store criteria details per level
 
         // Pre-processing for Asoy's matrix operations
         const cycleR1 = new Cycle(matrixInput.R1); // Cycle detection for R1
@@ -450,7 +540,17 @@ export class Soundness {
             const { pass } = matrixInstance.evaluateSafeLoopSafe();
             if (!pass){
                 safeCA_loopSafeNCA = false;
-                matrixViolations = matrixInstance.getSafeLoopSafeViolations();  
+                matrixViolations = matrixInstance.getSafeLoopSafeViolations();
+                criteria.push({
+                    pass: false,
+                    description: "Safe CA and Loop-Safe NCA (L1): Not Satisfied"
+                });
+            }
+            else{
+                criteria.push({
+                    pass: true,
+                    description: "Safe CA and Loop-Safe NCA (L1): Satisfied"
+                });
             }
         } else {
             console.log("RDLT contains other JOINs. Evaluating both R1 and R2");
@@ -459,8 +559,18 @@ export class Soundness {
             
             if (!pass){
                 safeCA_loopSafeNCA = false;
-                matrixViolations = matrixInstance.getSafeLoopSafeViolations();   
-            } 
+                matrixViolations = matrixInstance.getSafeLoopSafeViolations();
+                criteria.push({
+                    pass: false,
+                    description: "Safe CA and Loop-Safe NCA (L1 & L2): Not Satisfied"
+                });
+            }
+            else{
+                criteria.push({
+                    pass: false,
+                    description: "Safe CA and Loop-Safe NCA (L1 & L2): Satisfied"
+                });
+            }
         }
 
         if (matrixViolations.length > 0) {
@@ -499,115 +609,137 @@ export class Soundness {
                         type: "vertex"
                     });
                 });
+
+                criteria.push({
+                    pass: false,
+                    description: `Deadlock-Resolving (L${level}): Not Satisfied` // Append level to the description
+                })
+            }
+            else{
+                criteria.push({
+                    pass: true,
+                    description: `Deadlock-Resolving (L${level}): Satisfied` // Append level to the description
+                })
             }
 
             // Checking for Weakened JOIN-Safe L values
             console.log("Checking weakened join l-safe for deadlock points: ", deadlockPoints);
             for (const deadlock of deadlockPoints) {
                 const incomingArcs = rdlt.edges.filter(edge => edge.to.id === deadlock.id);
+                let weakenedJoinSafeForThisDeadlock = true; // Track if weakened JOIN-safe L-values are satisfied for this deadlock
+
                 if (incomingArcs.length !== 2) {
-                    weakenedJoinSafe = false;
+                    weakenedJoinSafeForThisDeadlock = false;
                     violations.push({
                         id: deadlock.id,
                         message: `Deadlock point does not have exactly two incoming arcs. (L${level})`, // Append level
                         type: "vertex"
                     });
-                    continue;
-                }
+                } else {
+                    const joinVertex1 = incomingArcs[0].from;
+                    const joinVertex2 = incomingArcs[1].from;
 
-                const joinVertex1 = incomingArcs[0].from;
-                const joinVertex2 = incomingArcs[1].from;
+                    // Criterion 1: Shared split origin
+                    const splitOrigin = GraphOperations.findUniqueSplitOrigin(rdlt, joinVertex1, joinVertex2, deadlock);
+                    if (splitOrigin === null) {
+                        weakenedJoinSafeForThisDeadlock = false;
+                        violations.push({
+                            id: deadlock.id,
+                            message: `No shared split origin found for the deadlock point. (L${level})`, // Append level
+                            type: "vertex"
+                        });
+                    } else {
+                        const pathU = GraphOperations.findSimplePath(rdlt, splitOrigin, joinVertex1);
+                        const pathV = GraphOperations.findSimplePath(rdlt, splitOrigin, joinVertex2);
 
-                // Criterion 1: Shared split origin
-                const splitOrigin = GraphOperations.findUniqueSplitOrigin(rdlt, joinVertex1, joinVertex2, deadlock);
-                if (splitOrigin === null) {
-                    weakenedJoinSafe = false;
-                    violations.push({
-                        id: deadlock.id,
-                        message: `No shared split origin found for the deadlock point. (L${level})`, // Append level
-                        type: "vertex"
-                    });
-                    continue;
-                }
-
-                const pathU = GraphOperations.findSimplePath(rdlt, splitOrigin, joinVertex1);
-                if (!pathU) {
-                    weakenedJoinSafe = false;
-                    violations.push({
-                        id: joinVertex1.id,
-                        message: `No unique simple path found from split origin to join vertex. (L${level})`, // Append level
-                        type: "vertex"
-                    });
-                    continue;
-                }
-                pathU.push(deadlock);
-
-                const pathV = GraphOperations.findSimplePath(rdlt, splitOrigin, joinVertex2);
-                if (!pathV) {
-                    weakenedJoinSafe = false;
-                    violations.push({
-                        id: joinVertex2.id,
-                        message: `No unique simple path found from split origin to join vertex. (L${level})`, // Append level
-                        type: "vertex"
-                    });
-                    continue;
-                }
-                pathV.push(deadlock);
-
-                // Criterion 2: No Unrelated Processes
-                if (!GraphOperations.noInterruptions(rdlt, pathU) || !GraphOperations.noInterruptions(rdlt, pathV)) {
-                    weakenedJoinSafe = false;
-                    violations.push({
-                        id: deadlock.id,
-                        message: `Unrelated processes detected on one or both paths. (L${level})`, // Append level
-                        type: "vertex"
-                    });
-                    continue;
-                }
-
-                // Criterion 3: No branching out
-                if (!GraphOperations.noBranchingOut(rdlt, pathU) || !GraphOperations.noBranchingOut(rdlt, pathV)) {
-                    weakenedJoinSafe = false;
-                    violations.push({
-                        id: deadlock.id,
-                        message: `Branching out detected on one or both paths. (L${level})`, // Append level
-                        type: "vertex"
-                    });
-                    continue;
-                }
-
-                // Criterion 5: Duplicate Values
-                if (incomingArcs[0].constraint !== "" && incomingArcs[1].constraint !== "") {
-                    const checkDuplicateConditions = GraphOperations.checkDuplicateValues(incomingArcs[0], incomingArcs[1], rdlt);
-                    if(!checkDuplicateConditions.pass){
-                        weakenedJoinSafe = false;
-                        for (const violation of checkDuplicateConditions.violations) {
+                        if (!pathU) {
+                            weakenedJoinSafeForThisDeadlock = false;
                             violations.push({
-                                id: `${violation.from}, ${violation.to}`,
-                                message: `Duplicate constraint values not satisfied. (L${level})`, // Append level
-                                type: "edge"
+                                id: joinVertex1.id,
+                                message: `No unique simple path found from split origin to join vertex. (L${level})`, // Append level
+                                type: "vertex"
+                            });
+                        } else {
+                            pathU.push(deadlock);
+                        }
+
+                        if (!pathV) {
+                            weakenedJoinSafeForThisDeadlock = false;
+                            violations.push({
+                                id: joinVertex2.id,
+                                message: `No unique simple path found from split origin to join vertex. (L${level})`, // Append level
+                                type: "vertex"
+                            });
+                        } else {
+                            pathV.push(deadlock);
+                        }
+
+                        // Criterion 2: No Unrelated Processes
+                        if (pathU && pathV && (!GraphOperations.noInterruptions(rdlt, pathU) || !GraphOperations.noInterruptions(rdlt, pathV))) {
+                            weakenedJoinSafeForThisDeadlock = false;
+                            violations.push({
+                                id: deadlock.id,
+                                message: `Unrelated processes detected on one or both paths. (L${level})`, // Append level
+                                type: "vertex"
                             });
                         }
 
-                        continue;
+                        // Criterion 3: No branching out
+                        if (pathU && pathV && (!GraphOperations.noBranchingOut(rdlt, pathU) || !GraphOperations.noBranchingOut(rdlt, pathV))) {
+                            weakenedJoinSafeForThisDeadlock = false;
+                            violations.push({
+                                id: deadlock.id,
+                                message: `Branching out detected on one or both paths. (L${level})`, // Append level
+                                type: "vertex"
+                            });
+                        }
+
+                        // Criterion 5: Duplicate Values
+                        if (incomingArcs[0].constraint !== "" && incomingArcs[1].constraint !== "") {
+                            const checkDuplicateConditions = GraphOperations.checkDuplicateValues(incomingArcs[0], incomingArcs[1], rdlt);
+                            if (!checkDuplicateConditions.pass) {
+                                weakenedJoinSafeForThisDeadlock = false;
+                                for (const violation of checkDuplicateConditions.violations) {
+                                    violations.push({
+                                        id: `${violation.from}, ${violation.to}`,
+                                        message: `Duplicate constraint values not satisfied. (L${level})`, // Append level
+                                        type: "edge"
+                                    });
+                                }
+                            }
+                        }
+
+                        // Criterion 6: AND-Join L-Value Match
+                        if (incomingArcs[0].constraint !== "" && incomingArcs[1].constraint !== "") {
+                            if (incomingArcs[0].maxTraversals !== incomingArcs[1].maxTraversals) {
+                                weakenedJoinSafeForThisDeadlock = false;
+                                violations.push({
+                                    id: `${incomingArcs[0].from.id}, ${incomingArcs[0].to.id}`,
+                                    message: `L-values for AND-Join do not match. (L${level})`, // Append level
+                                    type: "edge"
+                                }, {
+                                    id: `${incomingArcs[1].from.id}, ${incomingArcs[1].to.id}`,
+                                    message: `L-values for AND-Join do not match. (L${level})`, // Append level
+                                    type: "edge"
+                                });
+                            }
+                        }
                     }
                 }
 
-                // Criterion 6: AND-Join L-Value Match
-                if (incomingArcs[0].constraint !== "" && incomingArcs[1].constraint !== "") {
-                    if (incomingArcs[0].maxTraversals !== incomingArcs[1].maxTraversals) {
-                        weakenedJoinSafe = false;
-                        violations.push({
-                            id: `${incomingArcs[0].from.id}, ${incomingArcs[0].to.id}`,
-                            message: `L-values for AND-Join do not match. (L${level})`, // Append level
-                            type: "edge"
-                        }, {
-                            id: `${incomingArcs[1].from.id}, ${incomingArcs[1].to.id}`,
-                            message: `L-values for AND-Join do not match. (L${level})`, // Append level
-                            type: "edge"
-                        });
-                        continue;
-                    }
+                // Add to criteria if weakened JOIN-safe L-values are not satisfied for this deadlock
+                if (!weakenedJoinSafeForThisDeadlock) {
+                    weakenedJoinSafe = false;
+                    criteria.push({
+                        pass: false,
+                        description: `Weakened JOIN-Safe L-Values (L${level}): Not Satisfied` // Append level to the description
+                    });
+                }
+                else{
+                    criteria.push({
+                        pass: true,
+                        description: `Weakened JOIN-Safe L-Values (L${level}): Satisfied` // Append level to the description
+                    });
                 }
             }
             level++;
@@ -631,16 +763,23 @@ export class Soundness {
             criteria:[
                 {   
                     pass: safeCA_loopSafeNCA,
-                    description: "Safe CA and Loop-Safe NCA"
+                    description: safeCA_loopSafeNCA
+                            ? "Safe CA and Loop-Safe NCA (R): Satisfied" 
+                            : "Safe CA and Loop-Safe NCA (R): Not Satisfied"
                 },
                 {   
                     pass: alldeadlockResolving,
-                    description: "Deadlock-Resolving"
+                    description: alldeadlockResolving
+                            ? "Deadlock-Resolving (R): Satisfied" 
+                            : "Deadlock-Resolving (R): Not Satisfied"
                 },
                 {   
                     pass: weakenedJoinSafe,
-                    description: "Weakened JOIN-Safe L-Values"
-                }
+                    description: weakenedJoinSafe
+                            ? "Weakened JOIN-Safe L-Values (R): Satisfied" 
+                            : "Weakened JOIN-Safe L-Values (R): Not Satisfied"
+                },
+                ...criteria
             ],
             violations
         };
