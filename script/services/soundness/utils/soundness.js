@@ -577,19 +577,20 @@ export class Soundness {
                 }
 
                 // Criterion 5: Duplicate Values
-                if (incomingArcs[0].constraint !== "" && incomingArcs[1].constraint !== "" && incomingArcs[0].constraint !== incomingArcs[1].constraint) {
-                    weakenedJoinSafe = false;
-                    console.log("incoming arcs: ", incomingArcs[0], incomingArcs[1]);
-                    violations.push({
-                        id: `${incomingArcs[0].from.id}, ${incomingArcs[0].to.id}`,
-                        message: `Duplicate constraint values not satisfied. (L${level})`, // Append level
-                        type: "edge"
-                    }, {
-                        id: `${incomingArcs[1].from.id}, ${incomingArcs[1].to.id}`,
-                        message: `Duplicate constraint values not satisfied. (L${level})`, // Append level
-                        type: "edge"
-                    });
-                    continue;
+                if (incomingArcs[0].constraint !== "" && incomingArcs[1].constraint !== "") {
+                    const checkDuplicateConditions = GraphOperations.checkDuplicateValues(incomingArcs[0], incomingArcs[1], rdlt);
+                    if(!checkDuplicateConditions.pass){
+                        weakenedJoinSafe = false;
+                        for (const violation of checkDuplicateConditions.violations) {
+                            violations.push({
+                                id: `${violation.from}, ${violation.to}`,
+                                message: `Duplicate constraint values not satisfied. (L${level})`, // Append level
+                                type: "edge"
+                            });
+                        }
+
+                        continue;
+                    }
                 }
 
                 // Criterion 6: AND-Join L-Value Match
@@ -597,11 +598,11 @@ export class Soundness {
                     if (incomingArcs[0].maxTraversals !== incomingArcs[1].maxTraversals) {
                         weakenedJoinSafe = false;
                         violations.push({
-                            id: incomingArcs[0].id,
+                            id: `${incomingArcs[0].from.id}, ${incomingArcs[0].to.id}`,
                             message: `L-values for AND-Join do not match. (L${level})`, // Append level
                             type: "edge"
                         }, {
-                            id: incomingArcs[1].id,
+                            id: `${incomingArcs[1].from.id}, ${incomingArcs[1].to.id}`,
                             message: `L-values for AND-Join do not match. (L${level})`, // Append level
                             type: "edge"
                         });

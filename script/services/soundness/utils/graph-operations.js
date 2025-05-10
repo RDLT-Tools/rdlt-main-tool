@@ -476,4 +476,41 @@ export class GraphOperations {
         console.log(`No branching out detected on path:`, path.map(v => v.id));
         return true; // No branching out detected
     }
+
+    /**
+     * Checks for duplicate constraint values in the graph.
+     * @param {Edge} edge1 - The first incoming edge.
+     * @param {Edge} edge2 - The second incoming edge.
+     * @param {Graph} graph - The graph containing all edges.
+     * @returns {Object} - An object with a `pass` boolean and a list of `violations`.
+     */
+    static checkDuplicateValues(edge1, edge2, graph) {
+        const violations = [];
+
+        // Iterate through all edges in the graph
+        for (const edge of graph.edges) {
+            // Skip the two incoming edges
+            if (edge === edge1 || edge === edge2) {
+                continue;
+            }
+
+            // Check if the constraint matches either of the incoming edges
+            if (edge.constraint === edge1.constraint || edge.constraint === edge2.constraint) {
+                violations.push({
+                    id: edge.id,
+                    from: edge.from.id,
+                    to: edge.to.id,
+                    constraint: edge.constraint
+                });
+            }
+        }
+
+        // Return the result
+        return {
+            pass: violations.length === 0, // Pass if no violations are found
+            violations
+        };
+    }
+
 }
+
