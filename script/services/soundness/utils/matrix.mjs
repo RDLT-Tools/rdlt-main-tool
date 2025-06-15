@@ -889,6 +889,62 @@ export class Matrix {
         return this.violations;
     }
 
+    /**
+    * Retrieves and logs violations found during checks without join-safeness.
+    *
+    * @returns {Array<Object>} The list of formatted violation details.
+    */
+    getSafeLoopSafeViolations() {
+        // Reset stored violations
+        this.violations = [];
+        const seenViolations = new Set();
+        
+        // Process Loop-Safeness Violations
+        if (this.loop_safe_violations.length) {
+            this.loop_safe_violations.forEach(v => {
+                const arc = v.arc || 'Unknown';
+                const rid = v['r-id'] || 'Unknown';
+                const details = {
+                    type: 'Loop-Safeness',
+                    arc,
+                    'r-id': rid
+                };
+                this.violations.push(details);
+                
+                console.log('\nLoop-Safeness Violation:');
+                console.log(`  arc: ${this.convertArcFormat(arc)}`);
+                console.log(`  r-id: ${rid}`);
+            });
+        }
+        
+        // Process Safeness of Critical Arcs (CAs) Violations
+        if (this.safeCA_violations.length) {
+            this.safeCA_violations.forEach(v => {
+                const arc = v.arc || 'Unknown';
+                const rid = v['r-id'] || 'Unknown';
+                const details = {
+                    type: 'Safeness of Critical Arcs',
+                    arc,
+                    'r-id': rid
+                };
+                this.violations.push(details);
+                
+                console.log('\nSafeness Violation:');
+                console.log(`  arc: ${this.convertArcFormat(arc)}`);
+                console.log(`  r-id: ${rid}`);
+            });
+        }
+        
+        // Final summary
+        if (!this.violations.length) {
+            console.log('\nNo violations found. The RDLT structure is L-safe.');
+        } else {
+            console.log(`\nFound ${this.violations.length} violations in total.`);
+        }
+        
+        return this.violations;
+    }
+
 
     /**
     * Handles the cycle-vector operation for a given arc row,
