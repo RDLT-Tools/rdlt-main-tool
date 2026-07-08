@@ -222,17 +222,8 @@ input[type="checkbox"] {
     padding: 0 2px 2px 4px;
 }
 
-.collapsible > header::after {
-    content: '▲';
-    float: right;
-}
-
 .collapsible > main {
     padding: 4px;
-}
-
-.collapsible.collapsed > header::after {
-    content: '▼'
 }
 
 .collapsible.collapsed > main {
@@ -380,6 +371,11 @@ table.subtable tr {
 }
 
 
+.sim-trace-row:hover { background-color: #f0f7ff; }
+.sim-trace-row.active { background-color: #dbeafe; }
+.sim-trace-row.impedance { background-color: #fee2e2; }
+.sim-trace-row.impedance:hover { background-color: #fecaca; }
+.sim-trace-row.active.impedance { background-color: #fecaca; }
 
 .vertex-display, .arc-display {
     height: 24px;

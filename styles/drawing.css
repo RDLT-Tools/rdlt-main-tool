@@ -236,7 +236,16 @@ svg .arc-waypoint:not([data-nomove]) {
   stroke: #ff5050;
 }
 
-.vs-subworkspace .arc.abstract .arc-bare {
+.ver-subworkspace .sim-svg .arc.active .arc-highlight {
+  stroke: #3a81de;
+}
+
+.ver-subworkspace .sim-svg .arc.active.impedance .arc-highlight {
+  stroke: #ff5050;
+}
+
+.vs-subworkspace .arc.abstract .arc-bare,
+.ver-subworkspace .arc.abstract .arc-bare {
   opacity: 0.2;
 }
 

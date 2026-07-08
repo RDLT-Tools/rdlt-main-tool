@@ -34,8 +34,16 @@
         <aside class="right-panels">
             <section class="tab-buttons">
                 <div class="tab-button" data-tab-id="result">Result</div>
+                <div class="tab-button" data-tab-id="pipeline">Pipeline</div>
+                <div class="tab-button" data-tab-id="simulation">Simulation</div>
             </section>
             <main class="panel-tabs">
+                <div class="tab-area panel" data-tab-id="pipeline" data-panel-id="pipeline">
+                    <header>
+                        <h2>Pipeline Trace</h2>
+                    </header>
+                </div>
+                <div class="tab-area panel" data-tab-id="simulation" data-panel-id="simulation"></div>
                 <div class="tab-area panel" data-tab-id="result" data-panel-id="result">
                     <header>
                         <h2>Result</h2>
@@ -44,6 +52,7 @@
                         <div class="status-title">Some title</div>
                         <div class="status-description">Some description</div>
                     </div>
+                    <div class="subsections-container hidden" data-ver-section="subsections"></div>
                     <div class="collapsible" data-ver-section="criteria">
                         <header>Criteria</header>
                         <main>
@@ -51,7 +60,8 @@
                                 <tbody></tbody>
                             </table>
                         </main>
-                    </div> 
+                    </div>
+                    <div class="hidden" data-ver-section="mas-info"></div>
                     <div class="collapsible" data-ver-section="v-arcs">
                         <header>Violating Arcs</header>
                         <main>

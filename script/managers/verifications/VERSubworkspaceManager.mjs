@@ -17,7 +17,8 @@ export class VERSubworkspaceManager {
    *      buttons: { actions: { [action: string]: HTMLButtonElement } },
    *      header: { title: HTMLSpanElement, instanceSelector: HTMLSelectElement },
    *      panels: { [panelID: string]: HTMLDivElement },
-   *      svg: SVGElement[]
+   *      svg: SVGElement[],
+   *      simulationSVG: SVGElement|null
    * }}
    */
   #view = {
@@ -25,6 +26,7 @@ export class VERSubworkspaceManager {
     buttons: { actions: {} },
     panels: {},
     svg: [],
+    simulationSVG: null,
   };
 
   /**
@@ -98,12 +100,18 @@ export class VERSubworkspaceManager {
 
     const instances = this.#verManager.result.instances;
 
-    // Initialize SVGs
+    // Initialize SVGs — one per instance, plus one for the simulation drawing
     const drawingView = this.#rootAreaElement.querySelector(".drawing");
     for (const instance of instances) {
       const instanceSVG = makeSVGElement("svg");
       drawingView.appendChild(instanceSVG);
       this.#view.svg.push(instanceSVG);
+    }
+
+    if (this.#verManager.result._simulationData) {
+      this.#view.simulationSVG = makeSVGElement("svg");
+      this.#view.simulationSVG.classList.add("sim-svg");
+      drawingView.appendChild(this.#view.simulationSVG);
     }
 
     // Initialize instance selector
@@ -140,6 +148,14 @@ export class VERSubworkspaceManager {
       rightPanelsTabAreaContainer
     );
 
+    this.#tabs.right.onTabSelectedListener = (id) => {
+      if (id === "simulation") {
+        this.#verManager.showSimulationDrawing();
+      } else {
+        this.#verManager.showInstanceDrawing();
+      }
+    };
+
     this.#tabs.right.loadTab(
       TabManager.load(
         this,
@@ -154,10 +170,46 @@ export class VERSubworkspaceManager {
       )
     );
 
+    const pipelineHTML   = this.#verManager.result._pipelineHTML;
+    const pipelineButton = rightPanelsTabButtonsContainer.querySelector(
+      ".tab-button[data-tab-id='pipeline']"
+    );
+    const pipelineArea   = rightPanelsTabAreaContainer.querySelector(
+      ".tab-area[data-tab-id='pipeline']"
+    );
+
+    if (pipelineHTML && pipelineButton && pipelineArea) {
+      pipelineArea.insertAdjacentHTML("beforeend", pipelineHTML);
+      this.#tabs.right.loadTab(
+        TabManager.load(this, "pipeline", "Pipeline", pipelineButton, pipelineArea)
+      );
+    } else if (pipelineButton) {
+      pipelineButton.classList.add("hidden");
+    }
+
+    const simulationButton = rightPanelsTabButtonsContainer.querySelector(
+      ".tab-button[data-tab-id='simulation']"
+    );
+    const simulationArea = rightPanelsTabAreaContainer.querySelector(
+      ".tab-area[data-tab-id='simulation']"
+    );
+
+    if (this.#verManager.result._simulationData && simulationButton && simulationArea) {
+      this.#tabs.right.loadTab(
+        TabManager.load(this, "simulation", "Simulation", simulationButton, simulationArea)
+      );
+    } else if (simulationButton) {
+      simulationButton.classList.add("hidden");
+    }
+
     this.#tabs.right.selectTab("result");
   }
 
   getInstanceSVG(index) {
     return this.#view.svg[index];
+  }
+
+  getSimulationSVG() {
+    return this.#view.simulationSVG;
   }
 }

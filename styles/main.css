@@ -274,6 +274,20 @@ header section.action-buttons {
   color: red;
 }
 
+.ver-subworkspace [data-ver-section="v-arcs"] th {
+  font-size: 0.85em;
+  font-weight: 400;
+  color: #6b7280;
+  text-align: left;
+  padding: 2px 4px 4px;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.ver-subworkspace [data-ver-section="v-arcs"] td {
+  padding: 4px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
 
 .rdlt2pn-subworkspace iframe {
   height: 100%;
